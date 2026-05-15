@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iron Man Tic-Tac-Toe — Презентация</title>
+  <style>
+    :root {
+      --red: #c0392b;
+      --red-bright: #e74c3c;
+      --gold: #f1c40f;
+      --gold-light: #f9e44a;
+      --orange: #e67e22;
+      --dark: #0d0d0d;
+      --glow-gold: 0 0 12px #f1c40f, 0 0 30px rgba(241,196,15,0.5);
+      --glow-red: 0 0 12px #c0392b, 0 0 30px rgba(192,57,43,0.5);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #f5f5f5;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ── Прогресс ── */
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--red), var(--gold));
+      transition: width 0.4s ease;
+      z-index: 100;
+      box-shadow: 0 0 8px rgba(241,196,15,0.5);
+    }
+
+    /* ── Слайды ── */
+    .slide {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 56px 80px 90px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.45s ease, transform 0.45s ease;
+      transform: translateX(70px);
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(0);
+    }
+
+    .slide.exit {
+      opacity: 0;
+      transform: translateX(-70px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    /* ── Номер слайда (фон) ── */
+    .bg-num {
+      position: absolute;
+      font-size: 26vw;
+      font-weight: 900;
+      color: rgba(255,255,255,0.018);
+      letter-spacing: -0.05em;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+      line-height: 1;
+    }
+
+    .slide > * { position: relative; z-index: 1; }
+
+    /* ── Навигация ── */
+    .nav {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      z-index: 200;
+    }
+
+    .nav-btn {
+      width: 42px; height: 42px;
+      border: 2px solid #2a0d00;
+      background: rgba(20,5,5,0.9);
+      color: var(--gold);
+      border-radius: 8px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .nav-btn:hover { border-color: var(--gold); box-shadow: var(--glow-gold); }
+
+    .dots { display: flex; gap: 7px; }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #2a0d00;
+      cursor: pointer;
+      transition: background 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+
+    .dot.active {
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold);
+      transform: scale(1.3);
+    }
+
+    .slide-counter {
+      font-size: 0.72rem;
+      color: #333;
+      letter-spacing: 0.2em;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    /* ── Типографика ── */
+    .tag {
+      display: inline-block;
+      padding: 3px 14px;
+      border: 1px solid var(--red);
+      border-radius: 20px;
+      font-size: 0.62rem;
+      color: var(--red);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h2.title {
+      font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      text-shadow: var(--glow-gold);
+      margin-bottom: 28px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .divider {
+      width: 100px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 14px auto 0;
+    }
+
+    /* ── Карточки ── */
+    .cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .card {
+      background: rgba(20,5,5,0.92);
+      border: 1px solid #2a0d00;
+      border-radius: 12px;
+      padding: 22px 24px;
+      flex: 1;
+      min-width: 190px;
+      max-width: 260px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--red), var(--gold));
+    }
+
+    .card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .card h3 {
+      font-size: 0.78rem;
+      color: var(--gold);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .card p { font-size: 0.77rem; color: #888; line-height: 1.65; }
+
+    /* ── Таблицы ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+
+    th {
+      background: rgba(192,57,43,0.2);
+      color: var(--gold);
+      padding: 10px 14px;
+      text-align: left;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      border-bottom: 1px solid var(--red);
+    }
+
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #1a0800;
+      color: #bbb;
+      vertical-align: middle;
+    }
+
+    tr:hover td { background: rgba(241,196,15,0.025); }
+
+    .code {
+      font-family: 'Courier New', monospace;
+      color: var(--gold-light);
+      font-size: 0.76rem;
+      background: rgba(241,196,15,0.07);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .badge-red  { background: rgba(192,57,43,0.25);  color: #e74c3c; border: 1px solid #c0392b; }
+    .badge-gold { background: rgba(241,196,15,0.12);  color: var(--gold); border: 1px solid #f1c40f; }
+    .badge-grey { background: rgba(255,255,255,0.04); color: #666;    border: 1px solid #333; }
+
+    /* ── Flow ── */
+    .flow-box {
+      background: rgba(20,5,5,0.92);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 0.74rem;
+      text-align: center;
+      color: #ccc;
+      min-width: 120px;
+    }
+
+    .flow-box.red    { border-color: var(--red);    color: #e74c3c; }
+    .flow-box.gold   { border-color: var(--gold);   color: var(--gold); }
+    .flow-box.orange { border-color: var(--orange); color: var(--orange); }
+
+    .arrow { color: #333; font-size: 1rem; padding: 0 5px; }
+
+    /* ── Two columns ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      width: 100%;
+      max-width: 860px;
+      align-items: start;
+    }
+
+    .col-label {
+      font-size: 0.65rem;
+      color: var(--red);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #2a0d00;
+      padding-bottom: 7px;
+    }
+
+    /* ── Final stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .stat-box {
+      background: rgba(20,5,5,0.92);
+      border: 1px solid #2a0d00;
+      border-radius: 10px;
+      padding: 18px 12px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 2.3rem;
+      font-weight: 900;
+      color: var(--gold);
+      text-shadow: var(--glow-gold);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.62rem;
+      color: #444;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* ── Tech icons row ── */
+    .tech-row {
+      display: flex;
+      gap: 28px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .tech-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tech-circle {
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 0 14px rgba(241,196,15,0.18);
+    }
+
+    .tech-label {
+      font-size: 0.6rem;
+      color: #555;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* ── Поле-схема ── */
+    .board-schema {
+      display: inline-grid;
+      grid-template-columns: repeat(3, 54px);
+      grid-template-rows: repeat(3, 54px);
+      gap: 2px;
+      background: linear-gradient(135deg, #8b0000, #b8860b 50%, #8b0000);
+      border-radius: 8px;
+      padding: 3px;
+    }
+
+    .board-cell {
+      background: #0d0d0d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #444;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 4px;
+    }
+
+    .board-cell.center {
+      background: rgba(241,196,15,0.1);
+      color: var(--gold);
+      box-shadow: 0 0 10px rgba(241,196,15,0.2);
+    }
+
+    /* ── Цветовой свотч ── */
+    .swatch {
+      width: 16px; height: 16px;
+      border-radius: 3px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<!-- ══════════════════════════════════════
+     СЛАЙД 1 — Титул
+═══════════════════════════════════════ -->
+<div class="slide active" id="s0">
+  <div class="bg-num">01</div>
+
+  <div class="tag">Веб-проект</div>
+
+  <h1 style="font-size:clamp(3rem,8vw,5.5rem); font-weight:900; letter-spacing:0.15em; line-height:1; text-align:center;">
+    <span style="color:#e74c3c; text-shadow:0 0 20px #e74c3c,0 0 55px rgba(192,57,43,0.4);">IRON</span>
+    <span style="color:var(--gold); text-shadow:0 0 20px #f1c40f,0 0 55px rgba(241,196,15,0.4); margin-left:0.22em;">MAN</span>
+  </h1>
+
+  <div style="margin-top:10px; font-size:1.1rem; color:#666; letter-spacing:0.55em; text-transform:uppercase;">
+    Tic · Tac · Toe
+  </div>
+
+  <div class="divider" style="margin-top:26px;"></div>
+  <p style="margin-top:20px; font-size:0.75rem; color:#444; letter-spacing:0.25em; text-transform:uppercase; text-align:center;">
+    Презентация проекта
+  </p>
+
+  <div class="tech-row" style="margin-top:44px;">
+    <div class="tech-item">
+      <div class="tech-circle">📄</div>
+      <div class="tech-label">HTML5</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-circle" style="border-color:var(--red);box-shadow:0 0 14px rgba(192,57,43,0.2);">🎨</div>
+      <div class="tech-label">CSS3</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-circle">⚡</div>
+      <div class="tech-label">Vanilla JS</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-circle" style="border-color:var(--orange);box-shadow:0 0 14px rgba(230,126,34,0.2);">🎭</div>
+      <div class="tech-label">SVG Anim</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     СЛАЙД 2 — О проекте
+═══════════════════════════════════════ -->
+<div class="slide" id="s1">
+  <div class="bg-num">02</div>
+  <div class="tag">Обзор</div>
+  <h2 class="title">О проекте</h2>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🎮</div>
+      <h3>Что это</h3>
+      <p>Браузерная игра «Крестики-нолики» в визуальном стиле Железного Человека. Два игрока на одном экране.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚙️</div>
+      <h3>Стек</h3>
+      <p>Чистый HTML5 + CSS3 + Vanilla JS. Без фреймворков, без сборщика, без зависимостей. Один файл — браузер — и всё.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">✨</div>
+      <h3>Визуал</h3>
+      <p>SVG-анимации ходов, сканлайн-оверлей, пульсирующие индикаторы игроков, модальный оверлей результата.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📱</div>
+      <h3>Адаптивность</h3>
+      <p>CSS Grid с медиазапросом на 500px. На мобильных ячейки сжимаются c 130×130 до 96×96 px автоматически.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     СЛАЙД 3 — Файловая структура
+═══════════════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="bg-num">03</div>
+  <div class="tag">Архитектура</div>
+  <h2 class="title">Файловая структура</h2>
+
+  <table style="max-width:720px;">
+    <thead>
+      <tr>
+        <th>Файл</th>
+        <th>Роль</th>
+        <th>Размер</th>
+        <th>Тип</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="code">index.html</span></td>
+        <td>Разметка: поле 3×3, индикаторы, оверлей результата</td>
+        <td>~1.5 КБ</td>
+        <td><span class="badge badge-grey">Структура</span></td>
+      </tr>
+      <tr>
+        <td><span class="code">style.css</span></td>
+        <td>Стили, анимации, CSS-переменные, адаптивность</td>
+        <td>~6 КБ</td>
+        <td><span class="badge badge-red">Визуал</span></td>
+      </tr>
+      <tr>
+        <td><span class="code">game.js</span></td>
+        <td>Игровая логика: STATE, ходы, победа, генерация SVG</td>
+        <td>~3.5 КБ</td>
+        <td><span class="badge badge-gold">Логика</span></td>
+      </tr>
+      <tr>
+        <td><span class="code">CLAUDE.md</span></td>
+        <td>Архитектурная документация для AI-ассистента</td>
+        <td>~1.8 КБ</td>
+        <td><span class="badge badge-grey">Документация</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:26px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+    <span class="badge badge-grey">0 npm-пакетов</span>
+    <span class="badge badge-grey">0 CDN-ссылок</span>
+    <span class="badge badge-grey">0 шагов сборки</span>
+    <span class="badge badge-gold">Открыть и играть</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     СЛАЙД 4 — STATE и WIN_LINES
+═══════════════════════════════════════ -->
+<div class="slide" id="s3">
+  <div class="bg-num">04</div>
+  <div class="tag">Логика</div>
+  <h2 class="title">Игровое состояние</h2>
+
+  <div class="two-col">
+    <div>
+      <div class="col-label">Объект STATE</div>
+      <table>
+        <thead>
+          <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">board</span></td>
+            <td>Array[9]</td>
+            <td>null / 'X' / 'O' для каждой ячейки</td>
+          </tr>
+          <tr>
+            <td><span class="code">current</span></td>
+            <td>'X' | 'O'</td>
+            <td>Чей сейчас ход</td>
+          </tr>
+          <tr>
+            <td><span class="code">gameOver</span></td>
+            <td>boolean</td>
+            <td>Блокирует все клики</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:20px;">
+        <div class="col-label">8 победных комбинаций WIN_LINES</div>
+        <table>
+          <thead><tr><th>Тип</th><th>Индексы</th></tr></thead>
+          <tbody>
+            <tr><td>Горизонтали ×3</td><td><span class="code">[0,1,2] [3,4,5] [6,7,8]</span></td></tr>
+            <tr><td>Вертикали ×3</td><td><span class="code">[0,3,6] [1,4,7] [2,5,8]</span></td></tr>
+            <tr><td>Диагонали ×2</td><td><span class="code">[0,4,8] [2,4,6]</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+      <div class="col-label" style="width:100%; text-align:center;">Индексация поля (0–8)</div>
+      <div class="board-schema">
+        <div class="board-cell">0</div>
+        <div class="board-cell">1</div>
+        <div class="board-cell">2</div>
+        <div class="board-cell">3</div>
+        <div class="board-cell center">4</div>
+        <div class="board-cell">5</div>
+        <div class="board-cell">6</div>
+        <div class="board-cell">7</div>
+        <div class="board-cell">8</div>
+      </div>
+      <p style="font-size:0.68rem; color:#444; text-align:center; letter-spacing:0.08em; max-width:200px;">
+        Индекс <span class="code">4</span> — центр, участвует в <span style="color:var(--gold);">4 из 8</span> WIN_LINES
+      </p>
+
+      <!-- Мини SVG схема диагоналей -->
+      <svg width="168" height="100" viewBox="0 0 168 100" style="opacity:0.7;">
+        <defs>
+          <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#f1c40f"/>
+          </marker>
+        </defs>
+        <!-- диагональ 1 -->
+        <line x1="14" y1="14" x2="154" y2="86" stroke="#f1c40f" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+        <!-- диагональ 2 -->
+        <line x1="154" y1="14" x2="14" y2="86" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+        <text x="84" y="96" text-anchor="middle" fill="#333" font-size="9" font-family="'Courier New',monospace">диагонали [0,4,8] и [2,4,6]</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     СЛАЙД 5 — Поток клика
+═══════════════════════════════════════ -->
+<div class="slide" id="s4">
+  <div class="bg-num">05</div>
+  <div class="tag">Flow</div>
+  <h2 class="title">Поток при клике на ячейку</h2>
+
+  <!-- Верхняя цепочка -->
+  <div style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:0; margin-bottom:16px;">
+    <div class="flow-box red" style="font-weight:700;">onCellClick<br><span style="font-size:0.62rem;color:#444;">addEventListener</span></div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Защита<br><span class="code" style="font-size:0.62rem;">gameOver?</span><br><span class="code" style="font-size:0.62rem;">board[i]?</span></div>
+    <div class="arrow">→</div>
+    <div class="flow-box gold">STATE.board[i]<br><span style="font-size:0.62rem;color:#666;">= current</span></div>
+    <div class="arrow">→</div>
+    <div class="flow-box orange">innerHTML<br><span class="code" style="font-size:0.62rem;">buildXMark(i)</span><br><span class="code" style="font-size:0.62rem;">buildOMark(i)</span></div>
+    <div class="arrow">→</div>
+    <div class="flow-box gold" style="font-weight:700;">checkWinner()<br><span style="font-size:0.62rem;color:#666;">перебор WIN_LINES</span></div>
+  </div>
+
+  <!-- Вертикальная стрелка вниз -->
+  <div style="color:#2a0d00; font-size:1.8rem; line-height:1; margin-bottom:12px;">↓</div>
+
+  <!-- Три исхода -->
+  <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+      <div style="font-size:0.62rem; color:var(--gold); letter-spacing:0.1em; text-transform:uppercase;">✓ Победитель найден</div>
+      <div class="flow-box red" style="min-width:160px;">highlightWinners()<br>endGame(winner)<br><span style="font-size:0.62rem;color:#444;">→ оверлей +750мс</span></div>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+      <div style="font-size:0.62rem; color:#555; letter-spacing:0.1em; text-transform:uppercase;">≡ Все ячейки заняты</div>
+      <div class="flow-box" style="min-width:160px; border-color:#333;">endGame(null)<br><span style="font-size:0.62rem;color:#444;">→ «Ничья!»</span></div>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+      <div style="font-size:0.62rem; color:#555; letter-spacing:0.1em; text-transform:uppercase;">→ Игра продолжается</div>
+      <div class="flow-box" style="min-width:160px; border-color:#333;">current = X↔O<br>updateTurnIndicator()<br><span style="font-size:0.62rem;color:#444;">→ пульс переключается</span></div>
+    </div>
+  </div>
+
+  <p style="margin-top:22px; font-size:0.7rem; color:#333; letter-spacing:0.08em;">
+    Задержка 750мс в endGame() позволяет SVG-анимации последнего хода завершиться до появления оверлея
+  </p>
+</div>
+
+<!-- ══════════════════════════════════════
+     СЛАЙД 6 — SVG-анимации
+═══════════════════════════════════════ -->
+<div class="slide" id="s5">
+  <div class="bg-num">06</div>
+  <div class="tag">Визуал</div>
+  <h2 class="title">SVG-анимации ходов</h2>
+
+  <div class="two-col" style="max-width:880px;">
+    <div>
+      <div class="col-label" style="color:var(--gold);">✕ Игрок 1 — Золото (X)</div>
+      <table>
+        <thead><tr><th>Элемент</th><th>Анимация</th><th>Время</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="code">&lt;line&gt; ×2</span></td>
+            <td>stroke-dashoffset 99→0, cubic-bezier</td>
+            <td>0.35s</td>
+          </tr>
+          <tr>
+            <td><span class="code">&lt;polyline&gt; ×8</span></td>
+            <td>Трещины от центра, 8 разных delays</td>
+            <td>0.28–0.36s</td>
+          </tr>
+          <tr>
+            <td><span class="code">&lt;filter&gt;</span></td>
+            <td>feGaussianBlur + feMerge = золотое свечение</td>
+            <td>постоянно</td>
+          </tr>
+          <tr>
+            <td>ID фильтра</td>
+            <td><span class="code">gx{idx}</span> — уникален для каждой ячейки</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <div class="col-label" style="color:var(--red);">○ Игрок 2 — Огонь (O)</div>
+      <table>
+        <thead><tr><th>Элемент</th><th>Анимация</th><th>Время</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="code">o-glow-outer</span></td>
+            <td>Внешнее свечение stroke-width 14, opacity 0.5→0.3</td>
+            <td>0.65s</td>
+          </tr>
+          <tr>
+            <td><span class="code">o-ring</span></td>
+            <td>Лазерная резка, dashoffset 201→0, цвет #ff8c00→#c0392b</td>
+            <td>0.65s</td>
+          </tr>
+          <tr>
+            <td><span class="code">o-hole</span></td>
+            <td>Выжженная дыра, scale 0.2→1 с задержкой</td>
+            <td>delay 0.58s</td>
+          </tr>
+          <tr>
+            <td><span class="code">o-ember</span></td>
+            <td>Раскалённый край, бесконечный пульс</td>
+            <td>2.2s loop</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+    <span class="badge badge-gold">stroke-dashoffset = длина пути</span>
+    <span class="badge badge-red">rotate(-90deg) → старт с 12 часов</span>
+    <span class="badge badge-grey">ID уникальны — нет конфликтов фильтров</span>
+    <span class="badge badge-grey">innerHTML вместо DOM API — проще и быстрее</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     СЛАЙД 7 — CSS-токены
+═══════════════════════════════════════ -->
+<div class="slide" id="s6">
+  <div class="bg-num">07</div>
+  <div class="tag">Дизайн</div>
+  <h2 class="title">CSS-токены дизайна</h2>
+
+  <table style="max-width:780px;">
+    <thead>
+      <tr>
+        <th>Переменная :root</th>
+        <th>Значение</th>
+        <th style="width:36px;"></th>
+        <th>Где применяется</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="code">--red-primary</span></td>
+        <td><span class="code">#c0392b</span></td>
+        <td><div class="swatch" style="background:#c0392b;"></div></td>
+        <td>Индикатор Игрока 2, рамки, кнопка новой игры</td>
+      </tr>
+      <tr>
+        <td><span class="code">--red-dark</span></td>
+        <td><span class="code">#7b241c</span></td>
+        <td><div class="swatch" style="background:#7b241c;"></div></td>
+        <td>Фон кнопки, тень оберки поля</td>
+      </tr>
+      <tr>
+        <td><span class="code">--gold-primary</span></td>
+        <td><span class="code">#f1c40f</span></td>
+        <td><div class="swatch" style="background:#f1c40f;"></div></td>
+        <td>Символ X, заголовки, рамка оверлея результата</td>
+      </tr>
+      <tr>
+        <td><span class="code">--gold-light</span></td>
+        <td><span class="code">#f9e44a</span></td>
+        <td><div class="swatch" style="background:#f9e44a;"></div></td>
+        <td>Вторая линия X, трещины, контрастный акцент</td>
+      </tr>
+      <tr>
+        <td><span class="code">--orange-mid</span></td>
+        <td><span class="code">#e67e22</span></td>
+        <td><div class="swatch" style="background:#e67e22;"></div></td>
+        <td>«MAN» в логотипе, тени заголовка</td>
+      </tr>
+      <tr>
+        <td><span class="code">--iron-dark</span></td>
+        <td><span class="code">#0d0d0d</span></td>
+        <td><div class="swatch" style="background:#0d0d0d;border:1px solid #333;"></div></td>
+        <td>Фон тела, ячеек, body-background</td>
+      </tr>
+      <tr>
+        <td><span class="code">--glow-gold / --glow-red</span></td>
+        <td>box-shadow 2 слоя</td>
+        <td><div class="swatch" style="background:#f1c40f;border-radius:50%;box-shadow:0 0 6px #f1c40f;"></div></td>
+        <td>Активный индикатор, hover кнопок, оверлей</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:16px; font-size:0.7rem; color:#444; letter-spacing:0.1em;">
+    Смена темы = правка только <span style="color:var(--gold);">7 строк</span> в :root — все остальные правила берут значения оттуда
+  </p>
+</div>
+
+<!-- ══════════════════════════════════════
+     СЛАЙД 8 — Итог
+═══════════════════════════════════════ -->
+<div class="slide" id="s7">
+  <div class="bg-num">END</div>
+  <div class="tag">Итог</div>
+  <h2 class="title">Статистика проекта</h2>
+
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Файла</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Зависимостей</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">8</div>
+      <div class="stat-label">WIN_LINES</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" style="font-size:2rem;">12</div>
+      <div class="stat-label">SVG-элементов на ход</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">7</div>
+      <div class="stat-label">CSS-переменных</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" style="color:var(--red-bright);text-shadow:var(--glow-red);">∞</div>
+      <div class="stat-label">Пульс-анимаций O</div>
+    </div>
+  </div>
+
+  <div class="divider" style="margin-top:26px;"></div>
+
+  <div style="margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+    <span class="badge badge-red">Чистый Web</span>
+    <span class="badge badge-gold">Zero-dependency</span>
+    <span class="badge badge-grey">Открыть и играть</span>
+    <span class="badge badge-grey">Iron Man Style</span>
+  </div>
+
+  <p style="margin-top:18px; font-size:0.72rem; color:#333; letter-spacing:0.2em; text-align:center; text-transform:uppercase;">
+    Iron Man Tic-Tac-Toe — без компромиссов
+  </p>
+</div>
+
+<!-- ══════════════════════════════════════
+     НАВИГАЦИЯ
+═══════════════════════════════════════ -->
+<div class="nav">
+  <button class="nav-btn" id="prev">‹</button>
+  <div class="dots" id="dots"></div>
+  <span class="slide-counter" id="counter">1 / 8</span>
+  <button class="nav-btn" id="next">›</button>
+</div>
+
+<script>
+  const slideEls = document.querySelectorAll('.slide');
+  const total    = slideEls.length;
+  const dotsEl   = document.getElementById('dots');
+  const counter  = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let cur = 0;
+
+  slideEls.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function updateUI() {
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+    counter.textContent = `${cur + 1} / ${total}`;
+    progress.style.width = `${((cur + 1) / total) * 100}%`;
+  }
+
+  function goTo(idx) {
+    if (idx === cur || idx < 0 || idx >= total) return;
+
+    slideEls[cur].classList.add('exit');
+    slideEls[cur].classList.remove('active');
+    const prev = cur;
+    setTimeout(() => slideEls[prev].classList.remove('exit'), 400);
+
+    cur = idx;
+    slideEls[cur].classList.add('active');
+    updateUI();
+  }
+
+  document.getElementById('prev').addEventListener('click', () => goTo(cur - 1));
+  document.getElementById('next').addEventListener('click', () => goTo(cur + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ')  { e.preventDefault(); goTo(cur + 1); }
+    if (e.key === 'ArrowLeft')                    { e.preventDefault(); goTo(cur - 1); }
+  });
+
+  updateUI();
+</script>
+</body>
+</html>
