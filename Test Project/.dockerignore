@@ -1,0 +1,10 @@
+.env
+.git
+.next
+node_modules
+data.db
+uploads/
+*.log
+.DS_Store
+tmp/
+README.md

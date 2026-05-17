@@ -1,0 +1,9 @@
+.env
+.env.local
+.next/
+node_modules/
+data.db
+uploads/
+.DS_Store
+*.log
+tmp/
