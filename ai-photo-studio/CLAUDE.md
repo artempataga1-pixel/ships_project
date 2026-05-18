@@ -39,6 +39,7 @@
 6. **[ШАГ 1 ЗАВЕРШЁН]** Все зависимости установлены, shadcn инициализирован
 7. **[ШАГ 2 ЗАВЕРШЁН]** База данных создана и применена
 8. **[ШАГ 3 ЗАВЕРШЁН]** Аутентификация — NextAuth v5, register/forgot/reset-password, proxy.ts
+9. **[ШАГ 4 ЗАВЕРШЁН]** UI Shell — ThemeProvider, NavBar, ThemeToggle, LimitBadge, (app) layout, заглушки страниц
 
 ### Детали шага 1
 
@@ -94,16 +95,35 @@
 - `src/app/layout.tsx` — добавлен `SessionProvider`, класс `dark` на `<html>`, metadata на русском
 - `.env` — `NEXTAUTH_SECRET` уже сгенерирован и заполнен
 
+### Детали шага 4
+
+**Файлы созданы:**
+- `src/components/ThemeToggle.tsx` — "use client", useTheme, иконки Sun/Moon; Button имеет `className="relative"` (нужно для absolute Moon)
+- `src/components/LimitBadge.tsx` — "use client", fetch `/api/account` → badge X/50; при ошибке (API ещё не готов) не показывается; cancel-флаг на unmount
+- `src/components/NavBar.tsx` — "use client" (usePathname), sticky header, логотип Camera + "AI Photo Studio", ссылки Генератор/История/Аккаунт, ThemeToggle + LimitBadge
+- `src/app/(app)/layout.tsx` — обёртка NavBar + main для защищённых страниц
+- `src/app/(app)/page.tsx` — заглушка главной (шаг 7 заменит)
+- `src/app/(app)/history/page.tsx` — заглушка (шаг 8 заменит)
+- `src/app/(app)/account/page.tsx` — заглушка (шаг 9 заменит)
+
+**Обновлён:**
+- `src/app/layout.tsx` — добавлен `ThemeProvider` (next-themes, defaultTheme="dark", enableSystem=false, disableTransitionOnChange), убран хардкоженный класс `dark`, добавлен `suppressHydrationWarning` на `<html>`
+
+**Удалён:**
+- `src/app/page.tsx` — конфликтовал с `src/app/(app)/page.tsx`
+
+**ВАЖНО:** `LimitBadge` вызывает `/api/account` который будет создан только на шаге 9. До тех пор badge просто не отображается (это ОК — intentional).
+
 ## Что предстоит сделать
 
 Смотри детальный план → `tmp/plans/plan.md`
 
-**Следующий шаг: ШАГ 4 — UI Shell**
+**Следующий шаг: ШАГ 5 — DropZone**
 
 Коротко — оставшиеся шаги:
 3. **[ГОТОВО]** Аутентификация — NextAuth v5 credentials, register/forgot-password/reset-password
-4. **[СЛЕДУЮЩИЙ]** UI Shell — ThemeProvider (dark-first), NavBar, layout
-5. DropZone — drag-and-drop (JPG/PNG, до 10MB, до 5 файлов)
+4. **[ГОТОВО]** UI Shell — ThemeProvider (dark-first), NavBar, layout
+5. **[СЛЕДУЮЩИЙ]** DropZone — drag-and-drop (JPG/PNG, до 10MB, до 5 файлов)
 6. Gemini — src/lib/gemini.ts с retry 3 раза + API /api/generate
 7. Главный экран — StyleGrid (10 пресетов), прогресс-бар, результат
 8. История — /history, Re-generate
