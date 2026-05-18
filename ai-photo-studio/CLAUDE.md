@@ -38,6 +38,7 @@
 5. bun установлен (v1.3.14)
 6. **[ШАГ 1 ЗАВЕРШЁН]** Все зависимости установлены, shadcn инициализирован
 7. **[ШАГ 2 ЗАВЕРШЁН]** База данных создана и применена
+8. **[ШАГ 3 ЗАВЕРШЁН]** Аутентификация — NextAuth v5, register/forgot/reset-password, proxy.ts
 
 ### Детали шага 1
 
@@ -76,10 +77,11 @@
 
 Смотри детальный план → `tmp/plans/plan.md`
 
-**Следующий шаг: ШАГ 3 — Аутентификация**
+**Следующий шаг: ШАГ 4 — UI Shell**
 
 Коротко — оставшиеся шаги:
-3. **[СЛЕДУЮЩИЙ]** Аутентификация — NextAuth v5 credentials, register/forgot-password/reset-password
+3. **[ГОТОВО]** Аутентификация — NextAuth v5 credentials, register/forgot-password/reset-password
+4. **[СЛЕДУЮЩИЙ]** UI Shell — ThemeProvider (dark-first), NavBar, layout
 4. UI Shell — ThemeProvider (dark-first), NavBar, layout
 5. DropZone — drag-and-drop (JPG/PNG, до 10MB, до 5 файлов)
 6. Gemini — src/lib/gemini.ts с retry 3 раза + API /api/generate
