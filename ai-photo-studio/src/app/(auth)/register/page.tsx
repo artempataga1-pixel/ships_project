@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -62,7 +63,20 @@ export default function RegisterPage() {
       return
     }
 
-    router.push("/login?registered=1")
+    // Автоматический вход после успешной регистрации
+    const result = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    })
+
+    if (result?.error) {
+      router.push("/login?registered=1")
+      return
+    }
+
+    router.push("/")
+    router.refresh()
   }
 
   return (

@@ -12,7 +12,7 @@ export default auth(function proxy(req) {
     (p) => pathname === p || pathname.startsWith(p + "/")
   )
   const isAuthPath = authPaths.some(
-    (p) => pathname === p || pathname.startsWith(p)
+    (p) => pathname === p || pathname.startsWith(p + "/")
   )
 
   if (isProtected && !session) {

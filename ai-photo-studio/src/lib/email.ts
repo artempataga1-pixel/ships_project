@@ -21,7 +21,8 @@ async function getTransport() {
 
 export async function sendPasswordResetEmail(email: string, token: string) {
   const t = await getTransport()
-  const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`
+  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000"
+  const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
   const info = await t.sendMail({
     from: '"AI Photo Studio" <noreply@aiphotostudio.com>',

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { users, passwordResetTokens } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
+import { eq, and, isNull } from "drizzle-orm"
 import { randomBytes } from "crypto"
 import { sendPasswordResetEmail } from "@/lib/email"
 import { z } from "zod"
@@ -29,6 +29,17 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ success: true })
     }
+
+    // Инвалидируем все старые неиспользованные токены пользователя
+    await db
+      .update(passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(
+        and(
+          eq(passwordResetTokens.userId, user.id),
+          isNull(passwordResetTokens.usedAt)
+        )
+      )
 
     const token = randomBytes(32).toString("hex")
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // +1 час
