@@ -37,6 +37,7 @@
 4. Настроены MCP серверы: `next-devtools`, `ai-elements` (`.mcp.json`)
 5. bun установлен (v1.3.14)
 6. **[ШАГ 1 ЗАВЕРШЁН]** Все зависимости установлены, shadcn инициализирован
+7. **[ШАГ 2 ЗАВЕРШЁН]** База данных создана и применена
 
 ### Детали шага 1
 
@@ -60,15 +61,25 @@
 
 **.env создан** с шаблоном (нужно заполнить NEXTAUTH_SECRET и GEMINI_API_KEY)
 
+### Детали шага 2
+
+**Файлы созданы:**
+- `src/lib/db/schema.ts` — таблицы users, generations, passwordResetTokens
+- `src/lib/db/index.ts` — Drizzle клиент с better-sqlite3, абсолютный путь через `process.cwd()`
+- `drizzle.config.ts` — конфиг для drizzle-kit (dialect: sqlite, path: ./data/app.db)
+
+**БД:** `data/app.db` создана, все три таблицы применены через `bun run db:push`
+
+**ВАЖНО:** better-sqlite3 требует нативных биндингов. На этой машине (Node.js v24.15.0) уже выполнен `npm rebuild better-sqlite3`. При первом запуске на новой машине — повторить.
+
 ## Что предстоит сделать
 
 Смотри детальный план → `tmp/plans/plan.md`
 
-**Следующий шаг: ШАГ 2 — База данных**
+**Следующий шаг: ШАГ 3 — Аутентификация**
 
 Коротко — оставшиеся шаги:
-2. **[СЛЕДУЮЩИЙ]** БД — schema.ts (users, generations, passwordResetTokens) + drizzle.config.ts + `bun run db:push`
-3. Аутентификация — NextAuth v5 credentials, register/forgot-password/reset-password
+3. **[СЛЕДУЮЩИЙ]** Аутентификация — NextAuth v5 credentials, register/forgot-password/reset-password
 4. UI Shell — ThemeProvider (dark-first), NavBar, layout
 5. DropZone — drag-and-drop (JPG/PNG, до 10MB, до 5 файлов)
 6. Gemini — src/lib/gemini.ts с retry 3 раза + API /api/generate
