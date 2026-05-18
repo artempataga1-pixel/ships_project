@@ -41,6 +41,7 @@
 8. **[ШАГ 3 ЗАВЕРШЁН]** Аутентификация — NextAuth v5, register/forgot/reset-password, proxy.ts
 9. **[ШАГ 4 ЗАВЕРШЁН]** UI Shell — ThemeProvider, NavBar, ThemeToggle, LimitBadge, (app) layout, заглушки страниц
 10. **[ШАГ 5 ЗАВЕРШЁН]** Загрузка файлов — upload.ts, API /api/uploads/[...path], DropZone компонент
+11. **[ШАГ 6 ЗАВЕРШЁН]** Gemini интеграция — gemini.ts, limits.ts, API POST /api/generate
 
 ### Детали шага 1
 
@@ -135,24 +136,38 @@
 - Route handler валидирует структуру пути: `inputs` = 4 сегмента, `results` = 3 сегмента
 - `resolveUploadPath()` возвращает `null` при выходе за UPLOADS_ROOT — защита от path traversal
 
-**ВАЖНО для шага 6 (Gemini + /api/generate):**
-- Используй `saveInputFiles(files, userId, generationId)` из `upload.ts` — принимает `File[]`, возвращает массив относительных путей
-- Используй `saveResultFile(buffer, userId, generationId)` — сохраняет PNG результата, возвращает относительный путь
-- `DropZone` — управляемый компонент, принимает `files: File[]` и `onChange: (files: File[]) => void` через пропсы
-- На шаге 7 (главный экран) нужно: создать стейт `files: File[]` в родителе, передать в `DropZone`, при сабмите передать в `/api/generate` как FormData
+### Детали шага 6
+
+**Файлы созданы:**
+- `src/lib/limits.ts` — `checkLimit(userId)` → boolean, `incrementGenerations(userId)`, `GENERATION_LIMIT` константа
+- `src/lib/gemini.ts` — `stylizeImage(images: ImageInput[], styleId, userPrompt?)` → Buffer PNG; retry 3x с экспоненциальной задержкой (1s, 2s); все 10 стилей в `STYLE_PROMPTS`
+- `src/app/api/generate/route.ts` — POST FormData (files[], style, prompt, aspectRatio): проверка лимита → saveInputFiles → обновить запись → Gemini → saveResultFile → completed + increment → `{ generationId, resultUrl }`
+
+**API /api/generate — детали:**
+- Принимает: `FormData` с полями `files` (несколько File), `style` (string), `prompt` (string, optional), `aspectRatio` ('1:1'|'9:16'|'16:9')
+- Возвращает: `{ generationId: string, resultUrl: string }` — resultUrl = `/api/uploads/results/{userId}/{generationId}.png`
+- Ошибки: 401 (не авторизован), 400 (нет файлов/стиль), 403 (лимит исчерпан), 500 (Gemini ошибка)
+- При ошибке Gemini: запись в БД обновляется в status=failed + errorMessage
+
+**ВАЖНО для шага 7 (главный экран):**
+- `DropZone` — управляемый компонент: `files: File[]` + `onChange: (files: File[]) => void` пропсы
+- При сабмите: создать `FormData`, добавить каждый файл как `formData.append('files', file)`, отправить `fetch('/api/generate', { method: 'POST', body: formData })`
+- `stylizeImage` принимает массив изображений — все загруженные фото передаются Gemini одновременно
+- Стиль валидируется на сервере против списка `VALID_STYLES` (константа в route.ts)
+- Во время генерации — indeterminate прогресс-бар (нет потоковой передачи, синхронный запрос)
 
 ## Что предстоит сделать
 
 Смотри детальный план → `tmp/plans/plan.md`
 
-**Следующий шаг: ШАГ 6 — Gemini интеграция**
+**Следующий шаг: ШАГ 7 — Главный экран (Generator)**
 
 Коротко — оставшиеся шаги:
 3. **[ГОТОВО]** Аутентификация — NextAuth v5 credentials, register/forgot-password/reset-password
 4. **[ГОТОВО]** UI Shell — ThemeProvider (dark-first), NavBar, layout
 5. **[ГОТОВО]** Загрузка файлов — upload.ts, API /api/uploads, DropZone компонент
-6. **[СЛЕДУЮЩИЙ]** Gemini — `src/lib/gemini.ts` с retry 3 раза + `src/lib/limits.ts` + API `POST /api/generate`
-7. Главный экран — StyleGrid (10 пресетов), прогресс-бар, результат
+6. **[ГОТОВО]** Gemini — `src/lib/gemini.ts` с retry 3 раза + `src/lib/limits.ts` + API `POST /api/generate`
+7. **[СЛЕДУЮЩИЙ]** Главный экран — StyleGrid (10 пресетов), прогресс-бар, результат
 8. История — /history, Re-generate
 9. Аккаунт — /account с лимитом (50 фото накопительно)
 10. Полировка — mobile, error states, пустые состояния
