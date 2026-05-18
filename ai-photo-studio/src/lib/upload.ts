@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises'
+import { writeFile, mkdir, readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join, resolve, sep } from 'path'
 import { randomUUID } from 'crypto'
@@ -143,4 +143,10 @@ export function uploadFileExists(relativePath: string): boolean {
   const full = resolveUploadPath(relativePath)
   if (!full) return false
   return existsSync(full)
+}
+
+export async function readUploadFile(relativePath: string): Promise<Buffer> {
+  const full = resolveUploadPath(relativePath)
+  if (!full) throw new Error('Invalid upload path')
+  return readFile(full)
 }

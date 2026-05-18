@@ -43,6 +43,7 @@
 10. **[ШАГ 5 ЗАВЕРШЁН]** Загрузка файлов — upload.ts, API /api/uploads/[...path], DropZone компонент
 11. **[ШАГ 6 ЗАВЕРШЁН]** Gemini интеграция — gemini.ts, limits.ts, API POST /api/generate
 12. **[ШАГ 7 ЗАВЕРШЁН]** Главный экран — StyleGrid, GenerationResult, page.tsx генератора
+13. **[ШАГ 8 ЗАВЕРШЁН]** История — API GET /api/history, HistoryCard, страница /history, Re-generate
 
 ### Детали шага 1
 
@@ -186,7 +187,7 @@
 
 Смотри детальный план → `tmp/plans/plan.md`
 
-**Следующий шаг: ШАГ 8 — История**
+**Следующий шаг: ШАГ 9 — Личный кабинет**
 
 Коротко — оставшиеся шаги:
 3. **[ГОТОВО]** Аутентификация — NextAuth v5 credentials, register/forgot-password/reset-password
@@ -194,8 +195,8 @@
 5. **[ГОТОВО]** Загрузка файлов — upload.ts, API /api/uploads, DropZone компонент
 6. **[ГОТОВО]** Gemini — `src/lib/gemini.ts` с retry 3 раза + `src/lib/limits.ts` + API `POST /api/generate`
 7. **[ГОТОВО]** Главный экран — StyleGrid, GenerationResult, page.tsx
-8. **[СЛЕДУЮЩИЙ]** История — API GET /api/history, HistoryCard, /history страница, Re-generate
-9. Аккаунт — /account с лимитом (50 фото накопительно)
+8. **[ГОТОВО]** История — API GET /api/history, HistoryCard, /history страница, Re-generate
+9. **[СЛЕДУЮЩИЙ]** Аккаунт — /account с лимитом (50 фото накопительно)
 10. Полировка — mobile, error states, пустые состояния
 
 ## Ключевые бизнес-правила
@@ -231,6 +232,46 @@ ai-photo-studio/
 ├── tmp/plans/plan.md   — детальный план
 └── .mcp.json           — next-devtools, ai-elements
 ```
+
+### Детали шага 8
+
+**Файлы созданы:**
+- `src/app/api/history/route.ts` — GET endpoint, возвращает generations текущего userId DESC по createdAt; JSON.parse оборнут в try/catch (защита от битых данных в БД)
+- `src/components/HistoryCard.tsx` — "use client" компонент: превью исходников (max 3 + счётчик остатка) → результат/статус, кнопка "Повторить"; экспортирует тип `HistoryItem`
+- `src/app/(app)/history/page.tsx` — Client Component: `useEffect` загрузка истории, Skeleton при загрузке, пустое состояние с призывом к действию, перезагрузка без Skeleton после re-generate
+
+**Файлы обновлены:**
+- `src/lib/upload.ts` — добавлена функция `readUploadFile(relativePath)` для чтения файлов с диска через `resolveUploadPath`
+- `src/app/api/generate/route.ts` — расширен для re-generate через `sourceImagePaths` (JSON в FormData)
+
+**Re-generate из истории — детали:**
+- HistoryCard передаёт `sourceImagePaths` (JSON строка), `style`, `prompt`, `aspectRatio` в `FormData`
+- API detect режим: если `files` пустые и `sourceImagePaths` есть → re-generate mode
+- **Безопасность**: валидация СНАЧАЛА, потом `checkAndIncrementLimit` — 400/403 не тратят квоту
+- Проверка путей: `isSafeRegeneratePath()` — запрещает `..`, `\`, `\0`, нормализует слэши, проверяет ровно 4 сегмента `inputs/{userId}/{generationId}/{file}`; плюс `userId` проверяется на `/^[a-zA-Z0-9_-]+$/`
+- `readUploadFile` кидает ошибку с кодом `SOURCE_MISSING:` при `ENOENT` → API возвращает **410 Gone** с понятным сообщением
+- Клиент обрабатывает 410 отдельным toast: "Исходные файлы недоступны. Создайте новую генерацию."
+- После успешного re-generate: тихая перезагрузка списка (без `setLoading(true)`, без Skeleton)
+
+**Формат ответа GET /api/history:**
+```json
+[{
+  "id": "uuid",
+  "status": "completed|failed|processing|pending",
+  "style": "ghibli",
+  "prompt": "...",
+  "aspectRatio": "1:1",
+  "sourceImagePaths": ["inputs/{userId}/{genId}/{file}"],
+  "sourceImageUrls": ["/api/uploads/inputs/..."],
+  "resultImageUrl": "/api/uploads/results/...",
+  "createdAt": "ISO string",
+  "completedAt": "ISO string | null"
+}]
+```
+
+**ВАЖНО для шага 9 (Личный кабинет):**
+- `LimitBadge` в NavBar уже вызывает `/api/account` — нужно создать этот endpoint
+- Страница `/account` должна: показать email, имя, "Free план", счётчик "Использовано X из 50", прогресс-бар
 
 ## Переменные окружения (.env)
 
