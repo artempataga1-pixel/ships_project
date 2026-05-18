@@ -73,6 +73,27 @@
 
 **ВАЖНО:** better-sqlite3 требует нативных биндингов. На этой машине (Node.js v24.15.0) уже выполнен `npm rebuild better-sqlite3`. При первом запуске на новой машине — повторить.
 
+### Детали шага 3
+
+**Файлы созданы:**
+- `src/auth.ts` — NextAuth v5 config: Credentials provider, bcrypt, callbacks jwt+session (передаёт userId)
+- `src/types/next-auth.d.ts` — расширение Session и JWT типов (добавлен `id: string`)
+- `src/proxy.ts` — защита роутов через NextAuth v5 `auth()` HOF; защищены `/`, `/history`, `/account`
+- `src/lib/email.ts` — nodemailer + Ethereal автоконфиг; ссылка на письмо выводится в консоль
+- `src/app/api/auth/[...nextauth]/route.ts` — NextAuth route handler
+- `src/app/api/auth/register/route.ts` — регистрация (bcrypt hash, проверка дубля)
+- `src/app/api/auth/forgot-password/route.ts` — генерация токена (инвалидирует старые), отправка письма
+- `src/app/api/auth/reset-password/route.ts` — проверка токена (expiry + usedAt), обновление хэша
+- `src/app/(auth)/layout.tsx` — центрированный layout для auth-страниц
+- `src/app/(auth)/login/page.tsx` — форма входа (react-hook-form + zod, signIn из next-auth/react)
+- `src/app/(auth)/register/page.tsx` — регистрация + auto-signIn после успеха
+- `src/app/(auth)/forgot-password/page.tsx` — форма запроса ссылки
+- `src/app/(auth)/reset-password/page.tsx` + `ResetPasswordForm.tsx` — сброс пароля (Suspense + useSearchParams)
+
+**Обновлены:**
+- `src/app/layout.tsx` — добавлен `SessionProvider`, класс `dark` на `<html>`, metadata на русском
+- `.env` — `NEXTAUTH_SECRET` уже сгенерирован и заполнен
+
 ## Что предстоит сделать
 
 Смотри детальный план → `tmp/plans/plan.md`
@@ -82,7 +103,6 @@
 Коротко — оставшиеся шаги:
 3. **[ГОТОВО]** Аутентификация — NextAuth v5 credentials, register/forgot-password/reset-password
 4. **[СЛЕДУЮЩИЙ]** UI Shell — ThemeProvider (dark-first), NavBar, layout
-4. UI Shell — ThemeProvider (dark-first), NavBar, layout
 5. DropZone — drag-and-drop (JPG/PNG, до 10MB, до 5 файлов)
 6. Gemini — src/lib/gemini.ts с retry 3 раза + API /api/generate
 7. Главный экран — StyleGrid (10 пресетов), прогресс-бар, результат
@@ -127,8 +147,8 @@ ai-photo-studio/
 ## Переменные окружения (.env)
 
 ```
-NEXTAUTH_SECRET=       # openssl rand -hex 32
+NEXTAUTH_SECRET=<уже заполнен>
 NEXTAUTH_URL=http://localhost:3000
-GEMINI_API_KEY=        # aistudio.google.com — Get API key (бесплатно, без карты)
+GEMINI_API_KEY=<нужно заполнить — aistudio.google.com, Get API key, бесплатно>
 GENERATION_LIMIT=50
 ```
