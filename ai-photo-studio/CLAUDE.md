@@ -40,6 +40,7 @@
 7. **[ШАГ 2 ЗАВЕРШЁН]** База данных создана и применена
 8. **[ШАГ 3 ЗАВЕРШЁН]** Аутентификация — NextAuth v5, register/forgot/reset-password, proxy.ts
 9. **[ШАГ 4 ЗАВЕРШЁН]** UI Shell — ThemeProvider, NavBar, ThemeToggle, LimitBadge, (app) layout, заглушки страниц
+10. **[ШАГ 5 ЗАВЕРШЁН]** Загрузка файлов — upload.ts, API /api/uploads/[...path], DropZone компонент
 
 ### Детали шага 1
 
@@ -114,17 +115,43 @@
 
 **ВАЖНО:** `LimitBadge` вызывает `/api/account` который будет создан только на шаге 9. До тех пор badge просто не отображается (это ОК — intentional).
 
+### Детали шага 5
+
+**Файлы созданы:**
+- `src/lib/upload.ts` — server-side утилиты: `validateFile`, `saveInputFiles`, `saveResultFile`, `resolveUploadPath`, `uploadFileExists`
+- `src/app/api/uploads/[...path]/route.ts` — GET route handler для выдачи файлов из `/uploads/` с проверкой auth + userId
+- `src/components/DropZone.tsx` — "use client" компонент: drag-and-drop, превью (URL.createObjectURL с cleanup через useEffect), удаление, до 5 файлов, валидация MIME+размер, кнопка галереи для мобильных
+
+**Структура хранения файлов:**
+- Входные: `uploads/inputs/{userId}/{generationId}/{uuid}.jpg|.png`
+- Результаты: `uploads/results/{userId}/{generationId}.png`
+- Относительные пути хранятся в `generations.sourceImagePaths` (JSON-массив) и `generations.resultImagePath`
+- Отдаются через `/api/uploads/{relativePath}` с авторизацией
+
+**Безопасность (важно для шага 6):**
+- `upload.ts` проверяет магические байты файла (PNG: `89 50 4E 47 0D 0A 1A 0A`, JPEG: `FF D8 FF`) — обходит MIME spoofing
+- Оба `userId` и `generationId` проходят `isSafeSegment()` (нет `..`, `/`, `\0`)
+- Итоговый путь проверяется через `resolve()` + `startsWith(UPLOADS_ROOT + sep)`
+- Route handler валидирует структуру пути: `inputs` = 4 сегмента, `results` = 3 сегмента
+- `resolveUploadPath()` возвращает `null` при выходе за UPLOADS_ROOT — защита от path traversal
+
+**ВАЖНО для шага 6 (Gemini + /api/generate):**
+- Используй `saveInputFiles(files, userId, generationId)` из `upload.ts` — принимает `File[]`, возвращает массив относительных путей
+- Используй `saveResultFile(buffer, userId, generationId)` — сохраняет PNG результата, возвращает относительный путь
+- `DropZone` — управляемый компонент, принимает `files: File[]` и `onChange: (files: File[]) => void` через пропсы
+- На шаге 7 (главный экран) нужно: создать стейт `files: File[]` в родителе, передать в `DropZone`, при сабмите передать в `/api/generate` как FormData
+
 ## Что предстоит сделать
 
 Смотри детальный план → `tmp/plans/plan.md`
 
-**Следующий шаг: ШАГ 5 — DropZone**
+**Следующий шаг: ШАГ 6 — Gemini интеграция**
 
 Коротко — оставшиеся шаги:
 3. **[ГОТОВО]** Аутентификация — NextAuth v5 credentials, register/forgot-password/reset-password
 4. **[ГОТОВО]** UI Shell — ThemeProvider (dark-first), NavBar, layout
-5. **[СЛЕДУЮЩИЙ]** DropZone — drag-and-drop (JPG/PNG, до 10MB, до 5 файлов)
-6. Gemini — src/lib/gemini.ts с retry 3 раза + API /api/generate
+5. **[ГОТОВО]** Загрузка файлов — upload.ts, API /api/uploads, DropZone компонент
+6. **[СЛЕДУЮЩИЙ]** Gemini — `src/lib/gemini.ts` с retry 3 раза + `src/lib/limits.ts` + API `POST /api/generate`
 7. Главный экран — StyleGrid (10 пресетов), прогресс-бар, результат
 8. История — /history, Re-generate
 9. Аккаунт — /account с лимитом (50 фото накопительно)
