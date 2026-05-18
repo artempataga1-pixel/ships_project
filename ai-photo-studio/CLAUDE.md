@@ -42,6 +42,7 @@
 9. **[ШАГ 4 ЗАВЕРШЁН]** UI Shell — ThemeProvider, NavBar, ThemeToggle, LimitBadge, (app) layout, заглушки страниц
 10. **[ШАГ 5 ЗАВЕРШЁН]** Загрузка файлов — upload.ts, API /api/uploads/[...path], DropZone компонент
 11. **[ШАГ 6 ЗАВЕРШЁН]** Gemini интеграция — gemini.ts, limits.ts, API POST /api/generate
+12. **[ШАГ 7 ЗАВЕРШЁН]** Главный экран — StyleGrid, GenerationResult, page.tsx генератора
 
 ### Детали шага 1
 
@@ -156,25 +157,44 @@
 - MIME type определяется по магическим байтам буфера (`detectMime` внутри route.ts), не по `file.type`
 
 **ВАЖНО для шага 7 (главный экран):**
-- `DropZone` — управляемый компонент: `files: File[]` + `onChange: (files: File[]) => void` пропсы
+- `DropZone` — управляемый компонент: `files: File[]` + `onChange: (files: File[]) => void` + `disabled?: boolean`
 - При сабмите: `const fd = new FormData(); files.forEach(f => fd.append('files', f)); fd.append('style', style)` → `fetch('/api/generate', { method: 'POST', body: fd })`
 - Прогресс-бар: indeterminate (`<Progress />` без value) пока идёт запрос — синхронный, нет стриминга
 - После успеха: отобразить `<img src={resultUrl}>` — картинка доступна сразу через `/api/uploads/...`
 - При лимите (403): заблокировать кнопку Generate + показать сообщение
 
+### Детали шага 7
+
+**Файлы созданы:**
+- `src/components/StyleGrid.tsx` — grid 2→5 колонок, 10 пресетов (Lucide иконки + названия), одиночный выбор, `disabled` prop
+- `src/components/GenerationResult.tsx` — показ результата: `<img>` + кнопки "Начать заново" / "Повторить"
+
+**Файлы обновлены:**
+- `src/app/(app)/page.tsx` — полная страница генератора: state (files, style, prompt, aspectRatio, loading, result, limitReached), FormData submit → `/api/generate`, indeterminate прогресс-бар, экран результата с re-generate
+- `src/components/DropZone.tsx` — добавлен `disabled` prop (блокирует drop/click/кнопку)
+- `src/app/layout.tsx` — добавлен `<Toaster richColors position="top-right" />` (sonner)
+- `src/app/globals.css` — добавлены `@keyframes indeterminate` для анимированного прогресс-бара
+
+**Логика page.tsx:**
+- `generate(files, style, prompt, aspectRatio)` — принимает параметры явно (нужно для re-generate из ResultState)
+- При 403 → `setLimitReached(true)` + toast, кнопка скрывается, показывается сообщение о лимите
+- При успехе → `setResult(...)` → рендерится `GenerationResult` с сохранёнными параметрами для re-generate
+- `handleRegenerate` — вызывает `generate` с параметрами из `result` (те же файлы/стиль/промпт)
+- `handleReset` — сбрасывает все state кроме `limitReached` (если лимит достигнут, кнопка и после reset не появится)
+
 ## Что предстоит сделать
 
 Смотри детальный план → `tmp/plans/plan.md`
 
-**Следующий шаг: ШАГ 7 — Главный экран (Generator)**
+**Следующий шаг: ШАГ 8 — История**
 
 Коротко — оставшиеся шаги:
 3. **[ГОТОВО]** Аутентификация — NextAuth v5 credentials, register/forgot-password/reset-password
 4. **[ГОТОВО]** UI Shell — ThemeProvider (dark-first), NavBar, layout
 5. **[ГОТОВО]** Загрузка файлов — upload.ts, API /api/uploads, DropZone компонент
 6. **[ГОТОВО]** Gemini — `src/lib/gemini.ts` с retry 3 раза + `src/lib/limits.ts` + API `POST /api/generate`
-7. **[СЛЕДУЮЩИЙ]** Главный экран — StyleGrid (10 пресетов), прогресс-бар, результат
-8. История — /history, Re-generate
+7. **[ГОТОВО]** Главный экран — StyleGrid, GenerationResult, page.tsx
+8. **[СЛЕДУЮЩИЙ]** История — API GET /api/history, HistoryCard, /history страница, Re-generate
 9. Аккаунт — /account с лимитом (50 фото накопительно)
 10. Полировка — mobile, error states, пустые состояния
 

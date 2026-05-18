@@ -10,6 +10,7 @@ interface DropZoneProps {
   files: File[]
   onChange: (files: File[]) => void
   className?: string
+  disabled?: boolean
 }
 
 function validateFile(file: File): string | null {
@@ -22,7 +23,7 @@ function validateFile(file: File): string | null {
   return null
 }
 
-export function DropZone({ files, onChange, className }: DropZoneProps) {
+export function DropZone({ files, onChange, className, disabled }: DropZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false)
   const [errors, setErrors] = useState<string[]>([])
   const [previews, setPreviews] = useState<string[]>([])
@@ -99,19 +100,20 @@ export function DropZone({ files, onChange, className }: DropZoneProps) {
   return (
     <div className={cn('space-y-3', className)}>
       <div
-        onDrop={onDrop}
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
+        onDrop={disabled ? undefined : onDrop}
+        onDragOver={disabled ? undefined : onDragOver}
+        onDragLeave={disabled ? undefined : onDragLeave}
         className={cn(
           'relative flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-colors',
-          !isFull && 'cursor-pointer',
+          !isFull && !disabled && 'cursor-pointer',
+          disabled && 'pointer-events-none opacity-50',
           isDragOver
             ? 'border-primary bg-primary/5'
             : isFull
               ? 'border-border opacity-50'
               : 'border-border hover:border-primary/50 hover:bg-muted/30'
         )}
-        onClick={() => !isFull && inputRef.current?.click()}
+        onClick={() => !isFull && !disabled && inputRef.current?.click()}
       >
         <Upload className="h-8 w-8 text-muted-foreground" />
         <div className="text-center">
@@ -122,7 +124,7 @@ export function DropZone({ files, onChange, className }: DropZoneProps) {
             JPG, PNG · до 10MB · {files.length}/{MAX_FILES} файлов
           </p>
         </div>
-        {!isFull && (
+        {!isFull && !disabled && (
           <Button
             type="button"
             variant="outline"

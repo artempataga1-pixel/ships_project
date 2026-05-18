@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { SessionProvider } from "next-auth/react"
 import { ThemeProvider } from "next-themes"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -37,7 +38,10 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
