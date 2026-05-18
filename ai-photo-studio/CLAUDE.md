@@ -139,22 +139,28 @@
 ### Детали шага 6
 
 **Файлы созданы:**
-- `src/lib/limits.ts` — `checkLimit(userId)` → boolean, `incrementGenerations(userId)`, `GENERATION_LIMIT` константа
-- `src/lib/gemini.ts` — `stylizeImage(images: ImageInput[], styleId, userPrompt?)` → Buffer PNG; retry 3x с экспоненциальной задержкой (1s, 2s); все 10 стилей в `STYLE_PROMPTS`
-- `src/app/api/generate/route.ts` — POST FormData (files[], style, prompt, aspectRatio): проверка лимита → saveInputFiles → обновить запись → Gemini → saveResultFile → completed + increment → `{ generationId, resultUrl }`
+- `src/lib/limits.ts` — `checkAndIncrementLimit(userId)` → boolean (синхронный, атомарный UPDATE), `decrementGenerations(userId)` (синхронный, откат при ошибке), `GENERATION_LIMIT` константа с NaN-guard
+- `src/lib/gemini.ts` — `stylizeImage(images: ImageInput[], styleId, userPrompt?)` → Buffer PNG; retry 3x с задержкой 1s/2s; `isRetriable` пропускает 400/401/403; все 10 стилей в `STYLE_PROMPTS`
+- `src/app/api/generate/route.ts` — POST FormData (files[], style, prompt, aspectRatio): атомарный check лимита → saveInputFiles → Gemini → saveResultFile → completed → `{ generationId, resultUrl }`; при ошибке — decrementGenerations + status=failed
+
+**Ключевые особенности limits.ts (важно — СИНХРОННЫЙ, не async):**
+- `checkAndIncrementLimit` и `decrementGenerations` — НЕ async функции (better-sqlite3 синхронный)
+- В route.ts вызывать без `await`: `const allowed = checkAndIncrementLimit(userId)` 
+- Инкремент происходит ДО вызова Gemini; при ошибке вызывается `decrementGenerations`
+- Атомарный UPDATE: `UPDATE users SET totalGenerations = totalGenerations + 1 WHERE id = ? AND totalGenerations < LIMIT` — returns `{ changes: number }`
 
 **API /api/generate — детали:**
-- Принимает: `FormData` с полями `files` (несколько File), `style` (string), `prompt` (string, optional), `aspectRatio` ('1:1'|'9:16'|'16:9')
+- Принимает: `FormData` с полями `files` (несколько File через `formData.append('files', file)`), `style` (string из VALID_STYLES), `prompt` (string, max 500 символов), `aspectRatio` ('1:1'|'9:16'|'16:9')
 - Возвращает: `{ generationId: string, resultUrl: string }` — resultUrl = `/api/uploads/results/{userId}/{generationId}.png`
 - Ошибки: 401 (не авторизован), 400 (нет файлов/стиль), 403 (лимит исчерпан), 500 (Gemini ошибка)
-- При ошибке Gemini: запись в БД обновляется в status=failed + errorMessage
+- MIME type определяется по магическим байтам буфера (`detectMime` внутри route.ts), не по `file.type`
 
 **ВАЖНО для шага 7 (главный экран):**
 - `DropZone` — управляемый компонент: `files: File[]` + `onChange: (files: File[]) => void` пропсы
-- При сабмите: создать `FormData`, добавить каждый файл как `formData.append('files', file)`, отправить `fetch('/api/generate', { method: 'POST', body: formData })`
-- `stylizeImage` принимает массив изображений — все загруженные фото передаются Gemini одновременно
-- Стиль валидируется на сервере против списка `VALID_STYLES` (константа в route.ts)
-- Во время генерации — indeterminate прогресс-бар (нет потоковой передачи, синхронный запрос)
+- При сабмите: `const fd = new FormData(); files.forEach(f => fd.append('files', f)); fd.append('style', style)` → `fetch('/api/generate', { method: 'POST', body: fd })`
+- Прогресс-бар: indeterminate (`<Progress />` без value) пока идёт запрос — синхронный, нет стриминга
+- После успеха: отобразить `<img src={resultUrl}>` — картинка доступна сразу через `/api/uploads/...`
+- При лимите (403): заблокировать кнопку Generate + показать сообщение
 
 ## Что предстоит сделать
 
