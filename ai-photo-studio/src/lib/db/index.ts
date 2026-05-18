@@ -4,7 +4,7 @@ import { mkdirSync } from 'fs'
 import path from 'path'
 import * as schema from './schema'
 
-const dbPath = './data/app.db'
+const dbPath = path.join(process.cwd(), 'data', 'app.db')
 mkdirSync(path.dirname(dbPath), { recursive: true })
 
 const sqlite = new Database(dbPath)

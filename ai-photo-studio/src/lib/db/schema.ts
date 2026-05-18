@@ -1,8 +1,9 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
+import { randomUUID } from 'crypto'
 
 export const users = sqliteTable('users', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   name: text('name'),
@@ -13,7 +14,7 @@ export const users = sqliteTable('users', {
 })
 
 export const generations = sqliteTable('generations', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -31,7 +32,7 @@ export const generations = sqliteTable('generations', {
 })
 
 export const passwordResetTokens = sqliteTable('password_reset_tokens', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
