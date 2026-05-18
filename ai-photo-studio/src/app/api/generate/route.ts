@@ -4,7 +4,11 @@ import { eq } from 'drizzle-orm'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { generations } from '@/lib/db/schema'
-import { checkLimit, incrementGenerations, GENERATION_LIMIT } from '@/lib/limits'
+import {
+  checkAndIncrementLimit,
+  decrementGenerations,
+  GENERATION_LIMIT,
+} from '@/lib/limits'
 import { saveInputFiles, saveResultFile, MAX_FILES } from '@/lib/upload'
 import { stylizeImage, type ImageInput } from '@/lib/gemini'
 
@@ -15,21 +19,25 @@ const VALID_STYLES = [
 
 const VALID_ASPECT_RATIOS = ['1:1', '9:16', '16:9']
 
+const MAX_PROMPT_LENGTH = 500
+
+// Детектирует mime type по магическим байтам — надёжнее чем file.type
+function detectMime(buffer: Buffer): 'image/jpeg' | 'image/png' | null {
+  if (buffer.length < 8) return null
+  if (
+    buffer[0] === 0x89 && buffer[1] === 0x50 &&
+    buffer[2] === 0x4e && buffer[3] === 0x47
+  ) return 'image/png'
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg'
+  return null
+}
+
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Необходима авторизация' }, { status: 401 })
   }
   const userId = session.user.id
-
-  // Проверяем лимит
-  const withinLimit = await checkLimit(userId)
-  if (!withinLimit) {
-    return NextResponse.json(
-      { error: `Достигнут лимит в ${GENERATION_LIMIT} генераций` },
-      { status: 403 }
-    )
-  }
 
   // Парсим FormData
   let formData: FormData
@@ -40,7 +48,7 @@ export async function POST(req: NextRequest) {
   }
 
   const style = formData.get('style')
-  const prompt = formData.get('prompt')
+  const promptRaw = formData.get('prompt')
   const aspectRatioRaw = formData.get('aspectRatio')
   const files = formData.getAll('files') as File[]
 
@@ -61,7 +69,20 @@ export async function POST(req: NextRequest) {
       ? aspectRatioRaw
       : '1:1'
 
-  const userPrompt = typeof prompt === 'string' && prompt.trim() ? prompt.trim() : undefined
+  // Ограничиваем промпт 500 символами
+  const userPrompt =
+    typeof promptRaw === 'string' && promptRaw.trim()
+      ? promptRaw.trim().slice(0, MAX_PROMPT_LENGTH)
+      : undefined
+
+  // Атомарная проверка лимита + инкремент (без race condition)
+  const allowed = checkAndIncrementLimit(userId)
+  if (!allowed) {
+    return NextResponse.json(
+      { error: `Достигнут лимит в ${GENERATION_LIMIT} генераций` },
+      { status: 403 }
+    )
+  }
 
   const generationId = randomUUID()
 
@@ -84,12 +105,12 @@ export async function POST(req: NextRequest) {
       .set({ sourceImagePaths: JSON.stringify(sourceImagePaths) })
       .where(eq(generations.id, generationId))
 
-    // Готовим буферы для Gemini
+    // Читаем буферы и детектируем mime по магическим байтам
     const images: ImageInput[] = await Promise.all(
       files.map(async (file) => {
         const buffer = Buffer.from(await file.arrayBuffer())
-        const mimeType: 'image/jpeg' | 'image/png' =
-          file.type === 'image/png' ? 'image/png' : 'image/jpeg'
+        const mimeType = detectMime(buffer)
+        if (!mimeType) throw new Error(`Файл ${file.name}: неподдерживаемый формат`)
         return { buffer, mimeType }
       })
     )
@@ -100,13 +121,11 @@ export async function POST(req: NextRequest) {
     // Сохраняем результат
     const resultImagePath = await saveResultFile(resultBuffer, userId, generationId)
 
-    // Обновляем запись + инкрементируем счётчик
+    // Обновляем запись (completed) — лимит уже инкрементирован до генерации
     await db
       .update(generations)
       .set({ status: 'completed', resultImagePath, completedAt: new Date() })
       .where(eq(generations.id, generationId))
-
-    await incrementGenerations(userId)
 
     return NextResponse.json({
       generationId,
@@ -116,6 +135,9 @@ export async function POST(req: NextRequest) {
     const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка'
 
     console.error(`[generate] generation ${generationId} failed:`, err)
+
+    // Откатываем инкремент лимита — генерация не удалась
+    decrementGenerations(userId)
 
     await db
       .update(generations)

@@ -13,10 +13,8 @@ const STYLE_PROMPTS: Record<string, string> = {
   anime: 'Transform into modern anime style with clean lines, vibrant colors, cell shading',
   cyberpunk: 'Stylize as cyberpunk scene with neon accents, dark atmosphere, holographic effects',
   sketch: 'Convert into detailed pencil sketch with fine line art and cross-hatching',
-  'golden-hour':
-    'Enhance with golden hour photography: warm orange-gold light, long shadows',
-  'cinematic-bw':
-    'Convert to cinematic black & white with high contrast, film noir atmosphere',
+  'golden-hour': 'Enhance with golden hour photography: warm orange-gold light, long shadows',
+  'cinematic-bw': 'Convert to cinematic black & white with high contrast, film noir atmosphere',
   'fairy-tale':
     'Transform into magical fairy tale illustration with ethereal glow and fantasy elements',
 }
@@ -24,6 +22,13 @@ const STYLE_PROMPTS: Record<string, string> = {
 export type ImageInput = {
   buffer: Buffer
   mimeType: 'image/jpeg' | 'image/png'
+}
+
+// 4xx кроме 429 (Rate Limit) — клиентские ошибки, retry не поможет
+function isRetriable(err: Error): boolean {
+  const msg = err.message
+  if (/\b40[013]\b/.test(msg)) return false
+  return true
 }
 
 export async function stylizeImage(
@@ -76,6 +81,7 @@ export async function stylizeImage(
       throw new Error('Gemini не вернул изображение в ответе')
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err))
+      if (!isRetriable(lastError)) break
     }
   }
 
