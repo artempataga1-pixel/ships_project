@@ -11,11 +11,10 @@ import { GeographySection } from "@/components/sections/GeographySection";
 import { NewsSection } from "@/components/sections/NewsSection";
 import { ClientsSection } from "@/components/sections/ClientsSection";
 import { ContactSection } from "@/components/sections/ContactSection";
-import { Footer } from "@/components/layout/Footer";
 
 export default function Home() {
   return (
-    <main>
+    <>
       <HeroSection />
       <PartnersSection />
       <StatsSection />
@@ -29,7 +28,6 @@ export default function Home() {
       <NewsSection />
       <ClientsSection />
       <ContactSection />
-      <Footer />
-    </main>
+    </>
   );
 }

@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { CursorBlob } from "@/components/ui/CursorBlob";
 import { StickyCtaButton } from "@/components/layout/StickyCtaButton";
 
@@ -46,6 +47,12 @@ const inter = localFont({
   preload: true,
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0a0a0a",
+};
+
 export const metadata: Metadata = {
   title: {
     default: "Братья Разумовские и Партнёры — юридическая компания в Москве",
@@ -68,7 +75,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <CursorBlob />
         <Navbar />
-        {children}
+        <main>{children}</main>
+        <Footer />
         <StickyCtaButton />
       </body>
     </html>

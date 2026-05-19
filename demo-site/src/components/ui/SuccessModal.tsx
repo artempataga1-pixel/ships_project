@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 interface SuccessModalProps {
@@ -8,6 +8,18 @@ interface SuccessModalProps {
 }
 
 export function SuccessModal({ isOpen, onClose }: SuccessModalProps) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const prevFocusRef = useRef<Element | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      prevFocusRef.current = document.activeElement;
+      closeRef.current?.focus();
+    } else {
+      (prevFocusRef.current as HTMLElement | null)?.focus();
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -39,8 +51,9 @@ export function SuccessModal({ isOpen, onClose }: SuccessModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          ref={closeRef}
           onClick={onClose}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded"
           aria-label="Закрыть"
         >
           <X size={20} />

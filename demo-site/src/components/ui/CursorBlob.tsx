@@ -8,6 +8,7 @@ export function CursorBlob() {
     const blob = blobRef.current;
     if (!blob) return;
     if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     blob.style.display = "block";
 

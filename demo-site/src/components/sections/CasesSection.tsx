@@ -1,9 +1,37 @@
 import { SectionWrapper } from "@/components/ui/SectionWrapper";
+import { GoldDivider } from "@/components/ui/GoldDivider";
+import { CaseCard } from "@/components/ui/CaseCard";
+import { CASES } from "@/lib/constants";
 
 export function CasesSection() {
   return (
     <SectionWrapper id="cases" dark>
-      <p className="text-white/20 text-sm">CasesSection — реализация в шаге 4</p>
+      <div className="text-center mb-14">
+        <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Кейсы</p>
+        <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-5">
+          Реализованные дела
+        </h2>
+        <GoldDivider className="max-w-xs mx-auto" />
+        <p className="mt-6 text-white/50 max-w-xl mx-auto leading-relaxed text-sm">
+          Детали и имена клиентов не раскрываются. Суммы подтверждены судебными актами.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {CASES.map((caseItem) => (
+          <CaseCard key={caseItem.id} caseItem={caseItem} />
+        ))}
+      </div>
+
+      <div className="mt-12 text-center">
+        <a
+          href="#contact"
+          className="inline-flex items-center gap-2 text-sm text-gold/70 hover:text-gold transition-colors"
+        >
+          Обсудить вашу ситуацию
+          <span aria-hidden>→</span>
+        </a>
+      </div>
     </SectionWrapper>
   );
 }
