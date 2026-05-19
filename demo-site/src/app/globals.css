@@ -10,7 +10,14 @@
 
   /* Фирменный золотой — единственный допустимый оттенок */
   --gold: #e4c753;
+  --gold-light: #edd67a;
+  --gold-dark: #c4a830;
+  --gold-muted: rgba(228, 199, 83, 0.08);
   --gold-foreground: #0a0a0a;
+
+  /* Тёмный фон секций */
+  --charcoal: #0a0a0a;
+  --charcoal-soft: #1a1a1a;
 }
 
 @theme inline {
@@ -19,9 +26,42 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+
   --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
+  --color-gold-muted: var(--gold-muted);
   --color-gold-foreground: var(--gold-foreground);
+
+  --color-charcoal: var(--charcoal);
+  --color-charcoal-soft: var(--charcoal-soft);
 
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-display: var(--font-playfair), Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Firefox-скроллбар */
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) var(--muted);
+}
+
+/* WebKit-скроллбар */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-dark);
 }
