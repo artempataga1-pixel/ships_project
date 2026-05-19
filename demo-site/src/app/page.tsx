@@ -1,12 +1,35 @@
+import { HeroSection } from "@/components/sections/HeroSection";
+import { PartnersSection } from "@/components/sections/PartnersSection";
+import { StatsSection } from "@/components/sections/StatsSection";
+import { ServicesSection } from "@/components/sections/ServicesSection";
+import { HowWeWorkSection } from "@/components/sections/HowWeWorkSection";
+import { CasesSection } from "@/components/sections/CasesSection";
+import { RecommendSection } from "@/components/sections/RecommendSection";
+import { PrinciplesSection } from "@/components/sections/PrinciplesSection";
+import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
+import { GeographySection } from "@/components/sections/GeographySection";
+import { NewsSection } from "@/components/sections/NewsSection";
+import { ClientsSection } from "@/components/sections/ClientsSection";
+import { ContactSection } from "@/components/sections/ContactSection";
+import { Footer } from "@/components/layout/Footer";
+
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-6 py-24">
-      <h1 className="font-display text-4xl tracking-tight sm:text-5xl">
-        Братья Разумовские и Партнёры
-      </h1>
-      <p className="mt-4 text-muted-foreground">
-        Сайт находится в разработке.
-      </p>
+    <main>
+      <HeroSection />
+      <PartnersSection />
+      <StatsSection />
+      <ServicesSection />
+      <HowWeWorkSection />
+      <CasesSection />
+      <RecommendSection />
+      <PrinciplesSection />
+      <TestimonialsSection />
+      <GeographySection />
+      <NewsSection />
+      <ClientsSection />
+      <ContactSection />
+      <Footer />
     </main>
   );
 }

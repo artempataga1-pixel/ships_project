@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Navbar } from "@/components/layout/Navbar";
+import { CursorBlob } from "@/components/ui/CursorBlob";
+import { StickyCtaButton } from "@/components/layout/StickyCtaButton";
 
 const playfair = localFont({
   src: [
@@ -63,7 +66,10 @@ export default function RootLayout({
       className={`${playfair.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
+        <CursorBlob />
+        <Navbar />
         {children}
+        <StickyCtaButton />
       </body>
     </html>
   );
