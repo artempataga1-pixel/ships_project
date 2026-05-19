@@ -109,7 +109,7 @@ const jsonLd = {
     "@type": "PostalAddress",
     streetAddress: "ул. Панфилова, д. 10",
     addressLocality: "Москва",
-    // postalCode — уточнить у клиента перед прод-деплоем
+    postalCode: "125080",
     addressCountry: "RU",
   },
   geo: {
