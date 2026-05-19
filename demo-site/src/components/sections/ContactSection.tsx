@@ -1,38 +1,25 @@
 "use client";
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { SectionWrapper } from "@/components/ui/SectionWrapper";
 import { GoldDivider } from "@/components/ui/GoldDivider";
 import { YandexMap } from "@/components/ui/YandexMap";
 import { SuccessModal } from "@/components/ui/SuccessModal";
 import { CONTACTS, PARTNERS } from "@/lib/constants";
-
-type FormState = {
-  name: string;
-  phone: string;
-  message: string;
-  partner: string;
-};
+import { submitContact, type ContactFormState } from "@/app/actions/contact";
 
 export function ContactSection() {
-  const [form, setForm] = useState<FormState>({
-    name: "",
-    phone: "",
-    message: "",
-    partner: PARTNERS[0].id,
-  });
+  const [state, formAction, pending] = useActionState<ContactFormState, FormData>(
+    submitContact,
+    null
+  );
+  const [selectedPartner, setSelectedPartner] = useState<string>(PARTNERS[0].id);
   const [showModal, setShowModal] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowModal(true);
-    setForm({ name: "", phone: "", message: "", partner: PARTNERS[0].id });
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  useEffect(() => {
+    if (state?.success) {
+      setShowModal(true);
+    }
+  }, [state]);
 
   const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_KEY;
 
@@ -52,7 +39,10 @@ export function ContactSection() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-start">
           {/* Форма */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <form action={formAction} className="flex flex-col gap-5">
+            {/* Скрытое поле партнёра */}
+            <input type="hidden" name="partner" value={selectedPartner} />
+
             {/* Выбор партнёра */}
             <div>
               <label className="block text-xs uppercase tracking-widest text-muted-foreground mb-2">
@@ -63,14 +53,18 @@ export function ContactSection() {
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => setForm((prev) => ({ ...prev, partner: p.id }))}
+                    onClick={() => setSelectedPartner(p.id)}
                     className={`flex items-center gap-3 px-4 py-3 border rounded-lg text-left transition-all duration-200 ${
-                      form.partner === p.id
+                      selectedPartner === p.id
                         ? "border-gold bg-[rgba(228,199,83,0.05)] text-foreground"
                         : "border-border hover:border-gold/40 text-muted-foreground"
                     }`}
                   >
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${form.partner === p.id ? "bg-gold" : "bg-border"}`} />
+                    <span
+                      className={`w-2 h-2 rounded-full shrink-0 ${
+                        selectedPartner === p.id ? "bg-gold" : "bg-border"
+                      }`}
+                    />
                     <div>
                       <p className="text-sm font-medium leading-tight">{p.name.split(" ")[0]}</p>
                       <p className="text-xs text-muted-foreground leading-tight">{p.role}</p>
@@ -78,11 +72,17 @@ export function ContactSection() {
                   </button>
                 ))}
               </div>
+              {state?.errors?.partner && (
+                <p className="mt-1 text-xs text-red-500">{state.errors.partner[0]}</p>
+              )}
             </div>
 
             {/* Имя */}
             <div>
-              <label htmlFor="name" className="block text-xs uppercase tracking-widest text-muted-foreground mb-2">
+              <label
+                htmlFor="name"
+                className="block text-xs uppercase tracking-widest text-muted-foreground mb-2"
+              >
                 Ваше имя *
               </label>
               <input
@@ -90,16 +90,20 @@ export function ContactSection() {
                 name="name"
                 type="text"
                 required
-                value={form.name}
-                onChange={handleChange}
                 placeholder="Иван Иванов"
                 className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50"
               />
+              {state?.errors?.name && (
+                <p className="mt-1 text-xs text-red-500">{state.errors.name[0]}</p>
+              )}
             </div>
 
             {/* Телефон */}
             <div>
-              <label htmlFor="phone" className="block text-xs uppercase tracking-widest text-muted-foreground mb-2">
+              <label
+                htmlFor="phone"
+                className="block text-xs uppercase tracking-widest text-muted-foreground mb-2"
+              >
                 Телефон *
               </label>
               <input
@@ -107,23 +111,25 @@ export function ContactSection() {
                 name="phone"
                 type="tel"
                 required
-                value={form.phone}
-                onChange={handleChange}
                 placeholder="+7 (___) ___-__-__"
                 className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50"
               />
+              {state?.errors?.phone && (
+                <p className="mt-1 text-xs text-red-500">{state.errors.phone[0]}</p>
+              )}
             </div>
 
             {/* Сообщение */}
             <div>
-              <label htmlFor="message" className="block text-xs uppercase tracking-widest text-muted-foreground mb-2">
+              <label
+                htmlFor="message"
+                className="block text-xs uppercase tracking-widest text-muted-foreground mb-2"
+              >
                 Краткое описание ситуации
               </label>
               <textarea
                 id="message"
                 name="message"
-                value={form.message}
-                onChange={handleChange}
                 rows={4}
                 placeholder="Опишите вашу задачу..."
                 className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors resize-none placeholder:text-muted-foreground/50"
@@ -132,9 +138,10 @@ export function ContactSection() {
 
             <button
               type="submit"
-              className="w-full py-4 bg-gold text-gold-foreground font-semibold rounded-lg text-sm hover:bg-gold-dark transition-colors shadow-[0_4px_20px_rgba(228,199,83,0.3)] hover:shadow-[0_4px_30px_rgba(228,199,83,0.45)]"
+              disabled={pending}
+              className="w-full py-4 bg-gold text-gold-foreground font-semibold rounded-lg text-sm hover:bg-gold-dark transition-colors shadow-[0_4px_20px_rgba(228,199,83,0.3)] hover:shadow-[0_4px_30px_rgba(228,199,83,0.45)] disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Отправить заявку
+              {pending ? "Отправляем..." : "Отправить заявку"}
             </button>
 
             <p className="text-xs text-muted-foreground text-center">
@@ -151,18 +158,26 @@ export function ContactSection() {
               </div>
               <div>
                 <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Телефон</p>
-                <a href={`tel:${CONTACTS.phone.replace(/\D/g, "")}`} className="font-medium hover:text-gold transition-colors">
+                <a
+                  href={`tel:${CONTACTS.phone.replace(/\D/g, "")}`}
+                  className="font-medium hover:text-gold transition-colors"
+                >
                   {CONTACTS.phone}
                 </a>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Email</p>
-                <a href={`mailto:${CONTACTS.email}`} className="font-medium hover:text-gold transition-colors">
+                <a
+                  href={`mailto:${CONTACTS.email}`}
+                  className="font-medium hover:text-gold transition-colors"
+                >
                   {CONTACTS.email}
                 </a>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Время работы</p>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
+                  Время работы
+                </p>
                 <p className="font-medium">{CONTACTS.workingHours}</p>
               </div>
             </div>
