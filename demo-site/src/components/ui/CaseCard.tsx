@@ -2,7 +2,7 @@ import type { Case } from "@/lib/constants";
 
 export function CaseCard({ caseItem }: { caseItem: Case }) {
   return (
-    <div className="flex flex-col gap-4 p-8 bg-charcoal-soft border border-white/10 rounded-lg hover:border-gold/30 transition-all duration-300">
+    <div className="flex flex-col gap-4 p-8 bg-charcoal-soft border border-gold/25 rounded-lg shadow-[0_0_15px_rgba(228,199,83,0.06)] hover:border-gold/55 hover:shadow-[0_0_25px_rgba(228,199,83,0.18)] transition-all duration-300">
       <span className="text-xs font-medium uppercase tracking-widest text-gold">
         {caseItem.category}
       </span>

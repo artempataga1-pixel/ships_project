@@ -19,7 +19,7 @@ export function StatCounter({ value, suffix = "", unit = "", label }: StatCounte
         {count}
         {suffix}
         {unit && (
-          <span className="ml-2 text-xl font-sans font-normal text-muted-foreground">
+          <span className="ml-2 text-xl font-sans font-normal text-gold/80">
             {unit}
           </span>
         )}

@@ -41,7 +41,7 @@ export function PartnersTabs() {
           className="grid grid-cols-1 lg:grid-cols-5 gap-10 items-start"
         >
           <div className="lg:col-span-2 flex justify-center">
-            <div className="relative w-72 h-96 rounded-lg overflow-hidden border border-white/10 shrink-0">
+            <div className="relative w-72 h-96 rounded-lg overflow-hidden border border-gold/60 shadow-[0_0_25px_rgba(228,199,83,0.30)] shrink-0">
               <Image
                 src={partner.photo}
                 alt={partner.name}

@@ -17,7 +17,7 @@ export function PrinciplesSection() {
         {PRINCIPLES.map((principle, idx) => (
           <div
             key={principle.id}
-            className="group flex gap-6 p-8 border border-border rounded-lg hover:border-gold/30 hover:shadow-[0_4px_30px_rgba(228,199,83,0.06)] transition-all duration-300"
+            className="group flex gap-6 p-8 border border-gold/25 rounded-lg shadow-[0_0_15px_rgba(228,199,83,0.06)] hover:border-gold/55 hover:shadow-[0_0_25px_rgba(228,199,83,0.18)] transition-all duration-300"
           >
             <div className="shrink-0 flex flex-col items-center gap-2 pt-1">
               <span className="font-display text-4xl font-bold text-gold/20 leading-none select-none">

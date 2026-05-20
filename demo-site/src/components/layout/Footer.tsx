@@ -23,7 +23,7 @@ export function Footer() {
                 alt="Логотип"
                 width={40}
                 height={40}
-                className="object-contain brightness-0 invert"
+                className="object-contain mix-blend-screen opacity-90"
               />
               <span className="font-display text-sm font-semibold text-white">
                 Разумовские и Партнёры

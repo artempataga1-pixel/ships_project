@@ -58,7 +58,6 @@ export const STATS = [
   { id: "cases", value: 1650, suffix: "+", unit: "", label: "выигранных дел" },
   { id: "assets", value: 48, suffix: "+", unit: "млрд ₽", label: "защищённых активов" },
   { id: "success", value: 93, suffix: "%", unit: "", label: "успешных процессов" },
-  { id: "countries", value: 11, suffix: "", unit: "", label: "стран присутствия" },
   { id: "clients", value: 300, suffix: "+", unit: "", label: "корпоративных клиентов" },
 ] as const;
 

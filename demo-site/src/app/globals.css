@@ -74,12 +74,14 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--gold);
   border-radius: 3px;
+  box-shadow: 0 0 6px rgba(228, 199, 83, 0.4);
 }
 
 ::-webkit-scrollbar-thumb:hover {
