@@ -21,7 +21,7 @@ export function RecommendSection() {
         {MEDIA_LOGOS.map((media) => (
           <div
             key={media.id}
-            className="flex items-center justify-center opacity-40 hover:opacity-80 transition-opacity duration-300 grayscale hover:grayscale-0"
+            className="flex items-center justify-center transition-transform duration-300 hover:scale-110 cursor-default"
             title={media.name}
           >
             <Image

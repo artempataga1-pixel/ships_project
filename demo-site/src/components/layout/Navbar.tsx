@@ -5,9 +5,9 @@ import { Menu } from "lucide-react";
 import { MobileMenu } from "./MobileMenu";
 
 const NAV_LINKS = [
+  { label: "Команда", href: "#partners" },
   { label: "Практика", href: "#services" },
   { label: "Кейсы", href: "#cases" },
-  { label: "Команда", href: "#partners" },
   { label: "О компании", href: "#principles" },
   { label: "Новости", href: "#news" },
   { label: "Контакты", href: "#contact" },
@@ -46,12 +46,12 @@ export function Navbar() {
             </span>
           </a>
 
-          <ul className="hidden lg:flex items-center gap-8">
+          <ul className="hidden lg:flex items-center gap-10">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
+                  className="text-sm text-white/75 hover:text-white transition-colors relative group"
                 >
                   {link.label}
                   <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-gold group-hover:w-full transition-all duration-300" />
@@ -61,9 +61,12 @@ export function Navbar() {
           </ul>
 
           <div className="flex items-center gap-3">
+            <span className="hidden lg:block text-sm text-gold font-medium tracking-wide px-3 py-1.5 border border-gold/30 rounded-lg">
+              +7 (495) 000-00-00
+            </span>
             <a
               href="#contact"
-              className="hidden lg:inline-flex items-center px-5 py-2.5 text-sm font-medium border border-gold text-gold rounded-lg hover:bg-gold hover:text-gold-foreground transition-all duration-300"
+              className="hidden lg:inline-flex items-center px-5 py-2.5 text-sm font-semibold bg-gold text-charcoal rounded-lg hover:bg-gold-dark transition-all duration-300"
             >
               Записаться
             </a>

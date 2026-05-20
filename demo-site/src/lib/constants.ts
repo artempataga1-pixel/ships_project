@@ -254,24 +254,28 @@ export const PRINCIPLES = [
   {
     id: "confidentiality",
     title: "Конфиденциальность",
+    icon: "ShieldCheck",
     description:
       "Мы не раскрываем имена доверителей и детали процессов без явного согласия клиента. Репутация — наш главный актив.",
   },
   {
     id: "strategy",
     title: "Стратегия вместо шаблонов",
+    icon: "Target",
     description:
       "Каждое дело — отдельный бизнес-проект с индивидуальной юридической архитектурой. Мы не работаем по шаблону.",
   },
   {
     id: "result",
     title: "Работа на результат",
+    icon: "TrendingUp",
     description:
       "Фирма берёт ограниченное количество проектов одновременно, чтобы партнёры были максимально вовлечены в каждое дело.",
   },
   {
     id: "transparency",
     title: "Честная позиция",
+    icon: "Scale",
     description:
       "Если шансы на победу невысоки — мы говорим об этом прямо. Никаких обещаний ради контракта.",
   },
@@ -291,24 +295,18 @@ export const CLIENT_TYPES = [
 // ─── Логотипы СМИ (раздел «Нас рекомендуют») ─────────────────────────────────
 
 export const MEDIA_LOGOS = [
-  { id: "forbes", name: "Forbes", logo: "/images/media/forbes.svg" },
-  { id: "rbc", name: "РБК", logo: "/images/media/rbc.svg" },
-  { id: "kommersant", name: "Коммерсантъ", logo: "/images/media/kommersant.svg" },
-  { id: "pravo-ru", name: "Право.ru", logo: "/images/media/pravo-ru.svg" },
-  { id: "roskongress", name: "Росконгресс", logo: "/images/media/roskongress.svg" },
-  { id: "legal-forum", name: "Legal Forum", logo: "/images/media/legal-forum.svg" },
+  { id: "forbes", name: "Forbes", logo: "/images/media/forbes.svg", color: "#000000" },
+  { id: "rbc", name: "РБК", logo: "/images/media/rbc.svg", color: "#CC0000" },
+  { id: "kommersant", name: "Коммерсантъ", logo: "/images/media/kommersant.svg", color: "#000000" },
+  { id: "pravo-ru", name: "Право.ru", logo: "/images/media/pravo-ru.svg", color: "#1a3a6e" },
+  { id: "roskongress", name: "Росконгресс", logo: "/images/media/roskongress.svg", color: "#003087" },
+  { id: "legal-forum", name: "Legal Forum", logo: "/images/media/legal-forum.svg", color: "#1C3557" },
 ] as const;
 
 // ─── География ───────────────────────────────────────────────────────────────
 
 export const GEOGRAPHY = [
   { city: "Москва", country: "Россия", isPrimary: true },
-  { city: "Санкт-Петербург", country: "Россия", isPrimary: false },
-  { city: "Дубай", country: "ОАЭ", isPrimary: false },
-  { city: "Лондон", country: "Великобритания", isPrimary: false },
-  { city: "Стамбул", country: "Турция", isPrimary: false },
-  { city: "Алматы", country: "Казахстан", isPrimary: false },
-  { city: "Минск", country: "Беларусь", isPrimary: false },
 ] as const;
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────

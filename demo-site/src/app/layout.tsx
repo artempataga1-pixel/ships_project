@@ -3,7 +3,9 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { CursorBlob } from "@/components/ui/CursorBlob";
+import { LogoIntro } from "@/components/ui/LogoIntro";
 import { StickyCtaButton } from "@/components/layout/StickyCtaButton";
 import { SITE_URL, CONTACTS } from "@/lib/constants";
 
@@ -148,11 +150,13 @@ export default function RootLayout({
             __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
           }}
         />
+        <LogoIntro />
         <CursorBlob />
         <Navbar />
-        <main>{children}</main>
+        <main className="pb-16 lg:pb-0">{children}</main>
         <Footer />
         <StickyCtaButton />
+        <BottomNav />
       </body>
     </html>
   );

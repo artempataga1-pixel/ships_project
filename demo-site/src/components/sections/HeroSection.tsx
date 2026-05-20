@@ -1,5 +1,5 @@
 import { HERO } from "@/lib/constants";
-import { HeroParallax } from "./HeroParallax";
+import { HeroSlider } from "./HeroSlider";
 import { HeroScrollArrow } from "./HeroScrollArrow";
 
 export function HeroSection() {
@@ -8,8 +8,8 @@ export function HeroSection() {
       id="hero"
       className="relative min-h-screen flex items-center overflow-hidden bg-charcoal"
     >
-      {/* Параллакс-фото — client leaf */}
-      <HeroParallax />
+      {/* Слайдер с параллакс-эффектом — client leaf */}
+      <HeroSlider />
 
       {/* Градиентные оверлеи — статичные */}
       <div className="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/70 to-charcoal/20" />

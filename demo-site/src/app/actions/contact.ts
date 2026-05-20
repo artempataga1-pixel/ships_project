@@ -10,8 +10,10 @@ const ContactSchema = z.object({
   phone: z
     .string()
     .trim()
-    .min(5, "Укажите корректный номер")
-    .max(30, "Слишком длинный номер"),
+    .refine(
+      (val) => val.replace(/\D/g, "").length === 11,
+      "Введите корректный номер (+7 XXX XXX-XX-XX)"
+    ),
   message: z.string().trim().max(2000, "Слишком длинное сообщение").optional(),
   partner: z.enum(PARTNER_IDS, { message: "Выберите партнёра" }),
 });

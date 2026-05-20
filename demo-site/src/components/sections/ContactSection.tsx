@@ -7,6 +7,18 @@ import { SuccessModal } from "@/components/ui/SuccessModal";
 import { CONTACTS, PARTNERS } from "@/lib/constants";
 import { submitContact, type ContactFormState } from "@/app/actions/contact";
 
+function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (!digits) return "+7";
+  const d = digits.startsWith("7") ? digits : "7" + digits;
+  let result = "+7";
+  if (d.length > 1) result += " (" + d.slice(1, 4);
+  if (d.length > 4) result += ") " + d.slice(4, 7);
+  if (d.length > 7) result += "-" + d.slice(7, 9);
+  if (d.length > 9) result += "-" + d.slice(9, 11);
+  return result;
+}
+
 export function ContactSection() {
   const [state, formAction, pending] = useActionState<ContactFormState, FormData>(
     submitContact,
@@ -14,6 +26,7 @@ export function ContactSection() {
   );
   const [selectedPartner, setSelectedPartner] = useState<string>(PARTNERS[0].id);
   const [showModal, setShowModal] = useState(false);
+  const [phone, setPhone] = useState("+7");
 
   useEffect(() => {
     if (state?.success) {
@@ -111,6 +124,8 @@ export function ContactSection() {
                 name="phone"
                 type="tel"
                 required
+                value={phone}
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
                 placeholder="+7 (___) ___-__-__"
                 className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50"
               />

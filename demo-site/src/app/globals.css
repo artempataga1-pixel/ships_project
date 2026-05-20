@@ -49,10 +49,34 @@ html {
   scrollbar-color: var(--gold) var(--muted);
 }
 
+.font-display {
+  font-optical-sizing: auto;
+  letter-spacing: 0.02em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
+}
+
+/* Hero slider */
+@keyframes slideLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.slider-track {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  animation: slideLeft 18s linear infinite;
+}
+
+.slider-item {
+  position: relative;
+  flex: 0 0 calc(100% / 6);
+  height: 100%;
 }
 
 /* Hero entry animation */
