@@ -28,7 +28,7 @@ export function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           scrolled
-            ? "bg-background/90 backdrop-blur-md border-b border-border shadow-sm"
+            ? "bg-charcoal/95 backdrop-blur-md border-b border-white/10"
             : "bg-transparent"
         }`}
       >
@@ -41,7 +41,7 @@ export function Navbar() {
               height={36}
               className="object-contain"
             />
-            <span className="font-display text-sm font-semibold tracking-wide hidden sm:block">
+            <span className="font-display text-sm font-semibold tracking-wide hidden sm:block text-white">
               Разумовские и Партнёры
             </span>
           </a>
