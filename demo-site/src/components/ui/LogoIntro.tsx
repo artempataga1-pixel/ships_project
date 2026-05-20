@@ -5,9 +5,18 @@ import Image from "next/image";
 
 export function LogoIntro() {
   const [visible, setVisible] = useState(true);
+  const [initSize, setInitSize] = useState<number | null>(null);
   const controls = useAnimation();
 
+  // Шаг 1: вычислить начальный размер на клиенте (экран / 1.5)
   useEffect(() => {
+    setInitSize(Math.floor(Math.min(window.innerWidth, window.innerHeight) / 1.5));
+  }, []);
+
+  // Шаг 2: запустить анимацию после вычисления размера
+  useEffect(() => {
+    if (initSize === null) return;
+
     const run = async () => {
       // Фаза 1: логотип появляется по центру (0–0.8s)
       await controls.start({
@@ -17,10 +26,10 @@ export function LogoIntro() {
 
       // Фаза 2: уменьшается и летит в левый верхний угол (0.8–2.5s)
       await controls.start({
-        width: 36,
-        height: 36,
+        width: 40,
+        height: 40,
         top: 12,
-        left: 24,
+        left: 16,
         x: 0,
         y: 0,
         transition: { duration: 1.7, ease: "easeInOut" },
@@ -31,11 +40,11 @@ export function LogoIntro() {
     };
 
     run();
-  }, [controls]);
+  }, [initSize, controls]);
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && initSize !== null && (
         <motion.div
           className="fixed inset-0 z-[100] bg-charcoal/85 backdrop-blur-sm cursor-pointer"
           onClick={() => setVisible(false)}
@@ -45,8 +54,8 @@ export function LogoIntro() {
             className="absolute"
             animate={controls}
             initial={{
-              width: 180,
-              height: 180,
+              width: initSize,
+              height: initSize,
               top: "50%",
               left: "50%",
               x: "-50%",
@@ -54,12 +63,11 @@ export function LogoIntro() {
               opacity: 0,
             }}
           >
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/images/logo2.png"
               alt="Братья Разумовские и Партнёры"
-              fill
-              className="object-contain"
-              priority
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </motion.div>
         </motion.div>
