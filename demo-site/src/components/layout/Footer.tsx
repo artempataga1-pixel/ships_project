@@ -2,11 +2,15 @@ import Image from "next/image";
 import { CONTACTS } from "@/lib/constants";
 
 const NAV_LINKS = [
-  { label: "Практика", href: "#services" },
-  { label: "Кейсы", href: "#cases" },
   { label: "Команда", href: "#partners" },
-  { label: "Принципы", href: "#principles" },
+  { label: "Результаты", href: "#stats" },
+  { label: "Практика", href: "#services" },
+  { label: "Процесс", href: "#process" },
+  { label: "Кейсы", href: "#cases" },
+  { label: "О компании", href: "#principles" },
+  { label: "Отзывы", href: "#testimonials" },
   { label: "Новости", href: "#news" },
+  { label: "Клиенты", href: "#clients" },
   { label: "Контакты", href: "#contact" },
 ];
 
@@ -19,11 +23,11 @@ export function Footer() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <Image
-                src="/images/logo.png"
+                src="/images/logo2.png"
                 alt="Логотип"
-                width={40}
-                height={40}
-                className="object-contain mix-blend-screen opacity-90"
+                width={44}
+                height={44}
+                className="object-contain mix-blend-screen"
               />
               <span className="font-display text-sm font-semibold text-white">
                 Разумовские и Партнёры

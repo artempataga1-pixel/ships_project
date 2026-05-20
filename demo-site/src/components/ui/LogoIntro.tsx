@@ -55,7 +55,7 @@ export function LogoIntro() {
             }}
           >
             <Image
-              src="/images/logo.png"
+              src="/images/logo2.png"
               alt="Братья Разумовские и Партнёры"
               fill
               className="object-contain"

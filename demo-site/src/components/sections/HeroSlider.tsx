@@ -8,7 +8,6 @@ const PHOTOS = [
   { src: "/images/oleg.jpg", alt: "Олег Разумовский" },
 ];
 
-// Дублируем массив для бесконечной прокрутки без рывков
 const TRACK = [...PHOTOS, ...PHOTOS];
 
 export function HeroSlider() {
@@ -23,14 +22,16 @@ export function HeroSlider() {
       <div className="slider-track">
         {TRACK.map((photo, idx) => (
           <div key={idx} className="slider-item">
-            <Image
-              src={photo.src}
-              alt={photo.alt}
-              fill
-              priority={idx < 2}
-              className="object-cover object-top"
-              sizes="50vw"
-            />
+            <div className="relative w-full h-full border-2 border-gold rounded-lg overflow-hidden shadow-[0_0_20px_rgba(228,199,83,0.35)]">
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                priority={idx < 2}
+                className="object-contain object-center"
+                sizes="33vw"
+              />
+            </div>
           </div>
         ))}
       </div>

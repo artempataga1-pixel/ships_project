@@ -7,8 +7,7 @@ export function RecommendSection() {
   return (
     <SectionWrapper id="recommend" className="py-20">
       <div className="text-center mb-12">
-        <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Репутация</p>
-        <h2 className="font-display text-4xl md:text-5xl font-bold mb-5">
+<h2 className="font-display text-4xl md:text-5xl font-bold mb-5">
           Нас рекомендуют
         </h2>
         <GoldDivider className="max-w-xs mx-auto" />

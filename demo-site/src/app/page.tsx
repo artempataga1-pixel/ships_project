@@ -21,8 +21,8 @@ export default function Home() {
       <ServicesSection />
       <HowWeWorkSection />
       <CasesSection />
-      <RecommendSection />
       <PrinciplesSection />
+      <RecommendSection />
       <TestimonialsSection />
       <GeographySection />
       <NewsSection />

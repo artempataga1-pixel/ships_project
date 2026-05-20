@@ -5,11 +5,16 @@ import { Menu } from "lucide-react";
 import { MobileMenu } from "./MobileMenu";
 
 const NAV_LINKS = [
+  { label: "Главная", href: "#hero" },
   { label: "Команда", href: "#partners" },
+  { label: "Результаты", href: "#stats" },
   { label: "Практика", href: "#services" },
+  { label: "Процесс", href: "#process" },
   { label: "Кейсы", href: "#cases" },
   { label: "О компании", href: "#principles" },
+  { label: "Отзывы", href: "#testimonials" },
   { label: "Новости", href: "#news" },
+  { label: "Клиенты", href: "#clients" },
   { label: "Контакты", href: "#contact" },
 ];
 
@@ -35,23 +40,20 @@ export function Navbar() {
         <nav className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
           <a href="#hero" className="flex items-center gap-3 shrink-0">
             <Image
-              src="/images/logo.png"
+              src="/images/logo2.png"
               alt="Братья Разумовские и Партнёры"
-              width={36}
-              height={36}
-              className="object-contain"
+              width={40}
+              height={40}
+              className="object-contain mix-blend-screen"
             />
-            <span className="font-display text-sm font-semibold tracking-wide hidden sm:block text-white">
-              Разумовские и Партнёры
-            </span>
           </a>
 
-          <ul className="hidden lg:flex items-center gap-10">
+          <ul className="hidden lg:flex items-center gap-5">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="text-sm text-white/75 hover:text-white transition-colors relative group"
+                  className="text-xs text-white/75 hover:text-white transition-colors relative group whitespace-nowrap"
                 >
                   {link.label}
                   <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-gold group-hover:w-full transition-all duration-300" />
@@ -61,10 +63,7 @@ export function Navbar() {
           </ul>
 
           <div className="flex items-center gap-3">
-            <span className="hidden lg:block text-sm text-gold font-medium tracking-wide px-3 py-1.5 border border-gold/30 rounded-lg">
-              +7 (495) 000-00-00
-            </span>
-            <a
+<a
               href="#contact"
               className="hidden lg:inline-flex items-center px-5 py-2.5 text-sm font-semibold bg-gold text-charcoal rounded-lg hover:bg-gold-dark transition-all duration-300"
             >
