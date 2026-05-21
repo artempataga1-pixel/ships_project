@@ -27,11 +27,11 @@
   --dark-overlay-70:    rgba(220, 207, 188, 0.70);
   --dark-overlay-20:    rgba(220, 207, 188, 0.20);
   --dark-overlay-80:    rgba(220, 207, 188, 0.80);
-  --dark-text-100:      #3d3326;
-  --dark-text-80:       rgba(61, 51, 38, 0.80);
-  --dark-text-70:       rgba(61, 51, 38, 0.70);
-  --dark-text-40:       rgba(61, 51, 38, 0.40);
-  --dark-text-10:       rgba(61, 51, 38, 0.10);
+  --dark-text-100:      #000000;
+  --dark-text-80:       rgba(0, 0, 0, 0.80);
+  --dark-text-70:       rgba(0, 0, 0, 0.70);
+  --dark-text-40:       rgba(0, 0, 0, 0.40);
+  --dark-text-10:       rgba(0, 0, 0, 0.10);
   --light-section-bg:   #ffffff;
   --light-section-text: #0a0a0a;
 }
@@ -50,7 +50,7 @@
   --dark-text-70:       rgba(255, 255, 255, 0.70);
   --dark-text-40:       rgba(255, 255, 255, 0.40);
   --dark-text-10:       rgba(255, 255, 255, 0.10);
-  --light-section-bg:   #928c5d;
+  --light-section-bg:   #626260;
   --light-section-text: #1a1a1a;
 }
 
