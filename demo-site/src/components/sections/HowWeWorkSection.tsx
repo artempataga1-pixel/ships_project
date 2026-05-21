@@ -25,7 +25,7 @@ export function HowWeWorkSection() {
             </div>
 
             <h3 className="font-display text-2xl font-semibold mb-4" style={{ color: "var(--dark-text-100)" }}>{step.title}</h3>
-            <p className="text-sm leading-relaxed max-w-xs" style={{ color: "var(--dark-text-70)" }}>{step.description}</p>
+            <p className="text-sm leading-relaxed max-w-xs" style={{ color: "var(--dark-text-100)" }}>{step.description}</p>
 
             {/* Разделитель между шагами на мобиле */}
             {idx < HOW_WE_WORK.length - 1 && (

@@ -38,7 +38,7 @@ export function ClientsSection() {
           <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Образование</p>
           <h3 className="font-display text-2xl font-bold mb-2" style={{ color: "var(--dark-text-100)" }}>{SCHOOL.title}</h3>
           <p className="text-xs mb-6" style={{ color: "var(--dark-text-40)" }}>Основана в {SCHOOL.founded}</p>
-          <p className="text-sm leading-relaxed mb-8" style={{ color: "var(--dark-text-70)" }}>{SCHOOL.description}</p>
+          <p className="text-sm leading-relaxed mb-8" style={{ color: "var(--dark-text-100)" }}>{SCHOOL.description}</p>
           <div>
             <p className="text-gold text-xs uppercase tracking-widest mb-4">Программы</p>
             <div className="flex flex-wrap gap-2">
@@ -46,7 +46,7 @@ export function ClientsSection() {
                 <span
                   key={prog}
                   className="px-3 py-1.5 rounded-full text-xs hover:border-gold/40 hover:text-gold transition-colors"
-                  style={{ border: "1px solid var(--dark-text-10)", color: "var(--dark-text-70)" }}
+                  style={{ border: "1px solid var(--dark-text-10)", color: "var(--dark-text-100)" }}
                 >
                   {prog}
                 </span>

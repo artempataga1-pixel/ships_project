@@ -23,7 +23,7 @@ export function TestimonialsSection() {
             {/* Кавычки */}
             <div className="text-gold/30 font-display text-5xl leading-none select-none">&ldquo;</div>
 
-            <p className="text-sm leading-relaxed flex-1 -mt-4" style={{ color: "var(--dark-text-80)" }}>{t.text}</p>
+            <p className="text-sm leading-relaxed flex-1 -mt-4" style={{ color: "var(--dark-text-100)" }}>{t.text}</p>
 
             <div className="pt-4" style={{ borderTop: "1px solid var(--dark-text-10)" }}>
               <p className="font-medium text-sm" style={{ color: "var(--dark-text-100)" }}>{t.author}</p>

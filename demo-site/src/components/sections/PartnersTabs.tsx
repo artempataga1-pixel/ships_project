@@ -70,7 +70,7 @@ export function PartnersTabs() {
               <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--dark-text-100)" }}>Ключевые достижения</p>
               <ul className="flex flex-col gap-2">
                 {partner.achievements.map((a, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "var(--dark-text-70)" }}>
+                  <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "var(--dark-text-100)" }}>
                     <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--dark-text-100)" }} />
                     {a}
                   </li>
@@ -81,7 +81,7 @@ export function PartnersTabs() {
               <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--dark-text-100)" }}>Образование</p>
               <ul className="flex flex-col gap-2">
                 {partner.education.map((e, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "var(--dark-text-70)" }}>
+                  <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "var(--dark-text-100)" }}>
                     <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--dark-text-100)" }} />
                     {e}
                   </li>
