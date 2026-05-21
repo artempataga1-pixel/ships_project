@@ -112,6 +112,10 @@
   --partner-tab-active: var(--gold);
   --partner-tab-muted:  rgba(228, 199, 83, 0.40);
 }
+[data-theme="dark"] #contact input,
+[data-theme="dark"] #contact textarea {
+  color: rgba(255, 255, 255, 0.9);
+}
 
 /* Переходы — только после mount, чтобы не мигало при первой загрузке */
 html.transitions-enabled *,
