@@ -33,10 +33,10 @@ export function ClientsSection() {
         {/* Школа юристов */}
         <div
           className="rounded-xl p-6 sm:p-10"
-          style={{ background: "var(--dark-section-bg)", border: "1px solid var(--dark-text-10)" }}
+          style={{ background: "var(--dark-section-bg)", border: "1px solid var(--clients-card-border)", boxShadow: "var(--clients-card-shadow)" }}
         >
           <p className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: "var(--dark-text-100)" }}>Образование</p>
-          <h3 className="font-display text-2xl font-bold mb-2" style={{ color: "var(--dark-text-100)" }}>{SCHOOL.title}</h3>
+          <h3 className="font-display text-2xl font-bold mb-2" style={{ color: "var(--card-accent)" }}>{SCHOOL.title}</h3>
           <p className="text-xs mb-6" style={{ color: "var(--dark-text-40)" }}>Основана в {SCHOOL.founded}</p>
           <p className="text-sm leading-relaxed mb-8" style={{ color: "var(--dark-text-100)" }}>{SCHOOL.description}</p>
           <div>

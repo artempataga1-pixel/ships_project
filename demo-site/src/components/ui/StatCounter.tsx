@@ -15,16 +15,16 @@ export function StatCounter({ value, suffix = "", unit = "", label }: StatCounte
 
   return (
     <div ref={ref} className="flex flex-col items-center gap-2 text-center">
-      <div className="font-display text-4xl sm:text-5xl font-bold tracking-tight leading-none" style={{ color: "var(--dark-text-100)" }}>
+      <div className="font-display text-4xl sm:text-5xl font-bold tracking-tight leading-none" style={{ color: "var(--stat-color)" }}>
         {count}
         {suffix}
         {unit && (
-          <span className="ml-2 text-xl font-sans font-normal" style={{ color: "var(--dark-text-100)" }}>
+          <span className="ml-2 text-xl font-sans font-normal" style={{ color: "var(--stat-color)" }}>
             {unit}
           </span>
         )}
       </div>
-      <p className="text-xs uppercase tracking-widest mt-1" style={{ color: "var(--dark-text-100)" }}>{label}</p>
+      <p className="text-xs uppercase tracking-widest mt-1" style={{ color: "var(--stat-color)" }}>{label}</p>
     </div>
   );
 }

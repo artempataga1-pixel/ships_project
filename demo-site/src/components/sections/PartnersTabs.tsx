@@ -22,7 +22,7 @@ export function PartnersTabs() {
             />
             <span
               className="text-xs uppercase tracking-wider transition-colors"
-              style={{ color: active === idx ? "var(--dark-text-100)" : "var(--dark-text-40)" }}
+              style={{ color: active === idx ? "var(--partner-tab-active)" : "var(--partner-tab-muted)" }}
             >
               {p.name.split(" ")[0]}
             </span>
@@ -59,15 +59,15 @@ export function PartnersTabs() {
 
           <div className="lg:col-span-3 flex flex-col gap-7">
             <div>
-              <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "var(--dark-text-100)" }}>Специализация</p>
+              <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "var(--partner-label)" }}>Специализация</p>
               <p className="text-lg font-display leading-snug" style={{ color: "var(--dark-text-100)" }}>{partner.specialty}</p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "var(--dark-text-100)" }}>О партнёре</p>
+              <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "var(--partner-label)" }}>О партнёре</p>
               <p className="leading-relaxed text-sm" style={{ color: "var(--dark-text-100)" }}>{partner.bio}</p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--dark-text-100)" }}>Ключевые достижения</p>
+              <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--partner-label)" }}>Ключевые достижения</p>
               <ul className="flex flex-col gap-2">
                 {partner.achievements.map((a, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "var(--dark-text-100)" }}>
@@ -78,7 +78,7 @@ export function PartnersTabs() {
               </ul>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--dark-text-100)" }}>Образование</p>
+              <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--partner-label)" }}>Образование</p>
               <ul className="flex flex-col gap-2">
                 {partner.education.map((e, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "var(--dark-text-100)" }}>

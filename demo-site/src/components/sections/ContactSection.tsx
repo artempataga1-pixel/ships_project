@@ -58,7 +58,7 @@ export function ContactSection() {
 
             {/* Выбор партнёра */}
             <div>
-              <label className="block text-xs uppercase tracking-widest text-muted-foreground mb-2">
+              <label className="block text-xs uppercase tracking-widest mb-2" style={{ color: "var(--contact-label)" }}>
                 Выберите партнёра
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -79,7 +79,7 @@ export function ContactSection() {
                       }`}
                     />
                     <div>
-                      <p className="text-sm font-medium leading-tight">{p.name.split(" ")[0]}</p>
+                      <p className="text-sm font-medium leading-tight" style={{ color: "var(--card-accent)" }}>{p.name.split(" ")[0]}</p>
                       <p className="text-xs text-muted-foreground leading-tight">{p.role}</p>
                     </div>
                   </button>

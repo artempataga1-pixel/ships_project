@@ -29,16 +29,16 @@ export function PrinciplesSection() {
           return (
             <div
               key={principle.id}
-              className="group flex gap-4 sm:gap-6 p-6 sm:p-8 border border-gold/25 rounded-lg shadow-[0_0_15px_rgba(228,199,83,0.06)] hover:border-gold/55 hover:shadow-[0_0_25px_rgba(228,199,83,0.18)] transition-all duration-300"
-              style={{ background: "var(--card-bg)" }}
+              className="group flex gap-4 sm:gap-6 p-6 sm:p-8 rounded-lg transition-all duration-300"
+              style={{ background: "var(--card-bg)", border: "1px solid var(--principle-card-border)", boxShadow: "var(--principle-card-shadow)" }}
             >
               <div className="shrink-0 pt-1">
                 {Icon && (
-                  <Icon className="w-9 h-9" style={{ color: "var(--dark-text-100)" }} strokeWidth={1.5} />
+                  <Icon className="w-9 h-9" style={{ color: "var(--card-accent)" }} strokeWidth={1.5} />
                 )}
               </div>
               <div>
-                <h3 className="font-display text-xl font-semibold mb-3" style={{ color: "var(--dark-text-100)" }}>{principle.title}</h3>
+                <h3 className="font-display text-xl font-semibold mb-3" style={{ color: "var(--card-accent)" }}>{principle.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: "var(--dark-text-100)" }}>{principle.description}</p>
               </div>
             </div>
@@ -53,7 +53,7 @@ export function PrinciplesSection() {
             Нас рекомендуют
           </h2>
           <GoldDivider className="max-w-xs mx-auto" />
-          <p className="mt-6 text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
+          <p className="mt-6 text-sm max-w-md mx-auto leading-relaxed" style={{ color: "#0a0a0a" }}>
             Партнёры компании выступают экспертами ведущих деловых изданий России и мира.
           </p>
         </div>

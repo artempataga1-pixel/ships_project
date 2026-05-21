@@ -20,11 +20,11 @@ export function HowWeWorkSection() {
         {HOW_WE_WORK.map((step, idx) => (
           <div key={step.step} className="relative flex flex-col items-center text-center px-6 py-8">
             {/* Номер шага */}
-            <div className="relative z-10 w-16 h-16 rounded-full border flex items-center justify-center mb-6" style={{ background: "var(--dark-section-bg)", borderColor: "var(--dark-text-100)" }}>
-              <span className="font-display text-xl font-bold" style={{ color: "var(--dark-text-100)" }}>{step.step}</span>
+            <div className="relative z-10 w-16 h-16 rounded-full border flex items-center justify-center mb-6" style={{ background: "var(--dark-section-bg)", borderColor: "var(--process-step-color)" }}>
+              <span className="font-display text-xl font-bold" style={{ color: "var(--process-step-color)" }}>{step.step}</span>
             </div>
 
-            <h3 className="font-display text-2xl font-semibold mb-4" style={{ color: "var(--dark-text-100)" }}>{step.title}</h3>
+            <h3 className="font-display text-2xl font-semibold mb-4" style={{ color: "var(--process-step-color)" }}>{step.title}</h3>
             <p className="text-sm leading-relaxed max-w-xs" style={{ color: "var(--dark-text-100)" }}>{step.description}</p>
 
             {/* Разделитель между шагами на мобиле */}

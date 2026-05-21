@@ -35,13 +35,33 @@
   --light-section-bg:   #ffffff;
   --light-section-text: #0a0a0a;
   --card-bg:            #dccfbc;
+  --card-accent:        var(--dark-text-100);
+  --stat-color:         var(--dark-text-100);
+  --stat-card-border:   rgba(228, 199, 83, 0.30);
+  --stat-card-shadow:   0 0 60px rgba(228, 199, 83, 0.05);
+  --service-card-border: var(--border);
+  --service-card-shadow: none;
+  --process-step-color:  var(--dark-text-100);
+  --case-card-border:    rgba(228, 199, 83, 0.25);
+  --case-card-shadow:    none;
+  --principle-card-border: rgba(228, 199, 83, 0.25);
+  --principle-card-shadow: 0 0 15px rgba(228, 199, 83, 0.06);
+  --news-card-border:      rgba(228, 199, 83, 0.25);
+  --news-card-shadow:      none;
+  --clients-card-border:   var(--dark-text-10);
+  --clients-card-shadow:   none;
+  --quote-color:        var(--dark-text-100);
+  --contact-label:      var(--muted-foreground);
+  --partner-label:      var(--dark-text-100);
+  --partner-tab-active: var(--dark-text-100);
+  --partner-tab-muted:  var(--dark-text-40);
 }
 
 /* Тёмная тема */
 [data-theme="dark"] {
   --dark-section-bg:    #0a0a0a;
   --dark-section-text:  #ffffff;
-  --dark-card-bg:       #1a1a1a;
+  --dark-card-bg:       #3a3a3a;
   --dark-overlay-90:    rgba(10, 10, 10, 0.90);
   --dark-overlay-70:    rgba(10, 10, 10, 0.70);
   --dark-overlay-20:    rgba(10, 10, 10, 0.20);
@@ -53,7 +73,33 @@
   --dark-text-10:       rgba(255, 255, 255, 0.10);
   --light-section-bg:   #626260;
   --light-section-text: #1a1a1a;
-  --card-bg:            rgba(255, 255, 255, 0.08);
+  --card-bg:            #0a0a0a;
+  --card-accent:        var(--gold);
+  --stat-color:         var(--gold);
+  --stat-card-border:   rgba(228, 199, 83, 0.70);
+  --stat-card-shadow:   0 0 80px rgba(228, 199, 83, 0.40), 0 0 30px rgba(228, 199, 83, 0.20);
+  --service-card-border: rgba(228, 199, 83, 0.60);
+  --service-card-shadow: 0 0 25px rgba(228, 199, 83, 0.25);
+  --process-step-color:  var(--gold);
+  --case-card-border:    rgba(228, 199, 83, 0.60);
+  --case-card-shadow:    0 0 25px rgba(228, 199, 83, 0.25);
+  --principle-card-border: rgba(228, 199, 83, 0.60);
+  --principle-card-shadow: 0 0 25px rgba(228, 199, 83, 0.25);
+  --news-card-border:      rgba(228, 199, 83, 0.60);
+  --news-card-shadow:      0 0 25px rgba(228, 199, 83, 0.25);
+  --clients-card-border:   rgba(228, 199, 83, 0.60);
+  --clients-card-shadow:   0 0 25px rgba(228, 199, 83, 0.25);
+  --quote-color:        var(--gold);
+  --contact-label:      #0a0a0a;
+}
+
+[data-theme="dark"] #contact,
+[data-theme="dark"] #clients,
+[data-theme="dark"] #services {
+  --muted-foreground: #0a0a0a;
+  --partner-label:      var(--gold);
+  --partner-tab-active: var(--gold);
+  --partner-tab-muted:  rgba(228, 199, 83, 0.40);
 }
 
 /* Переходы — только после mount, чтобы не мигало при первой загрузке */

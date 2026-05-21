@@ -21,7 +21,7 @@ export function TestimonialsSection() {
             style={{ background: "var(--dark-card-bg)", border: "1px solid var(--dark-text-10)" }}
           >
             {/* Кавычки */}
-            <div className="font-display text-5xl leading-none select-none" style={{ color: "var(--dark-text-100)" }}>&ldquo;</div>
+            <div className="font-display text-5xl leading-none select-none" style={{ color: "var(--quote-color)" }}>&ldquo;</div>
 
             <p className="text-sm leading-relaxed flex-1 -mt-4" style={{ color: "var(--dark-text-100)" }}>{t.text}</p>
 
