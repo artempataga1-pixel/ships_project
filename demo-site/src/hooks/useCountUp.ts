@@ -5,7 +5,7 @@ function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
-export function useCountUp(target: number, duration = 2000, active = false) {
+export function useCountUp(target: number, duration = 3000, active = false) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
