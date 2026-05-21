@@ -7,7 +7,7 @@ export function HowWeWorkSection() {
     <SectionWrapper id="process" dark className="overflow-hidden">
       <div className="text-center mb-14">
         <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Процесс</p>
-        <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-5">
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5">
           Как мы работаем
         </h2>
         <GoldDivider className="max-w-xs mx-auto" />

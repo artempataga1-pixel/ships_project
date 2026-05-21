@@ -5,11 +5,11 @@ import { CLIENT_TYPES, SCHOOL } from "@/lib/constants";
 export function ClientsSection() {
   return (
     <SectionWrapper id="clients">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
         {/* Клиенты */}
         <div>
           <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Клиенты</p>
-          <h2 className="font-display text-4xl font-bold mb-5">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-5">
             Кто нас выбирает
           </h2>
           <GoldDivider className="mb-8" />
@@ -31,7 +31,7 @@ export function ClientsSection() {
         </div>
 
         {/* Школа юристов */}
-        <div className="bg-charcoal rounded-xl p-10 border border-white/10">
+        <div className="bg-charcoal rounded-xl p-6 sm:p-10 border border-white/10">
           <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Образование</p>
           <h3 className="font-display text-2xl font-bold text-white mb-2">{SCHOOL.title}</h3>
           <p className="text-white/40 text-xs mb-6">Основана в {SCHOOL.founded}</p>

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Menu } from "lucide-react";
+import { Menu, Phone } from "lucide-react";
 import { MobileMenu } from "./MobileMenu";
 
 const NAV_LINKS = [
@@ -45,6 +45,7 @@ export function Navbar() {
               alt="Братья Разумовские и Партнёры"
               width={40}
               height={40}
+              data-navbar-logo=""
               className="object-contain mix-blend-screen"
             />
             <span className="hidden lg:block text-sm font-semibold text-gold tracking-wide whitespace-nowrap">
@@ -77,6 +78,13 @@ export function Navbar() {
               className="hidden lg:inline-flex items-center px-4 py-2 text-sm font-semibold bg-gold text-charcoal rounded-lg hover:bg-gold-dark transition-all duration-300 whitespace-nowrap"
             >
               Записаться
+            </a>
+            <a
+              href="tel:+74950000000"
+              className="lg:hidden p-2 text-gold hover:text-gold-light transition-colors"
+              aria-label="Позвонить"
+            >
+              <Phone size={20} />
             </a>
             <button
               onClick={() => setMenuOpen(true)}

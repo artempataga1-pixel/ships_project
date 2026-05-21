@@ -54,7 +54,7 @@ export function YandexMap({ apiKey }: { apiKey?: string }) {
   return (
     <>
       <Script src={src} strategy="lazyOnload" onLoad={initMap} />
-      <div ref={containerRef} className="w-full h-[400px] rounded-lg overflow-hidden bg-muted" />
+      <div ref={containerRef} className="w-full h-[260px] sm:h-[400px] rounded-lg overflow-hidden bg-muted" />
     </>
   );
 }

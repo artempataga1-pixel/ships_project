@@ -7,7 +7,7 @@ export function TestimonialsSection() {
     <SectionWrapper id="testimonials" dark>
       <div className="text-center mb-14">
         <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Отзывы</p>
-        <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-5">
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5">
           Говорят клиенты
         </h2>
         <GoldDivider className="max-w-xs mx-auto" />
@@ -17,7 +17,7 @@ export function TestimonialsSection() {
         {TESTIMONIALS.map((t) => (
           <div
             key={t.id}
-            className="flex flex-col gap-6 p-8 border border-white/10 rounded-lg hover:border-gold/20 transition-all duration-300 bg-charcoal-soft"
+            className="flex flex-col gap-4 sm:gap-6 p-6 sm:p-8 border border-white/10 rounded-lg hover:border-gold/20 transition-all duration-300 bg-charcoal-soft"
           >
             {/* Кавычки */}
             <div className="text-gold/30 font-display text-5xl leading-none select-none">&ldquo;</div>

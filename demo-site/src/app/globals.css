@@ -42,11 +42,19 @@
 
 html {
   scroll-behavior: smooth;
-  /* Отступ при прокрутке к якорям — учитывает высоту Navbar */
-  scroll-padding-top: 5rem;
   /* Firefox-скроллбар */
   scrollbar-width: thin;
   scrollbar-color: var(--gold) var(--muted);
+}
+
+/* Компенсация высоты navbar (64px) при якорной навигации */
+section[id] {
+  scroll-margin-top: 64px;
+}
+
+/* Скрыть scrollbar в WebKit/Safari (для горизонтального BottomNav) */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .font-display {
@@ -79,6 +87,12 @@ html {
   height: 100%;
   padding: 16px 12px;
   box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .slider-item {
+    padding: 8px 5px;
+  }
 }
 
 /* Hero entry animation */

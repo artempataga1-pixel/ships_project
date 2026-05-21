@@ -28,7 +28,7 @@ export function HeroSlider() {
                 alt={photo.alt}
                 fill
                 priority={idx < 2}
-                className="object-contain object-center"
+                className="object-cover object-center"
                 sizes="33vw"
               />
             </div>

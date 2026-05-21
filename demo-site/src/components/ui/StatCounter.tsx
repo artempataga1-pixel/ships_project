@@ -15,7 +15,7 @@ export function StatCounter({ value, suffix = "", unit = "", label }: StatCounte
 
   return (
     <div ref={ref} className="flex flex-col items-center gap-2 text-center">
-      <div className="font-display text-5xl font-bold text-gold tracking-tight leading-none">
+      <div className="font-display text-4xl sm:text-5xl font-bold text-gold tracking-tight leading-none">
         {count}
         {suffix}
         {unit && (

@@ -8,7 +8,7 @@ export function CasesSection() {
     <SectionWrapper id="cases" dark>
       <div className="text-center mb-14">
         <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Кейсы</p>
-        <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-5">
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5">
           Реализованные дела
         </h2>
         <GoldDivider className="max-w-xs mx-auto" />

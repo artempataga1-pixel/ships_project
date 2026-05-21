@@ -41,7 +41,7 @@ export function ContactSection() {
       <SectionWrapper id="contact">
         <div className="text-center mb-14">
           <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Контакты</p>
-          <h2 className="font-display text-4xl md:text-5xl font-bold mb-5">
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5">
             Записаться на консультацию
           </h2>
           <GoldDivider className="max-w-xs mx-auto" />
@@ -50,7 +50,7 @@ export function ContactSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-start">
           {/* Форма */}
           <form action={formAction} className="flex flex-col gap-5">
             {/* Скрытое поле партнёра */}
@@ -61,7 +61,7 @@ export function ContactSection() {
               <label className="block text-xs uppercase tracking-widest text-muted-foreground mb-2">
                 Выберите партнёра
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {PARTNERS.map((p) => (
                   <button
                     key={p.id}
@@ -104,7 +104,7 @@ export function ContactSection() {
                 type="text"
                 required
                 placeholder="Иван Иванов"
-                className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50"
+                className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50 text-base sm:text-sm"
               />
               {state?.errors?.name && (
                 <p className="mt-1 text-xs text-red-500">{state.errors.name[0]}</p>
@@ -127,7 +127,7 @@ export function ContactSection() {
                 value={phone}
                 onChange={(e) => setPhone(formatPhone(e.target.value))}
                 placeholder="+7 (___) ___-__-__"
-                className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50"
+                className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50 text-base sm:text-sm"
               />
               {state?.errors?.phone && (
                 <p className="mt-1 text-xs text-red-500">{state.errors.phone[0]}</p>

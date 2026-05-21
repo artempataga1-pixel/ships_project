@@ -4,10 +4,8 @@ import { StatsSection } from "@/components/sections/StatsSection";
 import { ServicesSection } from "@/components/sections/ServicesSection";
 import { HowWeWorkSection } from "@/components/sections/HowWeWorkSection";
 import { CasesSection } from "@/components/sections/CasesSection";
-import { RecommendSection } from "@/components/sections/RecommendSection";
 import { PrinciplesSection } from "@/components/sections/PrinciplesSection";
 import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
-import { GeographySection } from "@/components/sections/GeographySection";
 import { NewsSection } from "@/components/sections/NewsSection";
 import { ClientsSection } from "@/components/sections/ClientsSection";
 import { ContactSection } from "@/components/sections/ContactSection";
@@ -22,9 +20,7 @@ export default function Home() {
       <HowWeWorkSection />
       <CasesSection />
       <PrinciplesSection />
-      <RecommendSection />
       <TestimonialsSection />
-      <GeographySection />
       <NewsSection />
       <ClientsSection />
       <ContactSection />

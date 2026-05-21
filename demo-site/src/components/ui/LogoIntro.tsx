@@ -25,6 +25,19 @@ export function LogoIntro() {
     const startLeft = Math.floor(window.innerWidth / 2 - size / 2);
     const startTop = Math.floor(window.innerHeight / 2 - size / 2);
 
+    // Реальные координаты логотипа в navbar
+    const navLogoEl = document.querySelector("[data-navbar-logo]") as HTMLElement | null;
+    let targetTop = 12;
+    let targetLeft = 16;
+    let targetSize = 40;
+
+    if (navLogoEl) {
+      const rect = navLogoEl.getBoundingClientRect();
+      targetTop = rect.top;
+      targetLeft = rect.left;
+      targetSize = rect.width || 40;
+    }
+
     Object.assign(logo.style, {
       position: "absolute",
       width: `${size}px`,
@@ -35,16 +48,19 @@ export function LogoIntro() {
     });
 
     const run = async () => {
+      // Фаза 1: появление в центре
       await animate(logo, { opacity: 1 }, { duration: 0.8, ease: "easeOut" });
       if (cancelled || dismissed.current) return;
 
+      // Фаза 2: плавное уменьшение с перемещением точно в navbar
       await animate(
         logo,
-        { width: 40, height: 40, top: 14, left: 16 },
+        { width: targetSize, height: targetSize, top: targetTop, left: targetLeft },
         { duration: 1.7, ease: [0.4, 0, 0.2, 1] }
       );
       if (cancelled || dismissed.current) return;
 
+      // Фаза 3: оверлей исчезает
       await animate(overlay, { opacity: 0 }, { duration: 0.4 });
       if (!cancelled) dismiss();
     };
@@ -67,7 +83,7 @@ export function LogoIntro() {
       onClick={dismiss}
       onKeyDown={(e) => e.key === "Escape" && dismiss()}
     >
-      <div ref={logoRef}>
+      <div ref={logoRef} style={{ opacity: 0 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/logo2.png"

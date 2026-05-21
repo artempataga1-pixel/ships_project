@@ -11,7 +11,7 @@ export function PartnersTabs() {
 
   return (
     <>
-      <div className="flex justify-center gap-8 mb-12">
+      <div className="flex justify-center gap-4 sm:gap-8 mb-12">
         {PARTNERS.map((p, idx) => (
           <div key={p.id} className="flex flex-col items-center gap-3">
             <PartnerAvatar
@@ -38,16 +38,16 @@ export function PartnersTabs() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.4 }}
-          className="grid grid-cols-1 lg:grid-cols-5 gap-10 items-start"
+          className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-10 items-start"
         >
           <div className="lg:col-span-2 flex justify-center">
-            <div className="relative w-72 h-96 rounded-lg overflow-hidden border border-gold/60 shadow-[0_0_25px_rgba(228,199,83,0.30)] shrink-0">
+            <div className="relative w-full max-w-xs mx-auto aspect-[3/4] lg:w-72 lg:h-96 lg:max-w-none rounded-lg overflow-hidden border border-gold/60 shadow-[0_0_25px_rgba(228,199,83,0.30)] shrink-0">
               <Image
                 src={partner.photo}
                 alt={partner.name}
                 fill
                 className="object-cover object-top"
-                sizes="300px"
+                sizes="(max-width: 1024px) 280px, 300px"
               />
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-charcoal to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
