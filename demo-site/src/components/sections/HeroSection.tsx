@@ -7,8 +7,7 @@ export function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center overflow-hidden"
-      style={{ background: "var(--dark-section-bg)" }}
+      className="relative min-h-screen flex items-center overflow-hidden bg-charcoal"
     >
       {/* Мобилка: одно статичное фото */}
       <div className="sm:hidden absolute inset-0">
@@ -27,9 +26,9 @@ export function HeroSection() {
         <HeroSlider />
       </div>
 
-      {/* Градиентные оверлеи */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to right, var(--dark-overlay-90), var(--dark-overlay-70), var(--dark-overlay-20))" }} />
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--dark-overlay-80), transparent, transparent)" }} />
+      {/* Градиентные оверлеи — всегда тёмные */}
+      <div className="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/70 to-charcoal/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent" />
 
       {/* Контент — рендерится на сервере */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
@@ -48,7 +47,7 @@ export function HeroSection() {
           {/* Слоган */}
           <h1
             className="font-display text-3xl sm:text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight mb-6 opacity-0"
-            style={{ color: "var(--dark-text-100)", animation: "heroFadeIn 0.8s ease 0.35s both" }}
+            style={{ color: "#ffffff", animation: "heroFadeIn 0.8s ease 0.35s both" }}
           >
             {HERO.headline}
           </h1>
@@ -56,7 +55,7 @@ export function HeroSection() {
           {/* Подзаголовок */}
           <p
             className="text-base sm:text-lg md:text-xl leading-relaxed mb-10 max-w-xl opacity-0"
-            style={{ color: "var(--dark-text-70)", animation: "heroFadeIn 0.7s ease 0.5s both" }}
+            style={{ color: "rgba(255,255,255,0.7)", animation: "heroFadeIn 0.7s ease 0.5s both" }}
           >
             {HERO.subheadline}
           </p>
@@ -75,7 +74,7 @@ export function HeroSection() {
             <a
               href="#cases"
               className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 font-medium rounded-lg text-sm hover:border-gold hover:text-gold transition-all duration-300"
-              style={{ border: "1px solid var(--dark-text-10)", color: "var(--dark-text-100)" }}
+              style={{ border: "1px solid rgba(255,255,255,0.3)", color: "#ffffff" }}
             >
               Наши кейсы
             </a>
