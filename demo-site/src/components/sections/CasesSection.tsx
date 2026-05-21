@@ -26,7 +26,7 @@ export function CasesSection() {
       <div className="mt-12 text-center">
         <a
           href="#contact"
-          className="inline-flex items-center gap-2 text-sm text-gold/70 hover:text-gold transition-colors"
+          className="inline-flex items-center gap-2 text-sm transition-colors" style={{ color: "var(--dark-text-100)" }}
         >
           Обсудить вашу ситуацию
           <span aria-hidden>→</span>

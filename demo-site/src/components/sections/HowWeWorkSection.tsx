@@ -20,7 +20,7 @@ export function HowWeWorkSection() {
         {HOW_WE_WORK.map((step, idx) => (
           <div key={step.step} className="relative flex flex-col items-center text-center px-6 py-8">
             {/* Номер шага */}
-            <div className="relative z-10 w-16 h-16 rounded-full border border-gold/40 flex items-center justify-center mb-6" style={{ background: "var(--dark-section-bg)" }}>
+            <div className="relative z-10 w-16 h-16 rounded-full border flex items-center justify-center mb-6" style={{ background: "var(--dark-section-bg)", borderColor: "var(--dark-text-100)" }}>
               <span className="font-display text-xl font-bold" style={{ color: "var(--dark-text-100)" }}>{step.step}</span>
             </div>
 
