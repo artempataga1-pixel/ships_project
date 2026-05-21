@@ -142,6 +142,7 @@ export default function RootLayout({
     <html
       lang="ru"
       className={`${playfair.variable} ${inter.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         {/* Устанавливаем тему до рендера — предотвращает flash */}
