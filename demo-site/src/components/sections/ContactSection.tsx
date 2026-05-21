@@ -67,11 +67,11 @@ export function ContactSection() {
                     key={p.id}
                     type="button"
                     onClick={() => setSelectedPartner(p.id)}
-                    className={`flex items-center gap-3 px-4 py-3 border rounded-lg text-left transition-all duration-200 ${
-                      selectedPartner === p.id
-                        ? "border-gold bg-[rgba(228,199,83,0.05)] text-foreground"
-                        : "border-border hover:border-gold/40 text-muted-foreground"
-                    }`}
+                    className="flex items-center gap-3 px-4 py-3 border rounded-lg text-left transition-all duration-200"
+                    style={{
+                      background: "var(--card-bg)",
+                      borderColor: selectedPartner === p.id ? "var(--gold)" : undefined,
+                    }}
                   >
                     <span
                       className={`w-2 h-2 rounded-full shrink-0 ${
@@ -104,7 +104,7 @@ export function ContactSection() {
                 type="text"
                 required
                 placeholder="Иван Иванов"
-                className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50 text-base sm:text-sm"
+                className="w-full px-4 py-3.5 border border-border rounded-lg text-sm focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50 text-base sm:text-sm" style={{ background: "var(--card-bg)" }}
               />
               {state?.errors?.name && (
                 <p className="mt-1 text-xs text-red-500">{state.errors.name[0]}</p>
@@ -127,7 +127,7 @@ export function ContactSection() {
                 value={phone}
                 onChange={(e) => setPhone(formatPhone(e.target.value))}
                 placeholder="+7 (___) ___-__-__"
-                className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50 text-base sm:text-sm"
+                className="w-full px-4 py-3.5 border border-border rounded-lg text-sm focus:outline-none focus:border-gold transition-colors placeholder:text-muted-foreground/50 text-base sm:text-sm" style={{ background: "var(--card-bg)" }}
               />
               {state?.errors?.phone && (
                 <p className="mt-1 text-xs text-red-500">{state.errors.phone[0]}</p>
@@ -147,7 +147,7 @@ export function ContactSection() {
                 name="message"
                 rows={4}
                 placeholder="Опишите вашу задачу..."
-                className="w-full px-4 py-3.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-gold transition-colors resize-none placeholder:text-muted-foreground/50"
+                className="w-full px-4 py-3.5 border border-border rounded-lg text-sm focus:outline-none focus:border-gold transition-colors resize-none placeholder:text-muted-foreground/50" style={{ background: "var(--card-bg)" }}
               />
             </div>
 

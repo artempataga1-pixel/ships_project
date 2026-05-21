@@ -34,6 +34,7 @@
   --dark-text-10:       rgba(0, 0, 0, 0.10);
   --light-section-bg:   #ffffff;
   --light-section-text: #0a0a0a;
+  --card-bg:            #dccfbc;
 }
 
 /* Тёмная тема */
@@ -52,6 +53,7 @@
   --dark-text-10:       rgba(255, 255, 255, 0.10);
   --light-section-bg:   #626260;
   --light-section-text: #1a1a1a;
+  --card-bg:            rgba(255, 255, 255, 0.08);
 }
 
 /* Переходы — только после mount, чтобы не мигало при первой загрузке */

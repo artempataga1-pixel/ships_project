@@ -30,10 +30,11 @@ export function PrinciplesSection() {
             <div
               key={principle.id}
               className="group flex gap-4 sm:gap-6 p-6 sm:p-8 border border-gold/25 rounded-lg shadow-[0_0_15px_rgba(228,199,83,0.06)] hover:border-gold/55 hover:shadow-[0_0_25px_rgba(228,199,83,0.18)] transition-all duration-300"
+              style={{ background: "var(--card-bg)" }}
             >
               <div className="shrink-0 pt-1">
                 {Icon && (
-                  <Icon className="w-9 h-9 text-gold" strokeWidth={1.5} />
+                  <Icon className="w-9 h-9" style={{ color: "var(--dark-text-100)" }} strokeWidth={1.5} />
                 )}
               </div>
               <div>
