@@ -16,6 +16,7 @@ const NAV_LINKS = [
   { label: "Отзывы", href: "#testimonials" },
   { label: "Новости", href: "#news" },
   { label: "Клиенты", href: "#clients" },
+  { label: "FAQ", href: "#faq", mobileLabel: "Q&A" },
   { label: "Контакты", href: "#contact" },
 ];
 
@@ -55,7 +56,7 @@ export function Navbar() {
           </a>
 
           {/* Центр: навигация (flex-1 — равные отступы по бокам) */}
-          <ul className="hidden lg:flex flex-1 items-center justify-center gap-3 px-4">
+          <ul className="hidden lg:flex flex-1 items-center justify-center gap-2 px-2">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <a

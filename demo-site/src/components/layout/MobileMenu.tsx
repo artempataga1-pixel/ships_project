@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 
 interface NavLink {
   label: string;
+  mobileLabel?: string;
   href: string;
 }
 
@@ -69,7 +70,7 @@ export function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) {
               onClick={onClose}
               className="py-3 border-b border-border font-medium text-foreground hover:text-gold transition-colors flex items-center justify-between group"
             >
-              {link.label}
+              {link.mobileLabel ?? link.label}
               <span className="text-gold opacity-0 group-hover:opacity-100 transition-opacity">
                 →
               </span>

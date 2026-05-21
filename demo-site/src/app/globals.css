@@ -50,6 +50,10 @@
   --news-card-shadow:      none;
   --clients-card-border:   var(--dark-text-10);
   --clients-card-shadow:   none;
+  --faq-card-border:       var(--dark-text-10);
+  --faq-card-shadow:       none;
+  --faq-card-active-border: var(--gold);
+  --faq-card-active-shadow: none;
   --quote-color:        var(--dark-text-100);
   --contact-label:      var(--muted-foreground);
   --partner-label:      var(--dark-text-100);
@@ -89,6 +93,10 @@
   --news-card-shadow:      0 0 25px rgba(228, 199, 83, 0.25);
   --clients-card-border:   rgba(228, 199, 83, 0.60);
   --clients-card-shadow:   0 0 25px rgba(228, 199, 83, 0.25);
+  --faq-card-border:       rgba(228, 199, 83, 0.35);
+  --faq-card-shadow:       0 0 15px rgba(228, 199, 83, 0.10);
+  --faq-card-active-border: var(--gold);
+  --faq-card-active-shadow: 0 0 25px rgba(228, 199, 83, 0.25);
   --quote-color:        var(--gold);
   --contact-label:      #0a0a0a;
 }
