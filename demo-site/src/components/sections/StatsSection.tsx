@@ -6,7 +6,7 @@ export function StatsSection() {
   return (
     <SectionWrapper id="stats" className="py-20">
       <div className="text-center mb-12">
-        <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Результаты</p>
+        <p className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: "var(--dark-text-100)" }}>Результаты</p>
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-3">
           Факты говорят сами за себя
         </h2>

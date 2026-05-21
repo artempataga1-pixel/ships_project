@@ -22,7 +22,7 @@
   /* Тематические переменные (светлая тема — по умолчанию) */
   --dark-section-bg:    #dccfbc;
   --dark-section-text:  #3d3326;
-  --dark-card-bg:       rgba(61, 51, 38, 0.12);
+  --dark-card-bg:       #ffffff;
   --dark-overlay-90:    rgba(220, 207, 188, 0.90);
   --dark-overlay-70:    rgba(220, 207, 188, 0.70);
   --dark-overlay-20:    rgba(220, 207, 188, 0.20);
@@ -34,7 +34,7 @@
   --dark-text-10:       rgba(0, 0, 0, 0.10);
   --light-section-bg:   #ffffff;
   --light-section-text: #0a0a0a;
-  --card-bg:            #dccfbc;
+  --card-bg:            #ffffff;
 }
 
 /* Тёмная тема */

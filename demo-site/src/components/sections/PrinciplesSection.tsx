@@ -16,7 +16,7 @@ export function PrinciplesSection() {
   return (
     <SectionWrapper id="principles">
       <div className="text-center mb-14">
-        <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">О компании</p>
+        <p className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: "var(--dark-text-100)" }}>О компании</p>
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5">
           Наши принципы
         </h2>
@@ -38,8 +38,8 @@ export function PrinciplesSection() {
                 )}
               </div>
               <div>
-                <h3 className="font-display text-xl font-semibold mb-3">{principle.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{principle.description}</p>
+                <h3 className="font-display text-xl font-semibold mb-3" style={{ color: "var(--dark-text-100)" }}>{principle.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--dark-text-100)" }}>{principle.description}</p>
               </div>
             </div>
           );

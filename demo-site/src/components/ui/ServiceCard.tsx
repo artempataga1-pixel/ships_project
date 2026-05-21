@@ -19,7 +19,7 @@ export function ServiceCard({ service }: { service: Service }) {
         {Icon && <Icon size={22} style={{ color: "var(--dark-text-100)" }} />}
       </div>
       <h3 className="font-display text-xl font-semibold mb-3">{service.title}</h3>
-      <p className="text-muted-foreground leading-relaxed text-sm">{service.description}</p>
+      <p className="leading-relaxed text-sm" style={{ color: "var(--dark-text-100)" }}>{service.description}</p>
     </div>
   );
 }

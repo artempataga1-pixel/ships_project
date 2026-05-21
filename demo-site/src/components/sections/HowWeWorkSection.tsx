@@ -6,7 +6,7 @@ export function HowWeWorkSection() {
   return (
     <SectionWrapper id="process" dark className="overflow-hidden">
       <div className="text-center mb-14">
-        <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Процесс</p>
+        <p className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: "var(--dark-text-100)" }}>Процесс</p>
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5" style={{ color: "var(--dark-text-100)" }}>
           Как мы работаем
         </h2>
@@ -21,7 +21,7 @@ export function HowWeWorkSection() {
           <div key={step.step} className="relative flex flex-col items-center text-center px-6 py-8">
             {/* Номер шага */}
             <div className="relative z-10 w-16 h-16 rounded-full border border-gold/40 flex items-center justify-center mb-6" style={{ background: "var(--dark-section-bg)" }}>
-              <span className="font-display text-xl font-bold text-gold">{step.step}</span>
+              <span className="font-display text-xl font-bold" style={{ color: "var(--dark-text-100)" }}>{step.step}</span>
             </div>
 
             <h3 className="font-display text-2xl font-semibold mb-4" style={{ color: "var(--dark-text-100)" }}>{step.title}</h3>

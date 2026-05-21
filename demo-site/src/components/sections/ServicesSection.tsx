@@ -7,7 +7,7 @@ export function ServicesSection() {
   return (
     <SectionWrapper id="services">
       <div className="text-center mb-14">
-        <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Практика</p>
+        <p className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: "var(--dark-text-100)" }}>Практика</p>
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5">
           Области специализации
         </h2>
@@ -26,7 +26,7 @@ export function ServicesSection() {
       <div className="mt-12 text-center">
         <a
           href="#contact"
-          className="inline-flex items-center gap-2 text-sm text-gold hover:text-gold-dark transition-colors font-medium"
+          className="inline-flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-70" style={{ color: "var(--dark-text-100)" }}
         >
           Обсудить вашу задачу
           <span aria-hidden>→</span>

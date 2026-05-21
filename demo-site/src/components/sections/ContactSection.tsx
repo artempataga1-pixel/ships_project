@@ -40,7 +40,7 @@ export function ContactSection() {
     <>
       <SectionWrapper id="contact">
         <div className="text-center mb-14">
-          <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Контакты</p>
+          <p className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: "var(--dark-text-100)" }}>Контакты</p>
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5">
             Записаться на консультацию
           </h2>

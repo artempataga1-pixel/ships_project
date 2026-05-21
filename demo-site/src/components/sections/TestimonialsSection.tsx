@@ -6,7 +6,7 @@ export function TestimonialsSection() {
   return (
     <SectionWrapper id="testimonials" dark>
       <div className="text-center mb-14">
-        <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Отзывы</p>
+        <p className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: "var(--dark-text-100)" }}>Отзывы</p>
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5" style={{ color: "var(--dark-text-100)" }}>
           Говорят клиенты
         </h2>
@@ -27,7 +27,7 @@ export function TestimonialsSection() {
 
             <div className="pt-4" style={{ borderTop: "1px solid var(--dark-text-10)" }}>
               <p className="font-medium text-sm" style={{ color: "var(--dark-text-100)" }}>{t.author}</p>
-              <p className="text-xs mt-1" style={{ color: "var(--dark-text-40)" }}>{t.region}</p>
+              <p className="text-xs mt-1" style={{ color: "var(--dark-text-100)" }}>{t.region}</p>
             </div>
           </div>
         ))}

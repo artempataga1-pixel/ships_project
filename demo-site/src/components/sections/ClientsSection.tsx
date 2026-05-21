@@ -8,7 +8,7 @@ export function ClientsSection() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
         {/* Клиенты */}
         <div>
-          <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Клиенты</p>
+          <p className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: "var(--dark-text-100)" }}>Клиенты</p>
           <h2 className="font-display text-3xl sm:text-4xl font-bold mb-5">
             Кто нас выбирает
           </h2>
@@ -23,7 +23,7 @@ export function ClientsSection() {
                 key={type}
                 className="flex items-center gap-4 py-3 border-b border-border last:border-0"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--dark-text-100)" }} />
                 <span className="text-sm font-medium">{type}</span>
               </div>
             ))}
