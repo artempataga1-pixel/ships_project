@@ -22,7 +22,7 @@ export function PartnersTabs() {
             />
             <span
               className="text-xs uppercase tracking-wider transition-colors"
-              style={{ color: active === idx ? "var(--gold)" : "var(--dark-text-40)" }}
+              style={{ color: active === idx ? "#ffffff" : "var(--dark-text-40)" }}
             >
               {p.name.split(" ")[0]}
             </span>
