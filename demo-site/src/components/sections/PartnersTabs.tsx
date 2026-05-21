@@ -71,7 +71,7 @@ export function PartnersTabs() {
               <ul className="flex flex-col gap-2">
                 {partner.achievements.map((a, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "var(--dark-text-70)" }}>
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--dark-text-100)" }} />
                     {a}
                   </li>
                 ))}
@@ -82,7 +82,7 @@ export function PartnersTabs() {
               <ul className="flex flex-col gap-2">
                 {partner.education.map((e, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "var(--dark-text-70)" }}>
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--dark-text-40)" }} />
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--dark-text-100)" }} />
                     {e}
                   </li>
                 ))}
