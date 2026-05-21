@@ -64,7 +64,7 @@ export function PartnersTabs() {
             </div>
             <div>
               <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "var(--dark-text-100)" }}>О партнёре</p>
-              <p className="leading-relaxed text-sm" style={{ color: "var(--dark-text-70)" }}>{partner.bio}</p>
+              <p className="leading-relaxed text-sm" style={{ color: "var(--dark-text-100)" }}>{partner.bio}</p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--dark-text-100)" }}>Ключевые достижения</p>
