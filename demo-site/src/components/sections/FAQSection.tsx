@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { SectionWrapper } from "@/components/ui/SectionWrapper";
 import { GoldDivider } from "@/components/ui/GoldDivider";
@@ -81,12 +82,11 @@ export function FAQSection() {
                   }}
                 />
               </button>
-              <div
-                style={{
-                  overflow: "hidden",
-                  maxHeight: isOpen ? "500px" : "0",
-                  transition: "max-height 0.5s ease",
-                }}
+              <motion.div
+                initial={false}
+                animate={{ height: isOpen ? "auto" : 0 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+                style={{ overflow: "hidden" }}
               >
                 <p
                   className="px-6 pb-4 pt-1 text-sm leading-relaxed"
@@ -94,7 +94,7 @@ export function FAQSection() {
                 >
                   {item.answer}
                 </p>
-              </div>
+              </motion.div>
             </div>
           );
         })}
