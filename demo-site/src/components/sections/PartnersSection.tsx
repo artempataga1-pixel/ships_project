@@ -6,7 +6,7 @@ export function PartnersSection() {
   return (
     <SectionWrapper id="partners" dark>
       <div className="text-center mb-14">
-        <p className="text-white text-xs uppercase tracking-[0.2em] mb-4">Команда</p>
+        <p className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: "var(--dark-text-100)" }}>Команда</p>
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5" style={{ color: "var(--dark-text-100)" }}>
           Братья Разумовские
         </h2>
