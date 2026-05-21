@@ -4,10 +4,8 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { CursorBlob } from "@/components/ui/CursorBlob";
 import { LogoIntro } from "@/components/ui/LogoIntro";
 import { StickyCtaButton } from "@/components/layout/StickyCtaButton";
-import { ScrollSnapper } from "@/components/ui/ScrollSnapper";
 import { SITE_URL, CONTACTS } from "@/lib/constants";
 
 const playfair = localFont({
@@ -152,8 +150,6 @@ export default function RootLayout({
           }}
         />
         <LogoIntro />
-        <ScrollSnapper />
-        <CursorBlob />
         <Navbar />
         <main className="pb-16 lg:pb-0">{children}</main>
         <Footer />
