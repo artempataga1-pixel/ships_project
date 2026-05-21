@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { LogoIntro } from "@/components/ui/LogoIntro";
 import { StickyCtaButton } from "@/components/layout/StickyCtaButton";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { SITE_URL, CONTACTS } from "@/lib/constants";
 
 const playfair = localFont({
@@ -142,6 +143,14 @@ export default function RootLayout({
       lang="ru"
       className={`${playfair.variable} ${inter.variable} h-full antialiased`}
     >
+      <head>
+        {/* Устанавливаем тему до рендера — предотвращает flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme')||'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <script
           type="application/ld+json"
@@ -154,6 +163,7 @@ export default function RootLayout({
         <main className="pb-16 lg:pb-0">{children}</main>
         <Footer />
         <StickyCtaButton />
+        <ThemeToggle className="fixed bottom-6 left-6 z-50 hidden lg:flex" />
         <BottomNav />
       </body>
     </html>

@@ -21,9 +21,8 @@ export function PartnersTabs() {
               size={80}
             />
             <span
-              className={`text-xs uppercase tracking-wider transition-colors ${
-                active === idx ? "text-gold" : "text-white/40"
-              }`}
+              className="text-xs uppercase tracking-wider transition-colors"
+              style={{ color: active === idx ? "var(--gold)" : "var(--dark-text-40)" }}
             >
               {p.name.split(" ")[0]}
             </span>
@@ -49,9 +48,9 @@ export function PartnersTabs() {
                 className="object-cover object-top"
                 sizes="(max-width: 1024px) 280px, 300px"
               />
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-charcoal to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-24" style={{ background: "linear-gradient(to top, var(--dark-section-bg), transparent)" }} />
               <div className="absolute bottom-4 left-4 right-4">
-                <p className="font-display text-white font-semibold">{partner.name}</p>
+                <p className="font-display font-semibold" style={{ color: "var(--dark-text-100)" }}>{partner.name}</p>
                 <p className="text-gold text-xs mt-0.5">{partner.role}</p>
               </div>
             </div>
@@ -60,17 +59,17 @@ export function PartnersTabs() {
           <div className="lg:col-span-3 flex flex-col gap-7">
             <div>
               <p className="text-gold text-xs uppercase tracking-widest mb-2">Специализация</p>
-              <p className="text-white text-lg font-display leading-snug">{partner.specialty}</p>
+              <p className="text-lg font-display leading-snug" style={{ color: "var(--dark-text-100)" }}>{partner.specialty}</p>
             </div>
             <div>
               <p className="text-gold text-xs uppercase tracking-widest mb-2">О партнёре</p>
-              <p className="text-white/70 leading-relaxed text-sm">{partner.bio}</p>
+              <p className="leading-relaxed text-sm" style={{ color: "var(--dark-text-70)" }}>{partner.bio}</p>
             </div>
             <div>
               <p className="text-gold text-xs uppercase tracking-widest mb-3">Ключевые достижения</p>
               <ul className="flex flex-col gap-2">
                 {partner.achievements.map((a, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-white/70">
+                  <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "var(--dark-text-70)" }}>
                     <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
                     {a}
                   </li>
@@ -81,8 +80,8 @@ export function PartnersTabs() {
               <p className="text-gold text-xs uppercase tracking-widest mb-3">Образование</p>
               <ul className="flex flex-col gap-2">
                 {partner.education.map((e, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-white/70">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-white/30 shrink-0" />
+                  <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "var(--dark-text-70)" }}>
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--dark-text-40)" }} />
                     {e}
                   </li>
                 ))}

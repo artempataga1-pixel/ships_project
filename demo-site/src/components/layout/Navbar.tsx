@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Menu, Phone } from "lucide-react";
 import { MobileMenu } from "./MobileMenu";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const NAV_LINKS = [
   { label: "Главная", href: "#hero" },
@@ -34,7 +35,7 @@ export function Navbar() {
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           scrolled
             ? "bg-charcoal/95 backdrop-blur-md border-b border-white/10"
-            : "bg-transparent"
+            : "bg-charcoal/75 backdrop-blur-sm"
         }`}
       >
         <nav className="max-w-7xl mx-auto px-4 lg:px-6 h-16 flex items-center">
@@ -86,6 +87,7 @@ export function Navbar() {
             >
               <Phone size={20} />
             </a>
+            <ThemeToggle className="lg:hidden" />
             <button
               onClick={() => setMenuOpen(true)}
               className="lg:hidden p-2 -mr-2 text-white/70 hover:text-white transition-colors"

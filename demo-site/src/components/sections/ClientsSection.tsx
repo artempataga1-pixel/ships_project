@@ -31,18 +31,22 @@ export function ClientsSection() {
         </div>
 
         {/* Школа юристов */}
-        <div className="bg-charcoal rounded-xl p-6 sm:p-10 border border-white/10">
+        <div
+          className="rounded-xl p-6 sm:p-10"
+          style={{ background: "var(--dark-section-bg)", border: "1px solid var(--dark-text-10)" }}
+        >
           <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Образование</p>
-          <h3 className="font-display text-2xl font-bold text-white mb-2">{SCHOOL.title}</h3>
-          <p className="text-white/40 text-xs mb-6">Основана в {SCHOOL.founded}</p>
-          <p className="text-white/70 text-sm leading-relaxed mb-8">{SCHOOL.description}</p>
+          <h3 className="font-display text-2xl font-bold mb-2" style={{ color: "var(--dark-text-100)" }}>{SCHOOL.title}</h3>
+          <p className="text-xs mb-6" style={{ color: "var(--dark-text-40)" }}>Основана в {SCHOOL.founded}</p>
+          <p className="text-sm leading-relaxed mb-8" style={{ color: "var(--dark-text-70)" }}>{SCHOOL.description}</p>
           <div>
             <p className="text-gold text-xs uppercase tracking-widest mb-4">Программы</p>
             <div className="flex flex-wrap gap-2">
               {SCHOOL.programs.map((prog) => (
                 <span
                   key={prog}
-                  className="px-3 py-1.5 border border-white/20 rounded-full text-xs text-white/70 hover:border-gold/40 hover:text-gold transition-colors"
+                  className="px-3 py-1.5 rounded-full text-xs hover:border-gold/40 hover:text-gold transition-colors"
+                  style={{ border: "1px solid var(--dark-text-10)", color: "var(--dark-text-70)" }}
                 >
                   {prog}
                 </span>

@@ -7,7 +7,7 @@ export function HowWeWorkSection() {
     <SectionWrapper id="process" dark className="overflow-hidden">
       <div className="text-center mb-14">
         <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Процесс</p>
-        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5">
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5" style={{ color: "var(--dark-text-100)" }}>
           Как мы работаем
         </h2>
         <GoldDivider className="max-w-xs mx-auto" />
@@ -20,12 +20,12 @@ export function HowWeWorkSection() {
         {HOW_WE_WORK.map((step, idx) => (
           <div key={step.step} className="relative flex flex-col items-center text-center px-6 py-8">
             {/* Номер шага */}
-            <div className="relative z-10 w-16 h-16 rounded-full border border-gold/40 bg-charcoal flex items-center justify-center mb-6">
+            <div className="relative z-10 w-16 h-16 rounded-full border border-gold/40 flex items-center justify-center mb-6" style={{ background: "var(--dark-section-bg)" }}>
               <span className="font-display text-xl font-bold text-gold">{step.step}</span>
             </div>
 
-            <h3 className="font-display text-2xl font-semibold text-white mb-4">{step.title}</h3>
-            <p className="text-white/60 text-sm leading-relaxed max-w-xs">{step.description}</p>
+            <h3 className="font-display text-2xl font-semibold mb-4" style={{ color: "var(--dark-text-100)" }}>{step.title}</h3>
+            <p className="text-sm leading-relaxed max-w-xs" style={{ color: "var(--dark-text-70)" }}>{step.description}</p>
 
             {/* Разделитель между шагами на мобиле */}
             {idx < HOW_WE_WORK.length - 1 && (

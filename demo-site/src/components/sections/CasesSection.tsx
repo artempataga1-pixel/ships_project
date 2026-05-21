@@ -8,11 +8,11 @@ export function CasesSection() {
     <SectionWrapper id="cases" dark>
       <div className="text-center mb-14">
         <p className="text-gold text-xs uppercase tracking-[0.2em] mb-4">Кейсы</p>
-        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5">
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5" style={{ color: "var(--dark-text-100)" }}>
           Реализованные дела
         </h2>
         <GoldDivider className="max-w-xs mx-auto" />
-        <p className="mt-6 text-white/50 max-w-xl mx-auto leading-relaxed text-sm">
+        <p className="mt-6 max-w-xl mx-auto leading-relaxed text-sm" style={{ color: "var(--dark-text-40)" }}>
           Детали и имена клиентов не раскрываются. Суммы подтверждены судебными актами.
         </p>
       </div>
