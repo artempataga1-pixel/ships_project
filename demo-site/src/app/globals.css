@@ -101,10 +101,13 @@
   --contact-label:      #0a0a0a;
 }
 
-[data-theme="dark"] #contact,
 [data-theme="dark"] #clients,
 [data-theme="dark"] #services {
   --muted-foreground: #0a0a0a;
+}
+[data-theme="dark"] #contact {
+  --muted-foreground: rgba(255, 255, 255, 0.6);
+  --contact-label:    rgba(255, 255, 255, 0.6);
   --partner-label:      var(--gold);
   --partner-tab-active: var(--gold);
   --partner-tab-muted:  rgba(228, 199, 83, 0.40);

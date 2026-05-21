@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Home, Users, TrendingUp, Briefcase, ListOrdered,
-  FolderOpen, Building2, MessageSquare, Newspaper, UserCheck, Phone,
+  FolderOpen, Building2, MessageSquare, Newspaper, UserCheck, HelpCircle, Phone,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { icon: MessageSquare, label: "Отзывы",     href: "#testimonials", section: "testimonials" },
   { icon: Newspaper,     label: "Новости",    href: "#news",         section: "news" },
   { icon: UserCheck,     label: "Клиенты",    href: "#clients",      section: "clients" },
+  { icon: HelpCircle,    label: "Q&A",        href: "#faq",          section: "faq" },
   { icon: Phone,         label: "Контакты",   href: "#contact",      section: "contact" },
 ];
 
