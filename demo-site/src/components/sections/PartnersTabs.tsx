@@ -50,7 +50,7 @@ export function PartnersTabs() {
               />
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-charcoal to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
-                <p className="font-display font-semibold" style={{ color: "var(--dark-text-100)" }}>{partner.name}</p>
+                <p className="font-display font-semibold text-white">{partner.name}</p>
                 <p className="text-white text-xs mt-0.5">{partner.role}</p>
               </div>
             </div>
