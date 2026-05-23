@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { LogoIntro } from "@/components/ui/LogoIntro";
 import { StickyCtaButton } from "@/components/layout/StickyCtaButton";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { CursorBlob } from "@/components/ui/CursorBlob";
 import { SITE_URL, CONTACTS } from "@/lib/constants";
 
 const playfair = localFont({
@@ -165,6 +166,7 @@ export default function RootLayout({
         <Footer />
         <StickyCtaButton />
         <ThemeToggle className="fixed bottom-6 left-6 z-50 hidden lg:flex" />
+        <CursorBlob />
         <BottomNav />
       </body>
     </html>

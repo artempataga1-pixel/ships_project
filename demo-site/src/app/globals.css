@@ -41,13 +41,17 @@
   --stat-card-shadow:   0 0 60px rgba(228, 199, 83, 0.05);
   --service-card-border: var(--border);
   --service-card-shadow: none;
+  --service-card-hover-shadow: 0 0 40px rgba(0,0,0,0.38), 0 0 14px rgba(0,0,0,0.22);
   --process-step-color:  var(--dark-text-100);
   --case-card-border:    rgba(228, 199, 83, 0.25);
   --case-card-shadow:    none;
+  --case-card-hover-shadow: 0 0 40px rgba(0,0,0,0.38), 0 0 14px rgba(0,0,0,0.22);
   --principle-card-border: rgba(228, 199, 83, 0.25);
   --principle-card-shadow: 0 0 15px rgba(228, 199, 83, 0.06);
+  --principle-card-hover-shadow: 0 0 40px rgba(0,0,0,0.38), 0 0 14px rgba(0,0,0,0.22);
   --news-card-border:      rgba(228, 199, 83, 0.25);
   --news-card-shadow:      none;
+  --news-card-hover-shadow: 0 0 40px rgba(0,0,0,0.38), 0 0 14px rgba(0,0,0,0.22);
   --clients-card-border:   var(--dark-text-10);
   --clients-card-shadow:   none;
   --faq-card-border:       var(--dark-text-10);
@@ -84,13 +88,17 @@
   --stat-card-shadow:   0 0 80px rgba(228, 199, 83, 0.40), 0 0 30px rgba(228, 199, 83, 0.20);
   --service-card-border: rgba(228, 199, 83, 0.60);
   --service-card-shadow: 0 0 25px rgba(228, 199, 83, 0.25);
+  --service-card-hover-shadow: 0 0 45px rgba(228,199,83,0.75), 0 0 16px rgba(228,199,83,0.50);
   --process-step-color:  var(--gold);
   --case-card-border:    rgba(228, 199, 83, 0.60);
   --case-card-shadow:    0 0 25px rgba(228, 199, 83, 0.25);
+  --case-card-hover-shadow: 0 0 45px rgba(228,199,83,0.75), 0 0 16px rgba(228,199,83,0.50);
   --principle-card-border: rgba(228, 199, 83, 0.60);
   --principle-card-shadow: 0 0 25px rgba(228, 199, 83, 0.25);
+  --principle-card-hover-shadow: 0 0 45px rgba(228,199,83,0.75), 0 0 16px rgba(228,199,83,0.50);
   --news-card-border:      rgba(228, 199, 83, 0.60);
   --news-card-shadow:      0 0 25px rgba(228, 199, 83, 0.25);
+  --news-card-hover-shadow: 0 0 45px rgba(228,199,83,0.75), 0 0 16px rgba(228,199,83,0.50);
   --clients-card-border:   rgba(228, 199, 83, 0.60);
   --clients-card-shadow:   0 0 25px rgba(228, 199, 83, 0.25);
   --faq-card-border:       rgba(228, 199, 83, 0.35);
@@ -99,6 +107,22 @@
   --faq-card-active-shadow: 0 0 25px rgba(228, 199, 83, 0.25);
   --quote-color:        var(--gold);
   --contact-label:      #0a0a0a;
+}
+
+.service-card:hover {
+  box-shadow: var(--service-card-hover-shadow) !important;
+}
+
+.case-card:hover {
+  box-shadow: var(--case-card-hover-shadow) !important;
+}
+
+.principle-card:hover {
+  box-shadow: var(--principle-card-hover-shadow) !important;
+}
+
+.news-card:hover {
+  box-shadow: var(--news-card-hover-shadow) !important;
 }
 
 [data-theme="dark"] #clients,

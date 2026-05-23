@@ -3,7 +3,7 @@ import type { Case } from "@/lib/constants";
 export function CaseCard({ caseItem }: { caseItem: Case }) {
   return (
     <div
-      className="flex flex-col gap-4 p-6 sm:p-8 rounded-lg transition-all duration-300"
+      className="case-card flex flex-col gap-4 p-6 sm:p-8 rounded-lg transition-all duration-300"
       style={{ background: "var(--dark-card-bg)", border: "1px solid var(--case-card-border)", boxShadow: "var(--case-card-shadow)" }}
     >
       <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--dark-text-100)" }}>

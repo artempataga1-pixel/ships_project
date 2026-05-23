@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useRef } from "react";
 
+const GRADIENT_DARK = "radial-gradient(circle, rgba(228,199,83,0.3) 0%, rgba(228,199,83,0.05) 60%, transparent 100%)";
+const GRADIENT_LIGHT = "radial-gradient(circle, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 60%, transparent 100%)";
+
 export function CursorBlob() {
   const blobRef = useRef<HTMLDivElement>(null);
 
@@ -11,6 +14,15 @@ export function CursorBlob() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     blob.style.display = "block";
+
+    const applyTheme = (theme: string) => {
+      blob.style.background = theme === "light" ? GRADIENT_LIGHT : GRADIENT_DARK;
+    };
+
+    applyTheme(document.documentElement.dataset.theme ?? "light");
+
+    const onThemeChange = (e: Event) => applyTheme((e as CustomEvent<string>).detail);
+    window.addEventListener("theme-change", onThemeChange);
 
     let targetX = 0;
     let targetY = 0;
@@ -26,7 +38,7 @@ export function CursorBlob() {
     const animate = () => {
       currentX += (targetX - currentX) * 0.08;
       currentY += (targetY - currentY) * 0.08;
-      blob.style.transform = `translate(${currentX - 200}px, ${currentY - 200}px)`;
+      blob.style.transform = `translate(${currentX - 100}px, ${currentY - 100}px)`;
       rafId = requestAnimationFrame(animate);
     };
 
@@ -35,6 +47,7 @@ export function CursorBlob() {
 
     return () => {
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("theme-change", onThemeChange);
       cancelAnimationFrame(rafId);
     };
   }, []);
@@ -45,12 +58,10 @@ export function CursorBlob() {
       aria-hidden
       className="pointer-events-none fixed top-0 left-0 z-50 hidden"
       style={{
-        width: 400,
-        height: 400,
+        width: 200,
+        height: 200,
         borderRadius: "50%",
-        background:
-          "radial-gradient(circle, rgba(228,199,83,0.3) 0%, rgba(228,199,83,0.05) 60%, transparent 100%)",
-        filter: "blur(50px)",
+        filter: "blur(25px)",
       }}
     />
   );

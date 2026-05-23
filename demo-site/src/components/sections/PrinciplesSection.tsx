@@ -29,7 +29,7 @@ export function PrinciplesSection() {
           return (
             <div
               key={principle.id}
-              className="group flex gap-4 sm:gap-6 p-6 sm:p-8 rounded-lg transition-all duration-300"
+              className="principle-card group flex gap-4 sm:gap-6 p-6 sm:p-8 rounded-lg transition-all duration-300"
               style={{ background: "var(--card-bg)", border: "1px solid var(--principle-card-border)", boxShadow: "var(--principle-card-shadow)" }}
             >
               <div className="shrink-0 pt-1">
