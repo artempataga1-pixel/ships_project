@@ -20,6 +20,11 @@ body {
   font-family: var(--font-body);
 }
 
+/* Компенсация sticky header (64px) при якорной навигации */
+section[id] {
+  scroll-margin-top: 64px;
+}
+
 /* GPU-слой для GSAP-анимаций */
 [data-reveal] {
   will-change: transform;
