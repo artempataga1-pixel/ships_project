@@ -46,7 +46,7 @@ export interface MediaItem {
 export interface Benefit {
   title: string
   desc: string
-  icon: string
+  icon: 'FileCheck' | 'ShieldCheck' | 'FileText'
 }
 
 export interface ContactInfo {
