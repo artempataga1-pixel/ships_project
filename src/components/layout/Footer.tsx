@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { X, Send, ExternalLink } from 'lucide-react'
 import { NAV_ITEMS } from '@/constants/nav'
+import { CONTACT_INFO } from '@/constants/content/contacts'
 
 export function Footer() {
   return (
@@ -80,18 +81,18 @@ export function Footer() {
               style={{ fontFamily: 'var(--font-body)' }}
             >
               <a
-                href="tel:+74950000000"
+                href={`tel:+${CONTACT_INFO.phone.replace(/\D/g, '')}`}
                 className="hover:text-white/90 transition-colors duration-200"
               >
-                +7 (495) 000-00-00
+                {CONTACT_INFO.phone}
               </a>
               <a
-                href="mailto:info@shumskaya.ru"
+                href={`mailto:${CONTACT_INFO.email}`}
                 className="hover:text-white/90 transition-colors duration-200"
               >
-                info@shumskaya.ru
+                {CONTACT_INFO.email}
               </a>
-              <span>Москва, ул. Примерная, д. 1</span>
+              <span>{CONTACT_INFO.address}</span>
             </div>
           </div>
         </div>
