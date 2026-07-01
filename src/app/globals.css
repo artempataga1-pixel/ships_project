@@ -20,7 +20,7 @@ body {
   font-family: var(--font-body);
 }
 
-/* GPU-слой для GSAP-анимаций */
+/* GPU-слой для GSAP-анимаций (blur + transform) */
 [data-reveal] {
-  will-change: transform;
+  will-change: transform, filter;
 }

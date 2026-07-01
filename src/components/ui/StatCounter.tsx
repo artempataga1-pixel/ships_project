@@ -1,0 +1,97 @@
+'use client'
+
+import { useRef, useEffect } from 'react'
+
+interface StatItem {
+  value: number
+  label: string
+  suffix?: string
+}
+
+interface StatCounterProps {
+  items: StatItem[]
+  className?: string
+}
+
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3)
+}
+
+interface AnimatedStatProps {
+  item: StatItem
+}
+
+function AnimatedStat({ item }: AnimatedStatProps) {
+  const numRef = useRef<HTMLSpanElement>(null)
+  const rafRef = useRef<number>(0)
+  const startedRef = useRef(false)
+
+  useEffect(() => {
+    if (!numRef.current) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !startedRef.current) {
+          startedRef.current = true
+          const start = performance.now()
+          const duration = 1800
+
+          function tick(now: number) {
+            const elapsed = now - start
+            const progress = Math.min(elapsed / duration, 1)
+            const current = Math.round(easeOutCubic(progress) * item.value)
+
+            if (numRef.current) {
+              numRef.current.textContent = current.toLocaleString('ru-RU')
+            }
+
+            if (progress < 1) {
+              rafRef.current = requestAnimationFrame(tick)
+            }
+          }
+
+          rafRef.current = requestAnimationFrame(tick)
+        }
+      },
+      { threshold: 0.4 }
+    )
+
+    observer.observe(numRef.current)
+
+    return () => {
+      observer.disconnect()
+      cancelAnimationFrame(rafRef.current)
+    }
+  }, [])
+
+  return (
+    <div className="flex flex-col items-center text-center gap-2">
+      <div className="flex items-baseline gap-1">
+        <span
+          ref={numRef}
+          className="font-heading text-5xl font-extrabold text-white"
+        >
+          0
+        </span>
+        {item.suffix && (
+          <span className="font-heading text-3xl font-extrabold text-[var(--color-accent-cold)]">
+            {item.suffix}
+          </span>
+        )}
+      </div>
+      <span className="text-white/60 text-sm uppercase tracking-widest">
+        {item.label}
+      </span>
+    </div>
+  )
+}
+
+export function StatCounter({ items, className }: StatCounterProps) {
+  return (
+    <div className={`flex flex-wrap gap-12 justify-center ${className ?? ''}`}>
+      {items.map((item, i) => (
+        <AnimatedStat key={item.label} item={item} />
+      ))}
+    </div>
+  )
+}
