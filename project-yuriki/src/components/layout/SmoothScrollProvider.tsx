@@ -4,10 +4,12 @@ import { ReactLenis } from 'lenis/react'
 import 'lenis/dist/lenis.css'
 import { gsap } from '@/lib/gsap'
 import { useRef, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import type { LenisRef } from 'lenis/react'
 
 export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<LenisRef>(null)
+  const pathname = usePathname()
 
   useEffect(() => {
     function update(time: number) {
@@ -17,6 +19,16 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     gsap.ticker.add(update)
     return () => gsap.ticker.remove(update)
   }, [])
+
+  // При смене страницы: останавливаем Lenis на время fade-transition (300ms),
+  // чтобы скролл не конфликтовал со снимком View Transitions API
+  useEffect(() => {
+    const lenis = lenisRef.current?.lenis
+    if (!lenis) return
+    lenis.stop()
+    const id = setTimeout(() => lenis.start(), 350)
+    return () => clearTimeout(id)
+  }, [pathname])
 
   return (
     <ReactLenis root ref={lenisRef} options={{ autoRaf: false }}>
