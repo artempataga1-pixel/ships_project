@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { PRACTICE_OPTIONS } from '@/constants/content/contacts'
 
 const formatPhone = (v: string): string => {
@@ -24,6 +24,13 @@ export function ContactForm() {
   const [phoneError, setPhoneError] = useState('')
   const [nameError, setNameError] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const thankRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (submitted) {
+      thankRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [submitted])
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhone(formatPhone(e.target.value))
@@ -55,7 +62,7 @@ export function ContactForm() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center gap-6 py-16 text-center">
+      <div ref={thankRef} className="flex flex-col items-center justify-center gap-6 py-16 text-center">
         <div className="w-16 h-16 rounded-full border border-[var(--color-accent-cold)]/50 flex items-center justify-center">
           <svg
             width="28"
