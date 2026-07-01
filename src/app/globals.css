@@ -12,6 +12,8 @@
 
 :root {
   --grad-brand: linear-gradient(180deg, #2e2e2e 0%, #cbcbcb 50%, #2e2e2e 100%);
+  /* Тень с цветом accent-cold — используется на hover у кейсов */
+  --shadow-accent-cold: 0 0 32px rgba(170, 210, 255, 0.15);
 }
 
 body {
