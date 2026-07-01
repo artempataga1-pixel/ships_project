@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Unbounded, Golos_Text } from "next/font/google";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 const heading = Unbounded({
@@ -42,7 +44,11 @@ export default function RootLayout({
       className={`${heading.variable} ${bodyFont.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased">
-        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <SmoothScrollProvider>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </SmoothScrollProvider>
       </body>
     </html>
   );
