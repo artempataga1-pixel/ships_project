@@ -42,7 +42,7 @@ export function Footer() {
               </a>
               <a
                 href="#"
-                aria-label="Внешняя ссылка"
+                aria-label="Официальный сайт"
                 className="text-white/35 hover:text-white/70 transition-colors duration-200"
               >
                 <ExternalLink size={18} />

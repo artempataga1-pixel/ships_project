@@ -21,19 +21,16 @@ export function NavLanternItem({ item }: Props) {
   const coneRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLAnchorElement>(null)
 
-  const { contextSafe } = useGSAP({ scope: containerRef })
-
-  useGSAP(
+  // Единый useGSAP — contextSafe + начальное состояние
+  const { contextSafe } = useGSAP(
     () => {
-      if (isActive) {
-        gsap.set(coneRef.current, { scaleY: 1, opacity: 1 })
-        gsap.set(textRef.current, {
-          textShadow: '0 0 14px rgba(170,210,255,0.65)',
-        })
-      } else {
-        gsap.set(coneRef.current, { scaleY: 0, opacity: 0 })
-        gsap.set(textRef.current, { textShadow: 'none' })
-      }
+      gsap.set(coneRef.current, {
+        scaleY: isActive ? 1 : 0,
+        opacity: isActive ? 1 : 0,
+      })
+      gsap.set(textRef.current, {
+        textShadow: isActive ? '0 0 14px rgba(170,210,255,0.65)' : 'none',
+      })
     },
     { scope: containerRef, dependencies: [isActive] }
   )
