@@ -587,6 +587,16 @@ tl.to(titleRef.current, { y: -80, opacity: 0, duration: 0.9, ease: 'power2.in' }
 - Циановый акцент (`--color-accent-cold`) на цифрах и hover-состояниях
 - AmbientVideoBackground: infograf2.MP4
 
+**⚠️ Нюансы:**
+- Проблема: `rgba(170,210,255,0.15)` в hover:shadow захардкожен → Решение: вынести в CSS-переменную `--shadow-accent-cold` в `:root` (globals.css), использовать `hover:shadow-[var(--shadow-accent-cold)]`
+- Декоративные номера карточек `01`, `02`... → добавить `aria-hidden="true"`, иначе скринридер читает "ноль один" перед названием дела
+- `overflow-hidden` на `<main>` намеренно ОТСУТСТВУЕТ (в отличие от /practice): у кейсов нет hover-панелей, которые могут выйти за правый край
+
+**✅ ВЫПОЛНЕНО:**
+- `src/app/cases/page.tsx` создан: 4 карточки в grid 2 колонки, RevealOnScroll, hover с цианом
+- `--shadow-accent-cold` добавлен в globals.css `:root`
+- `tsc --noEmit` → 0 ошибок; `npm run build` → success, `/cases` статически сгенерирована
+
 **Ключевые детали:**
 ```ts
 // constants/content/cases.ts
@@ -618,6 +628,11 @@ export const MEDIA = [
 ```
 
 Превью: `bg-gradient-to-br from-zinc-700 to-zinc-900 aspect-video`
+
+**✅ ВЫПОЛНЕНО:**
+- `src/app/media/page.tsx` создан: 4 карточки в grid 2 колонки, RevealOnScroll, hover с бронзой
+- Карточки: gradient превью (aspect-video) + publisher badge (overlay) + title (hover accent-cold) + date + ссылка "Читать →"
+- `tsc --noEmit` → 0 ошибок; `npm run build` → success, `/media` статически сгенерирована
 
 ---
 
