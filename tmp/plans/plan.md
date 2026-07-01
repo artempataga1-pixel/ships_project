@@ -652,6 +652,19 @@ export const BENEFITS = [
 ]
 ```
 
+**⚠️ Нюансы:**
+- Server Component (page.tsx) не поддерживает onClick → кнопка «Скачать» вынесена в отдельный client component `BenefitCard.tsx` в той же папке. Страница сохраняет metadata как Server Component.
+- iconMap типизирован через `as const` + `keyof typeof iconMap` — защита от неизвестных icon-строк. Если icon не совпадает с ключами — иконка просто не рендерится (guard `{Icon && <Icon />}`).
+- lucide-react@1.22.0: иконки FileCheck, ShieldCheck, FileText, Download — присутствуют.
+- grid-cols-3 (а не 2 как у /media) — потому что карточек ровно 3.
+- Кнопка «Скачать» — заглушка → сделана `disabled` + `opacity-50 cursor-not-allowed`, чтобы пользователь понимал что функция недоступна, а не молча не работает.
+- `Benefit.icon` сужен до `'FileCheck' | 'ShieldCheck' | 'FileText'` в types/content.ts → убран небезопасный `as IconName`, TypeScript теперь защищает от опечаток при добавлении новых BENEFITS.
+
+**✅ ВЫПОЛНЕНО:**
+- `src/app/benefit/BenefitCard.tsx` — client component: iconMap + кнопка «Скачать» (onClick e.preventDefault())
+- `src/app/benefit/page.tsx` — server component: metadata + AmbientVideoBackground (infograf4.mp4) + grid-cols-3
+- `tsc --noEmit` → 0 ошибок; `npm run build` → success, `/benefit` статически сгенерирована
+
 ---
 
 ### Шаг 13: Страница Контакты (/contacts)
@@ -679,6 +692,18 @@ const formatPhone = (v: string) => {
 ```
 
 **⚠️ Нюанс:** Select «Выбор практики» должен иметь те же значения что и константы в `PRACTICES` — импортировать из `src/constants/content/practice.ts`.
+
+**⚠️ Нюансы (зафиксированы при реализации):**
+- Форма вынесена в `ContactForm.tsx` (client component) — page.tsx остаётся Server Component с metadata. Паттерн как в benefit/BenefitCard.tsx
+- `<select>` требует явного bg-цвета через Tailwind: `bg-[#262424]` — CSS-переменная через var() в bg-* не работает надёжно в браузерах для `<select>`
+- `noValidate` на `<form>` обязателен для кастомной телефонной маски — иначе браузерная валидация перехватывает submit
+- Фон fon3.jpg: `position: fixed` (не absolute) — фон не двигается при скролле страницы
+- Практики берутся из `PRACTICE_OPTIONS` в `constants/content/contacts.ts` — они совпадают с titles в PRACTICES
+
+**✅ ВЫПОЛНЕНО:**
+- `src/app/contacts/ContactForm.tsx` — client component: маска телефона, валидация 11 цифр, submitted-стейт «Спасибо»
+- `src/app/contacts/page.tsx` — server component: metadata, фон fon3.jpg (fixed), 2-колонный layout (реквизиты + форма)
+- `tsc --noEmit` → 0 ошибок; `npm run build` → success, `/contacts` статически сгенерирована
 
 ---
 
