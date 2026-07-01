@@ -6,6 +6,7 @@ import { useLenis } from 'lenis/react'
 import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { StatCounter } from '@/components/ui/StatCounter'
+import { LogoIntro } from '@/components/ui/LogoIntro'
 import { HERO, ABOUT, STATS } from '@/constants/content/home'
 
 export default function Home() {
@@ -30,6 +31,9 @@ export default function Home() {
 
   return (
     <>
+      {/* Logo Intro — только на главной, при каждом открытии */}
+      <LogoIntro />
+
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <section className="h-screen flex items-center overflow-hidden">
         {/* Видео-панель 40% — вертикальное dama.mp4 в пропорциях */}
