@@ -31,3 +31,25 @@ section[id] {
 [data-reveal] {
   will-change: transform, filter;
 }
+
+/* Page transitions — View Transitions API */
+::view-transition-old(root) {
+  animation: vt-fade-out 0.25s ease-in forwards;
+}
+::view-transition-new(root) {
+  animation: vt-fade-in 0.3s ease-out forwards;
+}
+
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
