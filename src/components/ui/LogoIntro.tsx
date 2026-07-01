@@ -99,6 +99,10 @@ export function LogoIntro() {
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
       </div>
+
+      <p className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/25 text-xs tracking-widest uppercase pointer-events-none select-none">
+        Нажмите чтобы пропустить
+      </p>
     </div>
   )
 }
