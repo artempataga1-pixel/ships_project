@@ -1,20 +1,33 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Unbounded, Golos_Text } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const heading = Unbounded({
+  subsets: ["latin", "cyrillic"],
+  weight: "800",
+  variable: "--font-heading-var",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const bodyFont = Golos_Text({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600"],
+  variable: "--font-body-var",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Шумская и Партнёры — Юридическая компания",
-  description: "Представляем интересы бизнеса и частного капитала в сложных судебных процессах",
+  description:
+    "Представляем интересы бизнеса и частного капитала в сложных судебных процессах",
+  robots: { index: true, follow: true },
+  openGraph: {
+    title: "Шумская и Партнёры — Юридическая компания",
+    description:
+      "Представляем интересы бизнеса и частного капитала в сложных судебных процессах",
+    locale: "ru_RU",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -25,9 +38,9 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${heading.variable} ${bodyFont.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col antialiased">{children}</body>
     </html>
   );
 }
