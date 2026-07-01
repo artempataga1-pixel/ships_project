@@ -14,10 +14,12 @@ export function RevealOnScroll({ children, className, delay = 0 }: RevealOnScrol
   const ref = useRef<HTMLDivElement>(null)
 
   useGSAP(() => {
-    gsap.from(ref.current, {
-      opacity: 0,
-      y: 40,
-      filter: 'blur(8px)',
+    // set сразу задаёт начальное состояние синхронно — исключает FOUC
+    gsap.set(ref.current, { opacity: 0, y: 40, filter: 'blur(8px)' })
+    gsap.to(ref.current, {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
       duration: 0.8,
       delay,
       ease: 'power3.out',
