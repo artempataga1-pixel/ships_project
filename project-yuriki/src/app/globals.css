@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
+@theme {
+  --color-bg: #262424;
+  --color-white: #ffffff;
+  --color-accent-cold: rgba(170, 210, 255, 0.9);
+  --color-card-border: #77634b;
+
+  --font-heading: var(--font-heading-var), sans-serif;
+  --font-body: var(--font-body-var), sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --grad-brand: linear-gradient(180deg, #2e2e2e 0%, #cbcbcb 50%, #2e2e2e 100%);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #262424;
+  color: #ffffff;
+  font-family: var(--font-body);
+}
+
+/* GPU-слой для GSAP-анимаций */
+[data-reveal] {
+  will-change: transform;
 }
