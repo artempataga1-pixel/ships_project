@@ -8,6 +8,7 @@
 
   --font-heading: var(--font-heading-var), sans-serif;
   --font-body: var(--font-body-var), sans-serif;
+  --font-hero: var(--font-hero-var), serif;
 }
 
 :root {

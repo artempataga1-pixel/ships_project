@@ -1,80 +1,13 @@
-'use client'
-
-import { useRef } from 'react'
-import { useGSAP } from '@gsap/react'
-import { useLenis } from 'lenis/react'
-import { gsap } from '@/lib/gsap'
+import { SpotlightHero } from '@/components/hero/SpotlightHero'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { StatCounter } from '@/components/ui/StatCounter'
-import { LogoIntro } from '@/components/ui/LogoIntro'
-import { HERO, ABOUT, STATS } from '@/constants/content/home'
+import { ABOUT, STATS } from '@/constants/content/home'
 
 export default function Home() {
-  const titleRef = useRef<HTMLHeadingElement>(null)
-  const phraseRef = useRef<HTMLParagraphElement>(null)
-  const ctaRef = useRef<HTMLButtonElement>(null)
-
-  const lenis = useLenis()
-
-  // title уходит вверх → фраза + CTA появляются
-  useGSAP(() => {
-    // set гарантирует начальное состояние до первого рендера (без FOUC)
-    gsap.set([phraseRef.current, ctaRef.current], { opacity: 0, y: 20 })
-
-    const tl = gsap.timeline({ delay: 1 })
-    tl.to(titleRef.current, { y: -80, opacity: 0, duration: 0.9, ease: 'power2.in' }).to(
-      [phraseRef.current, ctaRef.current],
-      { opacity: 1, y: 0, duration: 0.7, stagger: 0.15, ease: 'power2.out' },
-      '-=0.2'
-    )
-  }, { dependencies: [] })
-
   return (
     <>
-      {/* Logo Intro — только на главной, при каждом открытии */}
-      <LogoIntro />
-
-      {/* ── Hero ──────────────────────────────────────────────────── */}
-      <section className="h-screen flex items-center overflow-hidden">
-        {/* Видео-панель 40% — вертикальное dama.mp4 в пропорциях */}
-        <div className="w-2/5 h-full flex items-center justify-center overflow-hidden">
-          <video
-            src="/video/dama.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            className="h-full w-auto max-w-none object-contain"
-          />
-        </div>
-
-        {/* Текст-панель 60% */}
-        <div className="w-3/5 flex flex-col justify-center px-16 gap-8">
-          <h1
-            ref={titleRef}
-            className="font-heading text-6xl font-extrabold leading-tight"
-          >
-            {HERO.heading}
-          </h1>
-
-          <p
-            ref={phraseRef}
-            className="text-xl text-white/80 leading-relaxed max-w-lg"
-          >
-            {HERO.phrase}
-          </p>
-
-          <button
-            ref={ctaRef}
-            type="button"
-            className="self-start px-8 py-4 border border-[var(--color-accent-cold)]/50 text-[var(--color-accent-cold)] hover:bg-[var(--color-accent-cold)]/10 transition-colors duration-300 text-sm uppercase tracking-widest"
-            onClick={() => lenis?.scrollTo('#about')}
-          >
-            {HERO.ctaLabel}
-          </button>
-        </div>
-      </section>
+      {/* ── Hero: курсор-прожектор ────────────────────────────────── */}
+      <SpotlightHero />
 
       {/* ── О нас ─────────────────────────────────────────────────── */}
       <section

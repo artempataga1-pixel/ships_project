@@ -14,10 +14,17 @@ export function LogoIntro() {
     if (dismissed.current) return
     dismissed.current = true
     tlRef.current?.progress(1)
+    sessionStorage.setItem('logo-intro-played', '1')
     setVisible(false)
   }
 
   useEffect(() => {
+    // Если уже показывали в этой сессии — скрыть без анимации
+    if (sessionStorage.getItem('logo-intro-played')) {
+      setVisible(false)
+      return
+    }
+
     const logo = logoRef.current
     const overlay = overlayRef.current
     if (!logo || !overlay) return
@@ -53,7 +60,10 @@ export function LogoIntro() {
     })
 
     const tl = gsap.timeline({
-      onComplete: () => setVisible(false),
+      onComplete: () => {
+        sessionStorage.setItem('logo-intro-played', '1')
+        setVisible(false)
+      },
     })
 
     // Фаза 1: появление в центре

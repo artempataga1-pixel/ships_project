@@ -30,18 +30,13 @@ export default function PracticePage() {
 
         <div className="mt-20 grid grid-cols-2 gap-4">
           {PRACTICES.map((practice, i) => {
-            // Карточки в правой колонке: панель уходит влево (right-full),
-            // чтобы не выйти за правый край viewport
-            const isRightCol = i % 2 === 1
-
             return (
               <RevealOnScroll key={practice.title} delay={i * 0.1}>
-                <div className="relative group">
-                  {/* ── Карточка практики ─────────────────────────── */}
+                <div className="group">
                   <div
                     className="
                       p-8 rounded-lg border border-[var(--color-card-border)]/40
-                      bg-white/[0.03] backdrop-blur-sm
+                      bg-gradient-to-b from-zinc-800 to-zinc-900
                       transition-all duration-300
                       group-hover:border-[var(--color-card-border)]
                       group-hover:shadow-[0_0_24px_rgba(119,99,75,0.35)]
@@ -53,31 +48,22 @@ export default function PracticePage() {
                     <h3 className="mt-4 font-heading text-2xl font-extrabold leading-snug">
                       {practice.title}
                     </h3>
-                  </div>
 
-                  {/* ── Hover-панель продуктов ────────────────────── */}
-                  <div
-                    className={[
-                      'absolute top-0 w-56',
-                      'opacity-0 pointer-events-none',
-                      'group-hover:opacity-100 group-hover:translate-x-0',
-                      'group-focus-within:opacity-100 group-focus-within:translate-x-0',
-                      'transition-all duration-300 z-10',
-                      isRightCol
-                        ? 'right-full mr-2 -translate-x-2'
-                        : 'left-full ml-2 translate-x-2',
-                    ].join(' ')}
-                  >
-                    <ul className="rounded border border-[var(--color-card-border)]/40 bg-[var(--color-bg)] p-4 space-y-3">
-                      {practice.products.map((product) => (
-                        <li
-                          key={product}
-                          className="text-sm text-white/70 leading-relaxed pl-3 border-l border-[var(--color-card-border)]/50"
-                        >
-                          {product}
-                        </li>
-                      ))}
-                    </ul>
+                    {/* Раскрывается при hover прямо внутри карточки */}
+                    <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300 ease-out">
+                      <div className="overflow-hidden">
+                        <ul className="mt-5 pt-5 border-t border-white/10 space-y-3">
+                          {practice.products.map((product) => (
+                            <li
+                              key={product}
+                              className="text-sm text-white/65 leading-relaxed pl-3 border-l border-[var(--color-card-border)]/50"
+                            >
+                              {product}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </RevealOnScroll>

@@ -1,9 +1,7 @@
 import type { Stat, HeroContent, AboutContent } from '@/types/content'
 
 export const HERO: HeroContent = {
-  heading: 'ШУМСКАЯ И ПАРТНЁРЫ',
-  phrase: 'Защищаем бизнес там, где ставки максимальны',
-  ctaLabel: 'Узнать больше',
+  phrase: 'Когда на чашах весов стоит будущее — важна каждая деталь',
 }
 
 export const ABOUT: AboutContent = {

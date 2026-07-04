@@ -1,53 +1,44 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { NAV_ITEMS } from '@/constants/nav'
-import { NavLanternItem } from '@/components/layout/NavLanternItem'
+import { LimelightNav } from '@/components/layout/LimelightNav'
 
 export function Header() {
+  // z-[90] — ниже оверлея LogoIntro (z-[100]), если интро вернут
   return (
-    <header className="sticky top-0 z-50 w-full">
-      <div
-        className="border-b border-white/10"
-        style={{
-          backgroundColor: 'rgba(38, 36, 36, 0.88)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-        }}
-      >
-        <div className="max-w-[1440px] mx-auto px-8 h-16 flex items-center justify-between gap-8">
-          {/* Логотип — data-header-logo для LogoIntro анимации */}
-          <Link
-            href="/"
-            className="shrink-0 flex items-center"
-            aria-label="На главную — Шумская и Партнёры"
-            data-header-logo=""
-          >
-            <Image
-              src="/images/logo.svg"
-              alt="Шумская и Партнёры"
-              width={36}
-              height={36}
-              priority
-            />
-          </Link>
+    <header className="fixed top-0 inset-x-0 z-[90]">
+      <div className="max-w-[1440px] mx-auto h-16 px-8 flex items-center justify-between gap-8">
+        {/* Логотип — data-header-logo для LogoIntro анимации */}
+        <Link
+          href="/"
+          className="shrink-0 flex items-center ml-4 rounded-xl bg-black/75 backdrop-blur-sm px-4 py-2"
+          aria-label="На главную — Шумская и Партнёры"
+          data-header-logo=""
+        >
+          <Image
+            src="/images/logo.svg"
+            alt="Шумская и Партнёры"
+            width={199}
+            height={28}
+            priority
+          />
+        </Link>
 
-          {/* Навигация */}
-          <nav aria-label="Основная навигация" className="flex-1 flex justify-center">
-            <ul className="flex items-center gap-8">
-              {NAV_ITEMS.map((item) => (
-                <NavLanternItem key={item.href} item={item} />
-              ))}
-            </ul>
-          </nav>
+        {/* Пилюля с навигацией; без overflow-hidden — лампа выступает над кромкой */}
+        <nav
+          aria-label="Основная навигация"
+          className="relative rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-2"
+        >
+          <LimelightNav items={NAV_ITEMS} />
+        </nav>
 
-          {/* CTA */}
-          <Link
-            href="/contacts"
-            className="shrink-0 text-sm font-medium px-5 py-2 border border-[rgba(170,210,255,0.6)] text-[rgba(170,210,255,0.9)] rounded-sm hover:bg-[rgba(170,210,255,0.9)] hover:text-[#262424] hover:border-[rgba(170,210,255,0.9)] transition-all duration-200"
-          >
-            Связаться
-          </Link>
-        </div>
+        {/* CTA */}
+        <Link
+          href="/contacts"
+          className="shrink-0 bg-white text-[#262424] text-sm font-semibold px-5 py-2 rounded-full hover:bg-white/85 transition-colors duration-200"
+        >
+          Связаться
+        </Link>
       </div>
     </header>
   )
