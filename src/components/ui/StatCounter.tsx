@@ -74,7 +74,7 @@ function AnimatedStat({ item }: AnimatedStatProps) {
           0
         </span>
         {item.suffix && (
-          <span className="font-heading text-3xl font-extrabold text-[var(--color-accent-cold)]">
+          <span className="font-heading text-3xl font-extrabold text-white">
             {item.suffix}
           </span>
         )}

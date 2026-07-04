@@ -707,7 +707,7 @@ const formatPhone = (v: string) => {
 
 ---
 
-### Шаг 14: Page transitions (Fade)
+### Шаг 14: Page transitions (Fade) ✅ ВЫПОЛНЕНО
 
 **Ключевые детали — CSS View Transitions API (надёжнее чем GSAP для App Router):**
 ```css
@@ -730,6 +730,13 @@ const nextConfig = {
 ```
 
 **⚠️ Нюанс:** View Transitions API поддерживается в Chrome 111+, Safari 18+, Firefox 130+. Если нужна поддержка старых браузеров — fallback через `usePathname + gsap.to(opacity: 0/1)` в layout.tsx.
+
+**✅ Реализовано:**
+- `next.config.ts` — флаг `experimental.viewTransition: true` (Next.js автоматически вызывает `document.startViewTransition()` при навигации через `<Link>`)
+- `globals.css` — CSS анимации `vt-fade-out` (0.25s) / `vt-fade-in` (0.3s) + `@media (prefers-reduced-motion: reduce)`
+- `SmoothScrollProvider.tsx` — Lenis останавливается на 350ms при смене `pathname` чтобы не конфликтовать со снимком View Transitions API
+- `layout.tsx` — `<ViewTransition>` компонент НЕ нужен (он нужен только для shared element transitions); флага в конфиге достаточно для кроссфейда
+- `tsc --noEmit` → 0 ошибок; `npm run build` → success, `✓ viewTransition` подтверждён
 
 ---
 

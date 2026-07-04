@@ -15,8 +15,8 @@ export function Footer() {
               <Image
                 src="/images/logo.svg"
                 alt="Шумская и Партнёры"
-                width={40}
-                height={40}
+                width={227}
+                height={32}
               />
             </Link>
             <p

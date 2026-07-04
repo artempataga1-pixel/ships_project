@@ -10,9 +10,7 @@ export interface Stat {
 }
 
 export interface HeroContent {
-  heading: string
   phrase: string
-  ctaLabel: string
 }
 
 export interface AboutContent {

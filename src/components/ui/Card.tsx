@@ -11,7 +11,7 @@ interface CardProps {
 export function Card({ children, className, href, onClick }: CardProps) {
   const baseClasses = [
     'block rounded-lg border border-[var(--color-card-border)]/40',
-    'bg-white/[0.03] backdrop-blur-sm',
+    'bg-gradient-to-b from-zinc-800 to-zinc-900',
     'transition-all duration-300',
     'hover:border-[var(--color-card-border)]',
     'hover:shadow-[0_0_24px_rgba(119,99,75,0.35)]',

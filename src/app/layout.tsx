@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Unbounded, Golos_Text } from "next/font/google";
+import { Unbounded, Golos_Text, Cormorant_Garamond } from "next/font/google";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -16,6 +16,14 @@ const bodyFont = Golos_Text({
   subsets: ["latin", "cyrillic"],
   weight: ["400", "500", "600"],
   variable: "--font-body-var",
+  display: "swap",
+});
+
+// Только для надписи в hero — люксовая антиква ювелирного брендинга (аналог KIRIMARU с кириллицей)
+const heroFont = Cormorant_Garamond({
+  subsets: ["latin", "cyrillic"],
+  weight: ["500", "600"],
+  variable: "--font-hero-var",
   display: "swap",
 });
 
@@ -41,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${heading.variable} ${bodyFont.variable} h-full`}
+      className={`${heading.variable} ${bodyFont.variable} ${heroFont.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased">
         <SmoothScrollProvider>
