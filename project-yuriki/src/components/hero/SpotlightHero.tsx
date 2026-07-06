@@ -191,18 +191,33 @@ export function SpotlightHero() {
           Поворот на внутреннем <p>: transform внешнего div пишет GSAP (y/blur) */}
       <div
         ref={textRef}
-        className="pointer-events-none absolute bottom-[6%] left-[6%] z-50 whitespace-nowrap"
+        className="pointer-events-none absolute bottom-[4%] left-[4%] z-50 whitespace-nowrap"
         style={{ perspective: '900px' }}
       >
         <p
-          className="text-[4.25rem]/[1.25] text-white"
+          className="text-[5rem]/[1.05]"
           style={{
             transform: 'rotateY(14deg)',
             transformOrigin: 'left center',
           }}
         >
-          <span className="block font-hero">{HERO.phraseStart}</span>
-          <span className="block font-hero-italic italic">{HERO.phraseEnd}</span>
+          <span className="block font-hero uppercase text-hero-silver">
+            {HERO.line1}
+          </span>
+          <span className="block font-hero uppercase text-hero-silver">
+            {HERO.line2}
+          </span>
+          <span className="block">
+            <span className="font-hero-italic italic text-hero-bronze">
+              {HERO.line3Start}
+            </span>{' '}
+            <span className="font-hero uppercase text-hero-silver">
+              {HERO.line3Accent}
+            </span>
+          </span>
+          <span className="block font-hero-italic italic text-hero-bronze">
+            {HERO.line4}
+          </span>
         </p>
       </div>
     </section>
