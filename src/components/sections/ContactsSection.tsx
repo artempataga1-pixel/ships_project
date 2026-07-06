@@ -5,8 +5,8 @@ import { ContactForm } from './ContactForm'
 
 export function ContactsSection() {
   return (
-    <section id="contacts" className="scroll-mt-16 bg-black">
-      <div className="max-w-[1440px] mx-auto px-16 py-32">
+    <section id="contacts" className="min-h-dvh flex items-center bg-black">
+      <div className="max-w-[1440px] w-full mx-auto px-16 py-32">
         <SectionHeading
           title="Контакты"
           subtitle="Свяжитесь с нами — ответим в течение рабочего дня"
