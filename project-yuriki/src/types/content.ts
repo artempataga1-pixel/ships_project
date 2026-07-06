@@ -13,11 +13,11 @@ export interface HeroContent {
   /* «Когда на чаше» / «весов стоит» — капсом, серебро */
   line1: string
   line2: string
-  /* третья строка: италик-бронза + акцент капсом-серебром */
-  line3Start: string
-  line3Accent: string
-  /* «каждая деталь» — италик, бронза */
-  line4: string
+  /* «будущее —» — италик, бронза */
+  line3: string
+  /* последняя строка: акцент капсом-серебром + хвост италиком-бронзой */
+  line4Accent: string
+  line4Rest: string
 }
 
 export interface AboutContent {
