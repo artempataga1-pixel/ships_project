@@ -190,7 +190,7 @@ export function SpotlightHero() {
       {/* Надпись на столе; transform внешнего div пишет GSAP (y/blur) */}
       <div
         ref={textRef}
-        className="pointer-events-none absolute bottom-[4%] left-[4%] z-50 whitespace-nowrap"
+        className="pointer-events-none absolute bottom-[7%] left-[4%] z-50 whitespace-nowrap"
       >
         <p className="text-[clamp(2.75rem,3.5vw,6rem)]/[1.05]">
           <span className="block font-hero uppercase text-hero-silver">
