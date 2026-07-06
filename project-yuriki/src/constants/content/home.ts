@@ -1,7 +1,8 @@
 import type { Stat, HeroContent, AboutContent } from '@/types/content'
 
 export const HERO: HeroContent = {
-  phrase: 'Когда на чашах весов стоит будущее — важна каждая деталь',
+  phraseStart: 'Когда на чаше весов стоит будущее',
+  phraseEnd: '— важна каждая деталь',
 }
 
 export const ABOUT: AboutContent = {
