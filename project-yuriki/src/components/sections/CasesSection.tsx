@@ -5,8 +5,8 @@ import { BENEFITS } from '@/constants/content/benefit'
 
 export function CasesSection() {
   return (
-    <section id="cases" className="scroll-mt-16 bg-black">
-      <div className="max-w-[1440px] mx-auto px-16 py-32">
+    <section id="cases" className="min-h-dvh flex items-center bg-black">
+      <div className="max-w-[1440px] w-full mx-auto px-16 py-32">
         <SectionHeading
           title="Кейсы"
           subtitle="Практические материалы от экспертов компании"

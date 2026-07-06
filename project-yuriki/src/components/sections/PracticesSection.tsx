@@ -4,8 +4,8 @@ import { CASES } from '@/constants/content/cases'
 
 export function PracticesSection() {
   return (
-    <section id="practices" className="scroll-mt-16 bg-black">
-      <div className="max-w-[1440px] mx-auto px-16 py-32">
+    <section id="practices" className="min-h-dvh flex items-center bg-black">
+      <div className="max-w-[1440px] w-full mx-auto px-16 py-32">
         <SectionHeading
           title="Практики"
           subtitle="Резонансные дела и подтверждённые результаты"

@@ -4,8 +4,8 @@ import { MEDIA } from '@/constants/content/media'
 
 export function ArticlesSection() {
   return (
-    <section id="articles" className="scroll-mt-16 bg-black">
-      <div className="max-w-[1440px] mx-auto px-16 py-32">
+    <section id="articles" className="min-h-dvh flex items-center bg-black">
+      <div className="max-w-[1440px] w-full mx-auto px-16 py-32">
         <SectionHeading
           title="Статьи"
           subtitle="Публикации и комментарии экспертов компании"

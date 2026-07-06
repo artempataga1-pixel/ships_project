@@ -4,8 +4,8 @@ import { PRACTICES } from '@/constants/content/practice'
 
 export function PartnersSection() {
   return (
-    <section id="partners" className="scroll-mt-16 bg-black">
-      <div className="max-w-[1440px] mx-auto px-16 py-32 overflow-hidden">
+    <section id="partners" className="min-h-dvh flex items-center bg-black">
+      <div className="max-w-[1440px] w-full mx-auto px-16 py-32 overflow-hidden">
         <SectionHeading
           title="Партнёры"
           subtitle="Профессиональная защита в ключевых областях права"

@@ -23,8 +23,8 @@ function SilhouetteIcon() {
 
 export function CompetenciesSection() {
   return (
-    <section id="competencies" className="scroll-mt-16 bg-black">
-      <div className="max-w-[1440px] mx-auto px-16 py-32">
+    <section id="competencies" className="min-h-dvh flex items-center bg-black">
+      <div className="max-w-[1440px] w-full mx-auto px-16 py-32">
         {/* SectionHeading содержит собственную ScrollTrigger-анимацию (SplitText lines) */}
         <SectionHeading
           title="Наши компетенции"
