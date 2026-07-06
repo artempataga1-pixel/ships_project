@@ -1,8 +1,6 @@
 'use client'
 
-import { useLayoutEffect, useRef, useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { NavItem } from '@/types/content'
 
 // Горизонтальный padding ссылки (px-4 с двух сторон) — лампа накрывает сам текст пункта
@@ -11,15 +9,42 @@ const LINK_PADDING_X = 32
 const LAMP_MIN_WIDTH = 44
 
 export function LimelightNav({ items }: { items: NavItem[] }) {
-  const pathname = usePathname()
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  // Активная секция определяется скроллом: какая из секций пересекает середину экрана
+  const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [lamp, setLamp] = useState<{ x: number; width: number } | null>(null)
   // Первый замер рисуем без transition — иначе лампа «переезжает» из нуля при загрузке
   const [isReady, setIsReady] = useState(false)
   const itemRefs = useRef<(HTMLLIElement | null)[]>([])
 
-  const activeIndex = items.findIndex((item) => item.href === pathname)
-  const targetIndex = hoveredIndex ?? (activeIndex >= 0 ? activeIndex : null)
+  const targetIndex = hoveredIndex ?? activeIndex
+
+  useEffect(() => {
+    // Узкая полоса по центру вьюпорта: активна секция, пересекающая её.
+    // В hero (без якоря) ни одна секция не активна — лампа гаснет
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const index = items.findIndex(
+            (item) => item.href === `#${entry.target.id}`,
+          )
+          if (index === -1) continue
+          if (entry.isIntersecting) {
+            setActiveIndex(index)
+          } else {
+            setActiveIndex((current) => (current === index ? null : current))
+          }
+        }
+      },
+      { rootMargin: '-45% 0px -45% 0px' },
+    )
+
+    for (const item of items) {
+      const section = document.getElementById(item.href.slice(1))
+      if (section) observer.observe(section)
+    }
+    return () => observer.disconnect()
+  }, [items])
 
   useLayoutEffect(() => {
     if (targetIndex === null) return
@@ -87,14 +112,16 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
             }}
             onMouseEnter={() => setHoveredIndex(i)}
           >
-            <Link
+            {/* Обычный <a>, не next/link — клик по якорю перехватывает Lenis
+                (anchors в SmoothScrollProvider) и плавно скроллит к секции */}
+            <a
               href={item.href}
               className={`block rounded-full px-4 py-1.5 text-sm transition-colors duration-200 ${
                 i === targetIndex ? 'text-white' : 'text-white/70'
               }`}
             >
               {item.label}
-            </Link>
+            </a>
           </li>
         ))}
       </ul>

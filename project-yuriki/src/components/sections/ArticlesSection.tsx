@@ -1,21 +1,13 @@
-import { AmbientVideoBackground } from '@/components/ui/AmbientVideoBackground'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { MEDIA } from '@/constants/content/media'
 
-// Server Component — не добавлять 'use client' (сломает metadata)
-export const metadata = {
-  title: 'Медиа — Шумская и Партнёры',
-}
-
-export default function MediaPage() {
+export function ArticlesSection() {
   return (
-    <>
-      <AmbientVideoBackground src="/video/infograf3.mp4" opacity={0.12} />
-
-      <main className="max-w-[1440px] mx-auto px-16 py-32">
+    <section id="articles" className="scroll-mt-16 bg-black">
+      <div className="max-w-[1440px] mx-auto px-16 py-32">
         <SectionHeading
-          title="Медиа"
+          title="Статьи"
           subtitle="Публикации и комментарии экспертов компании"
         />
 
@@ -78,7 +70,7 @@ export default function MediaPage() {
             </RevealOnScroll>
           ))}
         </div>
-      </main>
-    </>
+      </div>
+    </section>
   )
 }

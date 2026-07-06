@@ -1,22 +1,14 @@
-import { AmbientVideoBackground } from '@/components/ui/AmbientVideoBackground'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { BenefitCard } from './BenefitCard'
 import { BENEFITS } from '@/constants/content/benefit'
 
-// Server Component — не добавлять 'use client' (сломает metadata)
-export const metadata = {
-  title: 'Польза — Шумская и Партнёры',
-}
-
-export default function BenefitPage() {
+export function CasesSection() {
   return (
-    <>
-      <AmbientVideoBackground src="/video/infograf4.mp4" opacity={0.12} />
-
-      <main className="max-w-[1440px] mx-auto px-16 py-32">
+    <section id="cases" className="scroll-mt-16 bg-black">
+      <div className="max-w-[1440px] mx-auto px-16 py-32">
         <SectionHeading
-          title="Польза"
+          title="Кейсы"
           subtitle="Практические материалы от экспертов компании"
         />
 
@@ -27,7 +19,7 @@ export default function BenefitPage() {
             </RevealOnScroll>
           ))}
         </div>
-      </main>
-    </>
+      </div>
+    </section>
   )
 }

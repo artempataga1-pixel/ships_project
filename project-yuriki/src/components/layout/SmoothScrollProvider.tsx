@@ -31,7 +31,9 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
   }, [pathname])
 
   return (
-    <ReactLenis root ref={lenisRef} options={{ autoRaf: false }}>
+    // anchors: клики по <a href="#..."> плавно скроллят к секции;
+    // высоту header компенсирует scroll-margin-top у секций (globals.css)
+    <ReactLenis root ref={lenisRef} options={{ autoRaf: false, anchors: true }}>
       {children}
     </ReactLenis>
   )

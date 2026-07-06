@@ -1,30 +1,13 @@
-import { AmbientVideoBackground } from '@/components/ui/AmbientVideoBackground'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { PRACTICES } from '@/constants/content/practice'
 
-// Server Component — не добавлять 'use client' (сломает metadata)
-export const metadata = {
-  title: 'Практики — Шумская и Партнёры',
-}
-
-export default function PracticePage() {
+export function PartnersSection() {
   return (
-    <>
-      <AmbientVideoBackground src="/video/infograf1.mp4" opacity={0.12} />
-
-      {/* Фон fon2.jpg — глубже видео-слоя */}
-      <div
-        className="fixed inset-0 -z-20 bg-cover bg-center"
-        style={{
-          backgroundImage: 'url(/images/backgrounds/fon2.jpg)',
-          opacity: 0.1,
-        }}
-      />
-
-      <main className="max-w-[1440px] mx-auto px-16 py-32 overflow-hidden">
+    <section id="partners" className="scroll-mt-16 bg-black">
+      <div className="max-w-[1440px] mx-auto px-16 py-32 overflow-hidden">
         <SectionHeading
-          title="Практики"
+          title="Партнёры"
           subtitle="Профессиональная защита в ключевых областях права"
         />
 
@@ -70,7 +53,7 @@ export default function PracticePage() {
             )
           })}
         </div>
-      </main>
-    </>
+      </div>
+    </section>
   )
 }
