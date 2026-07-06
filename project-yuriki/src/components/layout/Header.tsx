@@ -32,9 +32,10 @@ export function Header() {
           <LimelightNav items={NAV_ITEMS} />
         </nav>
 
-        {/* CTA — обычный <a>: якорный клик перехватывает Lenis (плавный скролл) */}
+        {/* CTA — обычный <a>: на главной клик перехватывает Lenis (плавный скролл),
+            с внутренних страниц «/#contacts» уводит на главную к секции */}
         <a
-          href="#contacts"
+          href="/#contacts"
           className="shrink-0 bg-white text-[#262424] text-sm font-semibold px-5 py-2 rounded-full hover:bg-white/85 transition-colors duration-200"
         >
           Связаться
