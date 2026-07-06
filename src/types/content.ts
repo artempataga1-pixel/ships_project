@@ -48,10 +48,15 @@ export interface MediaItem {
   date: string
 }
 
-export interface Benefit {
+export interface CaseStudy {
+  slug: string
   title: string
+  category: string
   desc: string
-  icon: 'FileCheck' | 'ShieldCheck' | 'FileText'
+  amount: string
+  year: string
+  /* 1–2 предложения для отдельной страницы кейса */
+  summary: string
 }
 
 export interface ContactInfo {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import type { NavItem } from '@/types/content'
 
 // Горизонтальный padding ссылки (px-4 с двух сторон) — лампа накрывает сам текст пункта
@@ -16,17 +17,21 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
   // Первый замер рисуем без transition — иначе лампа «переезжает» из нуля при загрузке
   const [isReady, setIsReady] = useState(false)
   const itemRefs = useRef<(HTMLLIElement | null)[]>([])
+  // При клиентской навигации секции пересоздаются — observer нужно переподключить
+  const pathname = usePathname()
 
   const targetIndex = hoveredIndex ?? activeIndex
 
   useEffect(() => {
+    // На внутренних страницах (например /cases/…) секций нет — лампа не горит
+    setActiveIndex(null)
     // Узкая полоса по центру вьюпорта: активна секция, пересекающая её.
     // В hero (без якоря) ни одна секция не активна — лампа гаснет
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           const index = items.findIndex(
-            (item) => item.href === `#${entry.target.id}`,
+            (item) => item.href.endsWith(`#${entry.target.id}`),
           )
           if (index === -1) continue
           if (entry.isIntersecting) {
@@ -40,11 +45,13 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
     )
 
     for (const item of items) {
-      const section = document.getElementById(item.href.slice(1))
+      // href вида «/#about» — id после решётки
+      const id = item.href.split('#')[1]
+      const section = id ? document.getElementById(id) : null
       if (section) observer.observe(section)
     }
     return () => observer.disconnect()
-  }, [items])
+  }, [items, pathname])
 
   useLayoutEffect(() => {
     if (targetIndex === null) return

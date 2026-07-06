@@ -1,7 +1,6 @@
-import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { SectionHeading } from '@/components/ui/SectionHeading'
-import { BenefitCard } from './BenefitCard'
-import { BENEFITS } from '@/constants/content/benefit'
+import { CaseStudyCard } from './CaseStudyCard'
+import { CASE_STUDIES } from '@/constants/content/case-studies'
 
 export function CasesSection() {
   return (
@@ -9,14 +8,12 @@ export function CasesSection() {
       <div className="max-w-[1440px] w-full mx-auto px-16 py-32">
         <SectionHeading
           title="Кейсы"
-          subtitle="Практические материалы от экспертов компании"
+          subtitle="Избранные дела: отрасли, суммы и результаты"
         />
 
-        <div className="mt-20 grid grid-cols-3 gap-6">
-          {BENEFITS.map((item, i) => (
-            <RevealOnScroll key={item.title} delay={i * 0.1}>
-              <BenefitCard item={item} />
-            </RevealOnScroll>
+        <div className="mt-20 grid grid-cols-2 gap-x-8 gap-y-16">
+          {CASE_STUDIES.map((item, i) => (
+            <CaseStudyCard key={item.slug} item={item} delay={(i % 2) * 0.15} />
           ))}
         </div>
       </div>
