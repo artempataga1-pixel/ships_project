@@ -195,7 +195,7 @@ export function SpotlightHero() {
         style={{ perspective: '900px' }}
       >
         <p
-          className="text-[5rem]/[1.05]"
+          className="text-[clamp(3.5rem,5vw,8rem)]/[1.05]"
           style={{
             transform: 'rotateY(14deg)',
             transformOrigin: 'left center',
