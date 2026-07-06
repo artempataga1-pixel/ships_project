@@ -59,13 +59,14 @@ export function Footer() {
             <ul className="flex flex-col gap-3">
               {NAV_ITEMS.map((item) => (
                 <li key={item.href}>
-                  <Link
+                  {/* Обычный <a> — якорный клик перехватывает Lenis (плавный скролл) */}
+                  <a
                     href={item.href}
                     className="text-sm text-white/55 hover:text-white/90 transition-colors duration-200"
                     style={{ fontFamily: 'var(--font-body)' }}
                   >
                     {item.label}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>

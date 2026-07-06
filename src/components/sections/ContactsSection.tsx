@@ -3,23 +3,10 @@ import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { CONTACT_INFO } from '@/constants/content/contacts'
 import { ContactForm } from './ContactForm'
 
-export const metadata = {
-  title: 'Контакты — Шумская и Партнёры',
-}
-
-export default function ContactsPage() {
+export function ContactsSection() {
   return (
-    <>
-      {/* Фон fon3.jpg */}
-      <div
-        className="fixed inset-0 -z-10 bg-cover bg-center pointer-events-none"
-        style={{
-          backgroundImage: 'url(/images/backgrounds/fon3.jpg)',
-          opacity: 0.12,
-        }}
-      />
-
-      <main className="max-w-[1440px] mx-auto px-16 py-32">
+    <section id="contacts" className="scroll-mt-16 bg-black">
+      <div className="max-w-[1440px] mx-auto px-16 py-32">
         <SectionHeading
           title="Контакты"
           subtitle="Свяжитесь с нами — ответим в течение рабочего дня"
@@ -59,8 +46,8 @@ export default function ContactsPage() {
             </div>
           </RevealOnScroll>
         </div>
-      </main>
-    </>
+      </div>
+    </section>
   )
 }
 

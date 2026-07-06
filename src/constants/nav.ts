@@ -1,11 +1,12 @@
 import type { NavItem } from '@/types/content'
 
+// Одностраничный сайт: пункты ведут на якоря секций главной страницы
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'О нас', href: '/' },
-  { label: 'Наши компетенции', href: '/team' },
-  { label: 'Партнёры', href: '/practice' },
-  { label: 'Практики', href: '/cases' },
-  { label: 'Статьи', href: '/media' },
-  { label: 'Кейсы', href: '/benefit' },
-  { label: 'Контакты', href: '/contacts' },
+  { label: 'О нас', href: '#about' },
+  { label: 'Наши компетенции', href: '#competencies' },
+  { label: 'Партнёры', href: '#partners' },
+  { label: 'Практики', href: '#practices' },
+  { label: 'Статьи', href: '#articles' },
+  { label: 'Кейсы', href: '#cases' },
+  { label: 'Контакты', href: '#contacts' },
 ]

@@ -1,21 +1,13 @@
-import { AmbientVideoBackground } from '@/components/ui/AmbientVideoBackground'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { CASES } from '@/constants/content/cases'
 
-// Server Component — не добавлять 'use client' (сломает metadata)
-export const metadata = {
-  title: 'Кейсы — Шумская и Партнёры',
-}
-
-export default function CasesPage() {
+export function PracticesSection() {
   return (
-    <>
-      <AmbientVideoBackground src="/video/infograf2.mp4" opacity={0.12} />
-
-      <main className="max-w-[1440px] mx-auto px-16 py-32">
+    <section id="practices" className="scroll-mt-16 bg-black">
+      <div className="max-w-[1440px] mx-auto px-16 py-32">
         <SectionHeading
-          title="Кейсы"
+          title="Практики"
           subtitle="Резонансные дела и подтверждённые результаты"
         />
 
@@ -62,7 +54,7 @@ export default function CasesPage() {
             </RevealOnScroll>
           ))}
         </div>
-      </main>
-    </>
+      </div>
+    </section>
   )
 }

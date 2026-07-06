@@ -1,13 +1,7 @@
-import { AmbientVideoBackground } from '@/components/ui/AmbientVideoBackground'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Card } from '@/components/ui/Card'
 import { TEAM } from '@/constants/content/team'
-
-// Server Component — не добавлять 'use client' (сломает metadata)
-export const metadata = {
-  title: 'Команда — Шумская и Партнёры',
-}
 
 function SilhouetteIcon() {
   return (
@@ -27,15 +21,13 @@ function SilhouetteIcon() {
   )
 }
 
-export default function TeamPage() {
+export function CompetenciesSection() {
   return (
-    <>
-      <AmbientVideoBackground src="/video/infograf1.mp4" opacity={0.12} />
-
-      <main className="max-w-[1440px] mx-auto px-16 py-32">
+    <section id="competencies" className="scroll-mt-16 bg-black">
+      <div className="max-w-[1440px] mx-auto px-16 py-32">
         {/* SectionHeading содержит собственную ScrollTrigger-анимацию (SplitText lines) */}
         <SectionHeading
-          title="Наша команда"
+          title="Наши компетенции"
           subtitle="Профессионалы с многолетним опытом в ключевых отраслях права"
         />
 
@@ -61,7 +53,7 @@ export default function TeamPage() {
             </RevealOnScroll>
           ))}
         </div>
-      </main>
-    </>
+      </div>
+    </section>
   )
 }
