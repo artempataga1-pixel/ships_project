@@ -6,9 +6,11 @@ import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import { HERO } from '@/constants/content/home'
 
-// Мягкая круглая маска вокруг курсора — координаты приходят через --mx/--my
+// Круглая маска вокруг курсора — координаты приходят через --mx/--my.
+// До 80% радиуса — полностью непрозрачно (внутри круга только второе видео,
+// без «призрака» нижнего слоя), дальше узкая растушёвка до прозрачности
 const SPOTLIGHT_MASK =
-  'radial-gradient(circle 260px at var(--mx, -999px) var(--my, -999px), rgb(0 0 0) 0%, rgb(0 0 0 / 0.85) 55%, transparent 100%)'
+  'radial-gradient(circle 260px at var(--mx, -999px) var(--my, -999px), rgb(0 0 0) 0%, rgb(0 0 0) 80%, transparent 100%)'
 
 export function SpotlightHero() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -16,11 +18,14 @@ export function SpotlightHero() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const introRef = useRef<HTMLVideoElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
-  // target (tx/ty) пишет pointermove, текущие (x/y) лерпает gsap.ticker — ноль ре-рендеров
-  const pointer = useRef({ tx: -999, ty: -999, x: -999, y: -999 })
+  // target (tx/ty) пишет pointermove, текущие (x/y) лерпает gsap.ticker — ноль ре-рендеров;
+  // out = курсор за пределами секции, при возврате координаты телепортируются
+  const pointer = useRef({ tx: -999, ty: -999, x: -999, y: -999, out: true })
 
   // Интро играет один раз и замирает на последнем кадре; прожектор доступен только после него
   const [introEnded, setIntroEnded] = useState(false)
+  // Интро не загрузилось — вместо видео показываем статичный финальный кадр
+  const [introFailed, setIntroFailed] = useState(false)
 
   // Видео-слой монтируется только на устройствах с мышью и только после гидрации
   // (SSR всегда рендерит без видео → нет hydration mismatch, на тачах слой не появляется вовсе)
@@ -81,11 +86,20 @@ export function SpotlightHero() {
     const p = pointer.current
     p.tx = e.clientX - rect.left
     p.ty = e.clientY - rect.top
-    // Первое движение — телепорт без лерпа, иначе прожектор «влетает» с края экрана
-    if (p.x === -999) {
+    // Вход в секцию (или первое движение) — телепорт без лерпа,
+    // иначе прожектор «влетает» с места прошлого выхода
+    if (p.out) {
+      p.out = false
       p.x = p.tx
       p.y = p.ty
     }
+    maskRef.current?.style.setProperty('opacity', '1')
+  }
+
+  // Курсор ушёл за границу секции — прожектор плавно гаснет
+  function handlePointerLeave() {
+    pointer.current.out = true
+    maskRef.current?.style.setProperty('opacity', '0')
   }
 
   // Появление надписи: подъём + расфокус; при reduced-motion — сразу конечное состояние
@@ -111,30 +125,38 @@ export function SpotlightHero() {
     <section
       ref={sectionRef}
       onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
       className="relative h-dvh overflow-hidden"
     >
-      {/* База: тёмный кабинет (фолбэк, если интро-видео не загрузилось) */}
-      <Image
-        src="/images/backgrounds/hero-base.jpg"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="z-10 object-cover"
-      />
+      {/* Фолбэк: финальный кадр интро — только если видео не загрузилось.
+          Всегда держать его под видео нельзя: он мелькает до отрисовки постера */}
+      {introFailed && (
+        <Image
+          src="/images/backgrounds/hero-final.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="z-10 object-cover"
+        />
+      )}
 
-      {/* Интро: дым собирает предметы на столе; играет один раз и замирает на последнем кадре */}
+      {/* Интро: дым собирает предметы на столе; играет один раз и замирает на последнем кадре.
+          Постер = первый кадр видео, чтобы не было вспышки чужой картинки до старта */}
       <video
         ref={introRef}
         src="/video/hero-intro.mp4"
-        poster="/images/backgrounds/hero-start.jpg"
+        poster="/images/backgrounds/hero-poster.jpg"
         autoPlay
         muted
         playsInline
         preload="auto"
         disablePictureInPicture
         onEnded={() => setIntroEnded(true)}
-        onError={() => setIntroEnded(true)}
+        onError={() => {
+          setIntroFailed(true)
+          setIntroEnded(true)
+        }}
         className="absolute inset-0 z-20 h-full w-full object-cover"
       />
 
@@ -144,7 +166,7 @@ export function SpotlightHero() {
         <div
           ref={maskRef}
           aria-hidden
-          className="absolute inset-0 z-30"
+          className="absolute inset-0 z-30 transition-opacity duration-300"
           style={{
             maskImage: SPOTLIGHT_MASK,
             WebkitMaskImage: SPOTLIGHT_MASK,
@@ -169,17 +191,18 @@ export function SpotlightHero() {
           Поворот на внутреннем <p>: transform внешнего div пишет GSAP (y/blur) */}
       <div
         ref={textRef}
-        className="pointer-events-none absolute bottom-[6%] left-[6%] z-50 max-w-[46%]"
+        className="pointer-events-none absolute bottom-[6%] left-[6%] z-50 whitespace-nowrap"
         style={{ perspective: '900px' }}
       >
         <p
-          className="font-hero font-medium text-[4.25rem]/[1.25] text-white"
+          className="text-[4.25rem]/[1.25] text-white"
           style={{
             transform: 'rotateY(14deg)',
             transformOrigin: 'left center',
           }}
         >
-          {HERO.phrase}
+          <span className="block font-hero">{HERO.phraseStart}</span>
+          <span className="block font-hero-italic italic">{HERO.phraseEnd}</span>
         </p>
       </div>
     </section>

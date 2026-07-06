@@ -10,7 +10,8 @@ export interface Stat {
 }
 
 export interface HeroContent {
-  phrase: string
+  phraseStart: string
+  phraseEnd: string
 }
 
 export interface AboutContent {
