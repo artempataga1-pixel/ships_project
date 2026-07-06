@@ -187,36 +187,29 @@ export function SpotlightHero() {
         </div>
       )}
 
-      {/* Надпись на столе — лёгкий разворот в перспективе, правый край ближе к зрителю.
-          Поворот на внутреннем <p>: transform внешнего div пишет GSAP (y/blur) */}
+      {/* Надпись на столе; transform внешнего div пишет GSAP (y/blur) */}
       <div
         ref={textRef}
         className="pointer-events-none absolute bottom-[4%] left-[4%] z-50 whitespace-nowrap"
-        style={{ perspective: '900px' }}
       >
-        <p
-          className="text-[clamp(3.5rem,5vw,8rem)]/[1.05]"
-          style={{
-            transform: 'rotateY(14deg)',
-            transformOrigin: 'left center',
-          }}
-        >
+        <p className="text-[clamp(2.75rem,3.5vw,6rem)]/[1.05]">
           <span className="block font-hero uppercase text-hero-silver">
             {HERO.line1}
           </span>
           <span className="block font-hero uppercase text-hero-silver">
             {HERO.line2}
           </span>
-          <span className="block">
-            <span className="font-hero-italic italic text-hero-bronze">
-              {HERO.line3Start}
-            </span>{' '}
-            <span className="font-hero uppercase text-hero-silver">
-              {HERO.line3Accent}
-            </span>
+          {/* «будущее —» — отдельным абзацем, по центру блока */}
+          <span className="my-[0.35em] block text-center font-hero-italic italic text-hero-bronze">
+            {HERO.line3}
           </span>
-          <span className="block font-hero-italic italic text-hero-bronze">
-            {HERO.line4}
+          <span className="block">
+            <span className="font-hero uppercase text-hero-silver">
+              {HERO.line4Accent}
+            </span>{' '}
+            <span className="font-hero-italic italic text-hero-bronze">
+              {HERO.line4Rest}
+            </span>
           </span>
         </p>
       </div>
