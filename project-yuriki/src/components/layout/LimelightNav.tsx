@@ -5,8 +5,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { NavItem } from '@/types/content'
 
-// Ширина лампы (w-11) — нужна числом, чтобы центрировать её над пунктом через translateX
-const LAMP_WIDTH = 44
+// Горизонтальный padding ссылки (px-4 с двух сторон) — лампа накрывает сам текст пункта
+const LINK_PADDING_X = 32
+// Минимальная ширина лампы, чтобы на коротких пунктах («Кейсы») не схлопывалась в точку
+const LAMP_MIN_WIDTH = 44
 
 export function LimelightNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname()
@@ -35,32 +37,43 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
   return (
     <>
       {/* Лампа: полоска холодного света над кромкой пилюли + конус вниз.
-          Позиция через translateX (composite-only), координаты — от offsetParent (пилюля) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-0 top-0 h-[5px] w-11 rounded-full"
-        style={{
-          backgroundColor: 'rgba(228, 229, 233, 0.95)',
-          boxShadow:
-            '0 0 12px rgba(228, 229, 233, 0.8), 0 0 28px rgba(228, 229, 233, 0.45)',
-          transform: `translate(${
-            lamp ? lamp.x + lamp.width / 2 - LAMP_WIDTH / 2 : 0
-          }px, -50%)`,
-          opacity: targetIndex === null || lamp === null ? 0 : 1,
-          transition: isReady
-            ? 'transform 0.4s ease, opacity 0.3s ease'
-            : 'none',
-        }}
-      >
-        <div
-          className="pointer-events-none absolute left-1/2 top-full h-11 w-14 -translate-x-1/2"
-          style={{
-            clipPath: 'polygon(5% 100%, 25% 0, 75% 0, 95% 100%)',
-            background:
-              'linear-gradient(to bottom, rgba(228, 229, 233, 0.4), transparent)',
-          }}
-        />
-      </div>
+          Ширина тянется под текст пункта (длинные названия накрыты целиком),
+          позиция через translateX, координаты — от offsetParent (пилюля) */}
+      {(() => {
+        const lampWidth = lamp
+          ? Math.max(lamp.width - LINK_PADDING_X, LAMP_MIN_WIDTH)
+          : LAMP_MIN_WIDTH
+        return (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-0 top-0 h-[5px] rounded-full"
+            style={{
+              width: lampWidth,
+              backgroundColor: 'rgba(228, 229, 233, 0.95)',
+              boxShadow:
+                '0 0 12px rgba(228, 229, 233, 0.8), 0 0 28px rgba(228, 229, 233, 0.45)',
+              transform: `translate(${
+                lamp ? lamp.x + lamp.width / 2 - lampWidth / 2 : 0
+              }px, -50%)`,
+              opacity: targetIndex === null || lamp === null ? 0 : 1,
+              transition: isReady
+                ? 'transform 0.4s ease, width 0.4s ease, opacity 0.3s ease'
+                : 'none',
+            }}
+          >
+            {/* Конус — ширина в % от лампы, растягивается вместе с ней */}
+            <div
+              className="pointer-events-none absolute left-1/2 top-full h-11 -translate-x-1/2"
+              style={{
+                width: 'calc(100% + 12px)',
+                clipPath: 'polygon(5% 100%, 25% 0, 75% 0, 95% 100%)',
+                background:
+                  'linear-gradient(to bottom, rgba(228, 229, 233, 0.4), transparent)',
+              }}
+            />
+          </div>
+        )
+      })()}
 
       <ul
         className="flex items-center"
