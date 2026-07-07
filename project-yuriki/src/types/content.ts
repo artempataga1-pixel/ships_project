@@ -35,6 +35,16 @@ export interface Practice {
   products: string[]
 }
 
+/* Карточка практики в горизонтальном коллаже (референс landonorris.com) */
+export interface PracticeArea {
+  /* порядковый номер для подписи над фото — «01», «02», … */
+  num: string
+  /* короткий ярлык над фото, как дата-локация в референсе */
+  label: string
+  title: string
+  desc: string
+}
+
 export interface Case {
   title: string
   desc: string
