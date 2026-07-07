@@ -51,12 +51,28 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
         >
           {item.category}
         </span>
-      </div>
 
-      {/* Подпись под фото, как у референса — мелко и сдержанно */}
-      <div className="mt-4 flex items-baseline justify-between gap-4 text-sm">
-        <span className="text-white/75">{item.title}</span>
-        <span className="text-white/35 shrink-0">{item.year}</span>
+        {/* Название дела и год — в углах карточки, плашки как у категории */}
+        <span
+          className="
+            absolute bottom-4 left-4 max-w-[calc(100%-8rem)]
+            text-sm font-heading tracking-[0.15em] uppercase
+            text-hero-bronze bg-black/50 backdrop-blur-sm
+            px-3 py-1.5 rounded
+          "
+        >
+          {item.title}
+        </span>
+        <span
+          className="
+            absolute bottom-4 right-4
+            text-sm font-heading tracking-[0.15em] uppercase
+            text-hero-bronze bg-black/50 backdrop-blur-sm
+            px-3 py-1.5 rounded
+          "
+        >
+          {item.year}
+        </span>
       </div>
     </Link>
   )
