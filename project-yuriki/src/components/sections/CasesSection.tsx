@@ -73,7 +73,7 @@ export function CasesSection() {
           text-center px-6
         "
       >
-        <span className="text-xs tracking-[0.3em] uppercase text-white/40">
+        <span className="text-sm md:text-base tracking-[0.3em] uppercase text-hero-bronze">
           ( Кейсы )
         </span>
         <h2
@@ -88,7 +88,7 @@ export function CasesSection() {
           <br />
           бюро
         </h2>
-        <span className="text-sm text-white/40">
+        <span className="text-base md:text-lg text-hero-bronze">
           Отрасли, суммы и результаты
         </span>
       </div>
