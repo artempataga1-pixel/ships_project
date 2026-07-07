@@ -65,16 +65,16 @@ function AnimatedStat({ item }: AnimatedStatProps) {
   }, [])
 
   return (
-    <div className="flex flex-col items-center text-center gap-2">
+    <div className="flex flex-col items-center text-center gap-3">
       <div className="flex items-baseline gap-1">
         <span
           ref={numRef}
-          className="font-heading text-5xl font-extrabold text-white"
+          className="font-heading text-4xl sm:text-5xl md:text-7xl font-extrabold text-hero-bronze"
         >
           0
         </span>
         {item.suffix && (
-          <span className="font-heading text-3xl font-extrabold text-white">
+          <span className="font-heading text-2xl sm:text-3xl md:text-5xl font-extrabold text-hero-bronze">
             {item.suffix}
           </span>
         )}
@@ -88,9 +88,18 @@ function AnimatedStat({ item }: AnimatedStatProps) {
 
 export function StatCounter({ items, className }: StatCounterProps) {
   return (
-    <div className={`flex flex-wrap gap-12 justify-center ${className ?? ''}`}>
+    <div className={`grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12 ${className ?? ''}`}>
       {items.map((item, i) => (
-        <AnimatedStat key={item.label} item={item} />
+        <div
+          key={item.label}
+          className={
+            i > 0
+              ? 'md:border-l md:border-[var(--color-card-border)]/20'
+              : ''
+          }
+        >
+          <AnimatedStat item={item} />
+        </div>
       ))}
     </div>
   )

@@ -23,6 +23,18 @@ export interface HeroContent {
 export interface AboutContent {
   heading: string
   description: string
+  /* «Мы не считаем дела —» — жирным, как в hero */
+  quoteLead: string
+  /* «мы проживаем каждое как своё.» — курсив-бронза, акцент внутри той же фразы */
+  quoteAccent: string
+  /* второе предложение — снова жирным, без акцента */
+  quoteRest: string
+}
+
+export interface ValueItem {
+  icon: 'target' | 'eye' | 'award'
+  title: string
+  description: string
 }
 
 export interface TeamMember {
