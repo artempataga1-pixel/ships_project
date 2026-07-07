@@ -12,6 +12,20 @@
   --font-hero-italic: var(--font-hero-italic-var), serif;
 }
 
+/* Блик, бегущий по контуру star-button (кнопка «Все кейсы») */
+@theme inline {
+  --animate-star-btn: star-btn calc(var(--duration) * 1s) linear infinite;
+}
+
+@keyframes star-btn {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
 :root {
   --grad-brand: linear-gradient(180deg, #2e2e2e 0%, #cbcbcb 50%, #2e2e2e 100%);
   /* Тень с цветом accent-cold — используется на hover у кейсов */

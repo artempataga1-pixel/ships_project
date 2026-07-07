@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
+import { CaseAnchorScroll } from './CaseAnchorScroll'
 import type { CaseStudy } from '@/types/content'
 
 /* Референс — nudot.com.tw (reference 2/keys.mp4): заголовок прилипает
@@ -19,9 +20,10 @@ const ALIGN_CLASSES: Record<Align, string> = {
 function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
   return (
     <Link
+      id={`case-${item.slug}`}
       href={`/cases/${item.slug}`}
       aria-label={`Кейс «${item.title}» — подробнее`}
-      className={`group block ${ALIGN_CLASSES[align]}`}
+      className={`group block scroll-mt-[30dvh] ${ALIGN_CLASSES[align]}`}
     >
       {/* Заглушка вместо фото — потом заменим на реальные изображения */}
       <div className="relative aspect-[16/10] overflow-hidden">
@@ -81,6 +83,7 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
 export function CasesSection() {
   return (
     <section id="cases" className="relative bg-black">
+      <CaseAnchorScroll />
       {/* Прилипающий заголовок: стоит по центру экрана, пока мимо едут карточки */}
       <div
         className="
