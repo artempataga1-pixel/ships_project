@@ -123,14 +123,15 @@ export function PartnersSection() {
           })
         })
 
-        // При наведении карточка НЕ выходит поверх соседей — вместо этого
-        // соседние карточки раздвигаются в стороны, освобождая ей место
-        // (см. pam.mp4), а сама наведённая карточка распрямляется на месте
+        // При наведении карточка НЕ выходит поверх соседей и не распрямляется —
+        // она просто выезжает вверх относительно своего текущего положения
+        // (см. pam.mp4), а соседние карточки раздвигаются в стороны, освобождая место
         cards.forEach((card, i) => {
           const onEnter = () => {
             idleTweens[i]?.pause()
+            const lift = card.offsetHeight / 3
             gsap.to(card, {
-              rotate: 0,
+              y: positions[i].y - lift,
               duration: 0.4,
               ease: 'power3.out',
               overwrite: 'auto',
@@ -149,7 +150,7 @@ export function PartnersSection() {
           }
           const onLeave = () => {
             gsap.to(card, {
-              rotate: positions[i].rotate,
+              y: positions[i].y,
               duration: 0.5,
               ease: 'power3.out',
               overwrite: 'auto',
