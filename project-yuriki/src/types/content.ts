@@ -87,12 +87,11 @@ export interface ContactInfo {
   address: string
 }
 
-/* Учредитель для блока «Контакты» (референс landonorris.com — фигура
-   по краю блока, вырезанная на прозрачном фоне) */
-export interface Founder {
+/* СМИ/рейтинг в бегущей строке блока «Контакты». logo не задан —
+   значит для бренда нет чистого файла логотипа, рендерим текстом. */
+export interface MediaMention {
   name: string
-  role: string
-  image: string
-  imageWidth: number
-  imageHeight: number
+  logo?: string
+  logoWidth?: number
+  logoHeight?: number
 }
