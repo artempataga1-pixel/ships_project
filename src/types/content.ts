@@ -86,3 +86,13 @@ export interface ContactInfo {
   email: string
   address: string
 }
+
+/* Учредитель для блока «Контакты» (референс landonorris.com — фигура
+   по краю блока, вырезанная на прозрачном фоне) */
+export interface Founder {
+  name: string
+  role: string
+  image: string
+  imageWidth: number
+  imageHeight: number
+}
