@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Unbounded, Golos_Text } from "next/font/google";
+import { Unbounded, Golos_Text, Playfair_Display } from "next/font/google";
 import localFont from "next/font/local";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { Header } from "@/components/layout/Header";
@@ -35,6 +35,22 @@ const heroItalicFont = localFont({
   display: "swap",
 });
 
+// Шрифты только для hero главной страницы (SpotlightHero) — не влияют на остальной сайт
+const homeHeroFont = localFont({
+  src: "../../public/fonts/trial/gilroy/Gilroy.ttf",
+  weight: "700",
+  variable: "--font-home-hero-var",
+  display: "swap",
+});
+
+const homeHeroItalicFont = Playfair_Display({
+  subsets: ["latin", "cyrillic"],
+  style: ["italic"],
+  weight: ["600", "700"],
+  variable: "--font-home-hero-italic-var",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Шумская и Партнёры — Юридическая компания",
   description:
@@ -57,7 +73,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${heading.variable} ${bodyFont.variable} ${heroFont.variable} ${heroItalicFont.variable} h-full`}
+      className={`${heading.variable} ${bodyFont.variable} ${heroFont.variable} ${heroItalicFont.variable} ${homeHeroFont.variable} ${homeHeroItalicFont.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased">
         <SmoothScrollProvider>

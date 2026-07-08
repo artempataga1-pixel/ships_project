@@ -10,14 +10,14 @@ export interface Stat {
 }
 
 export interface HeroContent {
-  /* «Когда на чаше» / «весов стоит» — капсом, серебро */
+  /* «Когда на чашах» / «весов стоит» — белым */
   line1: string
   line2: string
-  /* «будущее —» — италик, бронза */
-  line3: string
-  /* последняя строка: акцент капсом-серебром + хвост италиком-бронзой */
-  line4Accent: string
-  line4Rest: string
+  /* «будущее» италиком золотом + «— важна» белым, одна строка */
+  line3Accent: string
+  line3Rest: string
+  /* «каждая деталь» — италиком серебром, отдельная строка */
+  line4: string
 }
 
 export interface AboutContent {

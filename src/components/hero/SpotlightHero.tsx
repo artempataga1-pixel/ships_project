@@ -192,24 +192,17 @@ export function SpotlightHero() {
         ref={textRef}
         className="pointer-events-none absolute bottom-[7%] left-[4%] z-50 whitespace-nowrap"
       >
-        <p className="text-[clamp(2.75rem,3.5vw,6rem)]/[1.05]">
-          <span className="block font-hero uppercase text-hero-silver">
-            {HERO.line1}
-          </span>
-          <span className="block font-hero uppercase text-hero-silver">
-            {HERO.line2}
-          </span>
-          {/* «будущее —» — отдельным абзацем, по центру блока */}
-          <span className="my-[0.35em] block text-center font-hero-italic italic text-hero-bronze">
-            {HERO.line3}
-          </span>
+        <p className="text-[clamp(2.75rem,3.5vw,6rem)]/[1.05] font-home-hero font-bold text-white">
+          <span className="block">{HERO.line1}</span>
+          <span className="block">{HERO.line2}</span>
           <span className="block">
-            <span className="font-hero uppercase text-hero-silver">
-              {HERO.line4Accent}
+            <span className="font-home-hero-italic italic text-home-hero-gold">
+              {HERO.line3Accent}
             </span>{' '}
-            <span className="font-hero-italic italic text-hero-bronze">
-              {HERO.line4Rest}
-            </span>
+            {HERO.line3Rest}
+          </span>
+          <span className="block font-home-hero-italic italic text-home-hero-silver">
+            {HERO.line4}
           </span>
         </p>
       </div>

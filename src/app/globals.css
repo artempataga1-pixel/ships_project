@@ -10,6 +10,10 @@
   --font-body: var(--font-body-var), sans-serif;
   --font-hero: var(--font-hero-var), serif;
   --font-hero-italic: var(--font-hero-italic-var), serif;
+
+  /* Только для hero главной страницы (SpotlightHero) */
+  --font-home-hero: var(--font-home-hero-var), sans-serif;
+  --font-home-hero-italic: var(--font-home-hero-italic-var), serif;
 }
 
 /* Блик, бегущий по контуру star-button (кнопка «Все кейсы») */
@@ -45,6 +49,22 @@
 }
 .text-hero-bronze {
   background-image: linear-gradient(180deg, #dfb888 0%, #b98d5e 48%, #85603c 100%);
+}
+
+/* Акценты hero главной страницы (SpotlightHero) — золото/серебро */
+.text-home-hero-gold,
+.text-home-hero-silver {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-home-hero-gold {
+  background-image: linear-gradient(135deg, #c9a84c 0%, #e8c97a 60%, #9a7a30 100%);
+}
+
+.text-home-hero-silver {
+  background-image: linear-gradient(135deg, #b7bcc4 0%, #f2f4f7 55%, #8c929b 100%);
 }
 
 body {

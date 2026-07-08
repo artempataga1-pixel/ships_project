@@ -1,11 +1,11 @@
 import type { Stat, HeroContent, AboutContent, ValueItem } from '@/types/content'
 
 export const HERO: HeroContent = {
-  line1: 'Когда на чаше',
+  line1: 'Когда на чашах',
   line2: 'весов стоит',
-  line3: 'будущее —',
-  line4Accent: 'важна',
-  line4Rest: 'каждая деталь',
+  line3Accent: 'будущее',
+  line3Rest: '— важна',
+  line4: 'каждая деталь',
 }
 
 export const ABOUT: AboutContent = {
