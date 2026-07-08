@@ -7,20 +7,21 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Card } from '@/components/ui/Card'
 import { TEAM } from '@/constants/content/team'
 
-/* Референс — reference 2/partneri.mp4 (landonorris.com): плотная колода
-   крупных портретных карточек раскрывается тесным веером-дугой при входе
-   в вьюпорт и бесконечно покачивается на месте (та же механика, что и в
-   компетенциях — kompenecii.mp4, только там тайлы с номерами). Подпись
-   с именем — одна, под колодой, как "Follow Lando on social media" в
-   референсе, и переключается на наведённую карточку — так колода остаётся
-   плотной, а не растянутой ради подписей на каждой карточке. Наведение
-   дополнительно распрямляет и поднимает карточку вперёд, как будто её
-   вытянули из колоды. */
+/* Референс — reference 2/partneri.mp4 и reference 2/pam.mp4 (landonorris.com):
+   плотная колода крупных портретных карточек раскрывается тесным веером-дугой
+   при входе в вьюпорт и бесконечно покачивается на месте (та же механика,
+   что и в компетенциях — kompenecii.mp4, только там тайлы с номерами).
+   Подпись с именем — одна, под колодой, как "Follow Lando on social media"
+   в референсе, и переключается на наведённую карточку. Наведение (см. pam.mp4)
+   НЕ поднимает карточку поверх соседей через z-index — вместо этого соседние
+   карточки раздвигаются в стороны (влево/вправо от наведённой), освобождая
+   ей место, а сама наведённая карточка просто распрямляется на своём месте. */
 
 const ARC_SPACING_X = 96
 const ARC_LIFT_Y = 30
 const ARC_TILT = 15
 const IDLE_WOBBLE_DURATION = 7
+const HOVER_GAP = 64
 const CENTER_INDEX = Math.floor((TEAM.length - 1) / 2)
 
 function arcPosition(index: number, total: number) {
@@ -89,9 +90,10 @@ export function PartnersSection() {
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         const idleTweens: gsap.core.Tween[] = []
         const listeners: Array<{ el: HTMLDivElement; enter: () => void; leave: () => void }> = []
+        const positions = cards.map((_, i) => arcPosition(i, TEAM.length))
 
         cards.forEach((card, i) => {
-          const { x, y, rotate, z } = arcPosition(i, TEAM.length)
+          const { x, y, rotate, z } = positions[i]
 
           gsap.set(card, { x: x * 2.2, y: y - 170, rotate: rotate * 2.5, opacity: 0, zIndex: z })
 
@@ -119,32 +121,48 @@ export function PartnersSection() {
               })
             },
           })
+        })
 
-          // При наведении карточка "вынимается из колоды": распрямляется, поднимается и выходит вперёд
+        // При наведении карточка НЕ выходит поверх соседей — вместо этого
+        // соседние карточки раздвигаются в стороны, освобождая ей место
+        // (см. pam.mp4), а сама наведённая карточка распрямляется на месте
+        cards.forEach((card, i) => {
           const onEnter = () => {
             idleTweens[i]?.pause()
             gsap.to(card, {
               rotate: 0,
-              y: y - 36,
-              scale: 1.08,
-              zIndex: TEAM.length + 1,
               duration: 0.4,
               ease: 'power3.out',
               overwrite: 'auto',
+            })
+            cards.forEach((other, j) => {
+              if (j === i) return
+              const { x } = positions[j]
+              gsap.to(other, {
+                x: x + (j < i ? -HOVER_GAP : HOVER_GAP),
+                duration: 0.4,
+                ease: 'power3.out',
+                overwrite: 'auto',
+              })
             })
             showCaption(i)
           }
           const onLeave = () => {
             gsap.to(card, {
-              x,
-              y,
-              rotate,
-              scale: 1,
-              zIndex: z,
+              rotate: positions[i].rotate,
               duration: 0.5,
               ease: 'power3.out',
               overwrite: 'auto',
               onComplete: () => idleTweens[i]?.resume(),
+            })
+            cards.forEach((other, j) => {
+              if (j === i) return
+              gsap.to(other, {
+                x: positions[j].x,
+                duration: 0.5,
+                ease: 'power3.out',
+                overwrite: 'auto',
+              })
             })
             showCaption(CENTER_INDEX)
           }
