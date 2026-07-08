@@ -49,7 +49,7 @@ function PracticeCard({ item, variant }: { item: PracticeArea; variant: CardVari
           data-parallax
           className="absolute inset-y-0 -inset-x-[8%] bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900"
         >
-          <span className="absolute inset-0 flex items-center justify-center font-hero text-[clamp(3rem,6vw,5.5rem)] text-hero-bronze">
+          <span className="absolute inset-0 flex items-center justify-center font-hero text-[clamp(3rem,6vw,5.5rem)] text-bronze-solid">
             {item.num}
           </span>
         </div>
@@ -68,7 +68,7 @@ function PracticeCard({ item, variant }: { item: PracticeArea; variant: CardVari
 function QuoteBlock({ text }: { text: string }) {
   return (
     <div className="shrink-0 self-center ml-[7vw] w-[26vw] min-w-[300px]">
-      <p className="font-hero-italic italic text-hero-bronze text-[clamp(1.25rem,1.8vw,1.75rem)] leading-snug">
+      <p className="font-hero-italic italic text-bronze-solid text-[clamp(1.25rem,1.8vw,1.75rem)] leading-snug">
         {text}
       </p>
     </div>

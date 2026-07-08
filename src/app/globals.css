@@ -33,18 +33,31 @@
 }
 
 /* Металлический текст в hero: серебро — под холодный свет ламп,
-   бронза — под статую Фемиды. Градиент режется по буквам */
+   бронза — под статую Фемиды. Градиент режется по буквам через
+   background-clip: text — это альфа-маска, а не заливка цветом.
+   Использовать ТОЛЬКО на неподвижном тексте: при активном скролле
+   Chromium растеризует GPU-тайлы в пониженном разрешении, и маска
+   градиента съезжает к тёмной части — текст выглядит потемневшим,
+   пока элемент едет по экрану внутри transform-анимации (GSAP) */
 .text-hero-silver,
 .text-hero-bronze {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  transform: translateZ(0);
 }
 .text-hero-silver {
   background-image: linear-gradient(180deg, #f4f5f7 0%, #c7ccd4 48%, #8e95a3 100%);
 }
 .text-hero-bronze {
   background-image: linear-gradient(180deg, #dfb888 0%, #b98d5e 48%, #85603c 100%);
+}
+
+/* Бронза для текста, который физически едет по экрану (внутри
+   GSAP scrub-transform, напр. трек «Практик») — сплошная заливка
+   вместо альфа-маски, чтобы не темнеть при активном скролле */
+.text-bronze-solid {
+  color: #b98d5e;
 }
 
 body {
