@@ -7,17 +7,21 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Card } from '@/components/ui/Card'
 import { TEAM } from '@/constants/content/team'
 
-/* Референс — reference 2/partneri.mp4 (landonorris.com): колода карточек
-   раскрывается дугой-веером при входе в вьюпорт и бесконечно покачивается
-   на месте (та же механика, что и в компетенциях — kompenecii.mp4, только
-   там тайлы с номерами, а тут — портретные карточки людей). Здесь дополнительно
-   добавлено наведение: карточка распрямляется и выходит вперёд, как будто её
+/* Референс — reference 2/partneri.mp4 (landonorris.com): плотная колода
+   крупных портретных карточек раскрывается тесным веером-дугой при входе
+   в вьюпорт и бесконечно покачивается на месте (та же механика, что и в
+   компетенциях — kompenecii.mp4, только там тайлы с номерами). Подпись
+   с именем — одна, под колодой, как "Follow Lando on social media" в
+   референсе, и переключается на наведённую карточку — так колода остаётся
+   плотной, а не растянутой ради подписей на каждой карточке. Наведение
+   дополнительно распрямляет и поднимает карточку вперёд, как будто её
    вытянули из колоды. */
 
-const ARC_SPACING_X = 250
-const ARC_LIFT_Y = 32
-const ARC_TILT = 9
+const ARC_SPACING_X = 96
+const ARC_LIFT_Y = 30
+const ARC_TILT = 15
 const IDLE_WOBBLE_DURATION = 7
+const CENTER_INDEX = Math.floor((TEAM.length - 1) / 2)
 
 function arcPosition(index: number, total: number) {
   const offset = index - (total - 1) / 2
@@ -35,7 +39,7 @@ function SilhouetteIcon() {
       viewBox="0 0 100 120"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-20 h-24 opacity-25"
+      className="w-24 h-28 opacity-25"
       aria-hidden="true"
     >
       <circle cx="50" cy="35" r="22" fill="white" />
@@ -44,22 +48,18 @@ function SilhouetteIcon() {
   )
 }
 
-function PartnerCard({ name, role }: { name: string; role: string }) {
+function PartnerCard() {
   return (
     <div
       className="
         relative w-full h-full rounded-2xl overflow-hidden
         border border-[var(--color-card-border)]/40
         bg-gradient-to-b from-zinc-700 to-zinc-900
+        flex items-center justify-center
       "
     >
-      <div className="absolute inset-0 flex items-center justify-center pb-10">
-        <SilhouetteIcon />
-      </div>
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-10 pb-3 px-4">
-        <h3 className="font-heading text-sm font-extrabold leading-snug">{name}</h3>
-        <p className="mt-1 text-xs text-white/50">{role}</p>
-      </div>
+      <SilhouetteIcon />
+      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
     </div>
   )
 }
@@ -67,6 +67,8 @@ function PartnerCard({ name, role }: { name: string; role: string }) {
 export function PartnersSection() {
   const arcRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+  const captionNameRef = useRef<HTMLHeadingElement>(null)
+  const captionRoleRef = useRef<HTMLParagraphElement>(null)
 
   useGSAP(
     () => {
@@ -74,6 +76,15 @@ export function PartnersSection() {
       if (!cards.length) return
 
       const mm = gsap.matchMedia()
+
+      const showCaption = (i: number) => {
+        const nameEl = captionNameRef.current
+        const roleEl = captionRoleRef.current
+        if (!nameEl || !roleEl) return
+        nameEl.textContent = TEAM[i].name
+        roleEl.textContent = TEAM[i].role
+        gsap.fromTo([nameEl, roleEl], { opacity: 0.3, y: 4 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' })
+      }
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         const idleTweens: gsap.core.Tween[] = []
@@ -114,13 +125,14 @@ export function PartnersSection() {
             idleTweens[i]?.pause()
             gsap.to(card, {
               rotate: 0,
-              y: y - 30,
+              y: y - 36,
               scale: 1.08,
               zIndex: TEAM.length + 1,
               duration: 0.4,
               ease: 'power3.out',
               overwrite: 'auto',
             })
+            showCaption(i)
           }
           const onLeave = () => {
             gsap.to(card, {
@@ -134,6 +146,7 @@ export function PartnersSection() {
               overwrite: 'auto',
               onComplete: () => idleTweens[i]?.resume(),
             })
+            showCaption(CENTER_INDEX)
           }
 
           card.addEventListener('mouseenter', onEnter)
@@ -169,20 +182,30 @@ export function PartnersSection() {
           className="text-center"
         />
 
-        {/* Дуга-веер карточек — как в референсе, только десктоп */}
-        <div ref={arcRef} className="relative mt-24 h-[420px] hidden lg:block">
+        {/* Плотная дуга-веер карточек — как в референсе, только десктоп */}
+        <div ref={arcRef} className="relative mt-24 h-[540px] hidden lg:block">
           {TEAM.map((member, i) => (
             <div
               key={member.name}
               ref={(el) => {
                 cardsRef.current[i] = el
               }}
-              className="absolute left-1/2 top-0 w-52 aspect-[3/4] -ml-[104px]"
+              className="absolute left-1/2 top-0 w-64 aspect-[9/16] -ml-32"
               style={{ transformOrigin: 'bottom center' }}
             >
-              <PartnerCard name={member.name} role={member.role} />
+              <PartnerCard />
             </div>
           ))}
+        </div>
+
+        {/* Подпись под колодой — переключается на наведённого партнёра */}
+        <div className="mt-10 text-center hidden lg:block">
+          <h3 ref={captionNameRef} className="font-heading text-xl font-extrabold leading-snug">
+            {TEAM[CENTER_INDEX].name}
+          </h3>
+          <p ref={captionRoleRef} className="mt-1 text-sm text-white/50">
+            {TEAM[CENTER_INDEX].role}
+          </p>
         </div>
 
         {/* Мобильная и планшетная раскладка — простая сетка без дуги */}
