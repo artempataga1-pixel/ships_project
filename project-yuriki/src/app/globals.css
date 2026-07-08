@@ -15,6 +15,7 @@
 /* Блик, бегущий по контуру star-button (кнопка «Все кейсы») */
 @theme inline {
   --animate-star-btn: star-btn calc(var(--duration) * 1s) linear infinite;
+  --animate-marquee: marquee calc(var(--duration) * 1s) linear infinite;
 }
 
 @keyframes star-btn {
@@ -23,6 +24,18 @@
   }
   100% {
     offset-distance: 100%;
+  }
+}
+
+/* Бесконечная бегущая строка (Marquee) — контент задублирован x2 внутри
+   компонента, лента едет ровно на половину своей ширины и уходит в
+   бесшовный повтор. Используется в «Контактах» под учредителями. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }
 
@@ -90,5 +103,9 @@ body {
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none;
+  }
+
+  .animate-marquee {
+    animation-play-state: paused;
   }
 }
