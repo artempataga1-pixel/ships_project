@@ -110,8 +110,20 @@ export function CompetenciesSection() {
   )
 
   return (
-    <section id="competencies" className="min-h-dvh flex items-center bg-black overflow-hidden">
-      <div className="max-w-[1440px] w-full mx-auto px-16 py-32">
+    <section
+      id="competencies"
+      className="relative min-h-dvh flex items-center overflow-hidden bg-[var(--color-bg)]"
+    >
+      {/* Мягкий лайм-glow за заголовком — по референсу 03_competencies_block */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(circle at 50% 46%, var(--color-lime-soft), transparent 22%)',
+        }}
+      />
+
+      <div className="relative max-w-[1440px] w-full mx-auto px-16 py-32">
         {/* Сцена: заголовок неподвижен в центре (десктоп — внутри орбиты, мобильный — обычным блоком) */}
         <div ref={stageRef} className="relative lg:h-[920px]">
           <div className="flex items-center justify-center lg:absolute lg:inset-0 lg:z-10">
@@ -122,30 +134,66 @@ export function CompetenciesSection() {
             />
           </div>
 
-          {/* Орбита карточек-заглушек — фото добавим позже, только десктоп */}
+          {/* Орбита карточек — только десктоп, проявляется по ScrollTrigger */}
           <div ref={orbitRef} className="absolute inset-0 hidden lg:block">
+            {/* Фоновые эллиптические орбиты + точки-искры */}
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+                w-[94%] h-[560px] rounded-[50%] border border-[var(--color-lime)]/40 rotate-[-3deg]"
+            />
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+                w-[82%] h-[440px] rounded-[50%] border border-black/[0.08] rotate-[-2deg]"
+            />
+            {[
+              'left-[18%] top-[24%]',
+              'right-[15%] top-[46%]',
+              'left-[22%] bottom-[22%]',
+              'right-[24%] bottom-[26%]',
+            ].map((pos) => (
+              <span
+                key={pos}
+                className={`pointer-events-none absolute ${pos} w-2.5 h-2.5 rounded-full bg-[var(--color-lime)]`}
+                style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
+              />
+            ))}
+
             {PRACTICES.map((practice, i) => (
               <div
                 key={practice.title}
                 ref={(el) => {
                   cardsRef.current[i] = el
                 }}
-                className="absolute left-1/2 top-1/2 w-64"
+                className="absolute left-1/2 top-1/2 w-[250px]"
               >
                 <div
                   className="
-                    aspect-square rounded-lg border border-[var(--color-card-border)]/40
-                    bg-gradient-to-b from-zinc-800 to-zinc-900
-                    flex items-center justify-center
+                    relative aspect-square rounded-[18px] border border-[var(--color-line)]
+                    bg-gradient-to-br from-white to-[var(--color-surface-soft)]
+                    flex flex-col items-center justify-center
+                    shadow-[0_30px_70px_rgba(0,0,0,0.13),inset_0_1px_0_rgba(255,255,255,0.95)]
                   "
                 >
-                  <span className="font-heading text-5xl text-hero-bronze">
+                  {/* Угловая рамка-скобка (line-frame) — видна только по углам */}
+                  <span
+                    className="pointer-events-none absolute -inset-[22px] rounded-[27px] border-[1.5px] border-black/[0.38] opacity-70"
+                    style={{
+                      clipPath:
+                        'polygon(0 0,28% 0,28% 7%,72% 7%,72% 0,100% 0,100% 28%,93% 28%,93% 72%,100% 72%,100% 100%,72% 100%,72% 93%,28% 93%,28% 100%,0 100%,0 72%,7% 72%,7% 28%,0 28%)',
+                    }}
+                  />
+                  {/* Лайм-полоса у правого края */}
+                  <span
+                    className="pointer-events-none absolute right-[-2px] top-7 bottom-7 w-1 rounded-full bg-[var(--color-lime)]"
+                    style={{ boxShadow: '0 0 24px var(--color-lime)' }}
+                  />
+                  <strong className="font-heading text-[57px] font-black leading-none tracking-[-0.05em] text-[var(--color-text)]">
                     {String(i + 1).padStart(2, '0')}
-                  </span>
+                  </strong>
+                  <p className="mt-6 px-4 text-center text-[17px] font-semibold leading-tight text-[var(--color-text)]">
+                    {practice.title}
+                  </p>
                 </div>
-                <p className="mt-4 text-center text-[1.3rem] tracking-[0.15em] uppercase text-white/50">
-                  {practice.title}
-                </p>
               </div>
             ))}
           </div>
@@ -157,14 +205,19 @@ export function CompetenciesSection() {
             <div
               key={practice.title}
               className="
-                p-6 rounded-lg border border-[var(--color-card-border)]/40
-                bg-gradient-to-b from-zinc-800 to-zinc-900
+                relative p-6 rounded-[18px] border border-[var(--color-line)]
+                bg-gradient-to-br from-white to-[var(--color-surface-soft)]
+                shadow-[var(--shadow-card)]
               "
             >
-              <span className="font-heading text-sm tracking-[0.2em] text-hero-bronze">
+              <span
+                className="pointer-events-none absolute right-[-2px] top-6 bottom-6 w-1 rounded-full bg-[var(--color-lime)]"
+                style={{ boxShadow: '0 0 24px var(--color-lime)' }}
+              />
+              <span className="font-heading text-4xl font-black tracking-[-0.05em] text-[var(--color-text)]">
                 {String(i + 1).padStart(2, '0')}
               </span>
-              <h3 className="mt-3 font-heading text-lg font-extrabold leading-snug">
+              <h3 className="mt-3 font-heading text-lg font-semibold leading-snug text-[var(--color-text)]">
                 {practice.title}
               </h3>
             </div>
