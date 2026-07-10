@@ -28,7 +28,7 @@ export function Marquee({ items, duration = 30, className, itemClassName, separa
               {items.map((item, i) => (
                 <span key={`${group}-${i}`} className={`flex items-center whitespace-nowrap ${itemClassName ?? ''}`}>
                   {item}
-                  <span className="mx-6 md:mx-10 text-white/15" aria-hidden="true">
+                  <span className="mx-6 md:mx-10 text-[var(--color-line)]" aria-hidden="true">
                     {separator}
                   </span>
                 </span>

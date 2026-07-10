@@ -8,10 +8,11 @@ export function Header() {
   return (
     <header className="fixed top-0 inset-x-0 z-[90]">
       <div className="max-w-[1440px] mx-auto h-16 px-8 flex items-center justify-between gap-8">
-        {/* Логотип — data-header-logo для LogoIntro анимации */}
+        {/* Логотип — data-header-logo для LogoIntro анимации.
+            Тёмная плашка убрана: тёмное лого на светлом фоне хедера. */}
         <Link
           href="/"
-          className="shrink-0 flex items-center ml-4 rounded-xl bg-black/75 backdrop-blur-sm px-4 py-2"
+          className="shrink-0 flex items-center ml-4"
           aria-label="На главную — Шумская и Партнёры"
           data-header-logo=""
         >
@@ -24,21 +25,24 @@ export function Header() {
           />
         </Link>
 
-        {/* Пилюля с навигацией; без overflow-hidden — лампа выступает над кромкой */}
-        <nav
-          aria-label="Основная навигация"
-          className="relative rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-2"
-        >
+        {/* Навигация — плоская, без фона-пилюли; relative нужен как offsetParent
+            для лампы (LimelightNav измеряет offsetLeft относительно него) */}
+        <nav aria-label="Основная навигация" className="relative">
           <LimelightNav items={NAV_ITEMS} />
         </nav>
 
         {/* CTA — обычный <a>: на главной клик перехватывает Lenis (плавный скролл),
-            с внутренних страниц «/#contacts» уводит на главную к секции */}
+            с внутренних страниц «/#contacts» уводит на главную к секции.
+            Белый фон, тонкая чёрная обводка, лайм-индикатор справа (см. .contact-btn) */}
         <a
           href="/#contacts"
-          className="shrink-0 bg-white text-[#262424] text-sm font-semibold px-5 py-2 rounded-full hover:bg-white/85 transition-colors duration-200"
+          className="shrink-0 inline-flex items-center gap-3 h-11 px-5 rounded-md border border-[var(--color-black)] bg-[var(--color-surface)] text-sm font-semibold text-[var(--color-text)] transition-colors duration-200 hover:bg-[var(--color-surface-soft)]"
         >
           Связаться
+          <span
+            aria-hidden="true"
+            className="w-2.5 h-2.5 rounded-[3px] bg-[var(--color-lime)] shadow-[0_0_16px_var(--color-lime-glow)]"
+          />
         </a>
       </div>
     </header>

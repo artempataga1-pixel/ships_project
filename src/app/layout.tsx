@@ -1,37 +1,17 @@
 import type { Metadata } from "next";
-import { Unbounded, Golos_Text } from "next/font/google";
-import localFont from "next/font/local";
+import { Manrope } from "next/font/google";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
-const heading = Unbounded({
+// Единый шрифт сайта — Manrope. Google Fonts отдаёт диапазон 200–800,
+// начертания 900 у Manrope нет — максимум ExtraBold 800 (font-black клампится
+// к нему). Переменная замэплена в --font-heading и --font-body в globals.css.
+const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
-  weight: "800",
-  variable: "--font-heading-var",
-  display: "swap",
-});
-
-const bodyFont = Golos_Text({
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600"],
-  variable: "--font-body-var",
-  display: "swap",
-});
-
-// Шрифты надписи в hero: жирная антиква для первой части фразы…
-const heroFont = localFont({
-  src: "../fonts/tt-norms-pro-serif-extrablack.otf",
-  variable: "--font-hero-var",
-  display: "swap",
-});
-
-// …и изящный италик для второй
-const heroItalicFont = localFont({
-  src: "../fonts/tt-ramillas-trial-italic.ttf",
-  style: "italic",
-  variable: "--font-hero-italic-var",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-manrope-var",
   display: "swap",
 });
 
@@ -57,7 +37,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${heading.variable} ${bodyFont.variable} ${heroFont.variable} ${heroItalicFont.variable} h-full`}
+      className={`${manrope.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased">
         <SmoothScrollProvider>

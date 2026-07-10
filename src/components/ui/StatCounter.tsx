@@ -69,17 +69,18 @@ function AnimatedStat({ item }: AnimatedStatProps) {
       <div className="flex items-baseline gap-1">
         <span
           ref={numRef}
-          className="font-heading text-4xl sm:text-5xl md:text-7xl font-extrabold text-hero-bronze"
+          className="font-heading text-4xl sm:text-5xl md:text-7xl font-extrabold text-[var(--color-text)]"
         >
           0
         </span>
         {item.suffix && (
-          <span className="font-heading text-2xl sm:text-3xl md:text-5xl font-extrabold text-hero-bronze">
+          // Суффикс — того же цвета, что и цифра (раньше был отдельным акцентом)
+          <span className="font-heading text-2xl sm:text-3xl md:text-5xl font-extrabold text-[var(--color-text)]">
             {item.suffix}
           </span>
         )}
       </div>
-      <span className="text-white/60 text-sm uppercase tracking-widest">
+      <span className="text-[var(--color-muted)] text-sm uppercase tracking-widest">
         {item.label}
       </span>
     </div>
@@ -94,7 +95,7 @@ export function StatCounter({ items, className }: StatCounterProps) {
           key={item.label}
           className={
             i > 0
-              ? 'md:border-l md:border-[var(--color-card-border)]/20'
+              ? 'md:border-l md:border-[var(--color-line)]'
               : ''
           }
         >

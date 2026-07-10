@@ -1,18 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #262424;
-  --color-white: #ffffff;
-  --color-accent-cold: rgba(170, 210, 255, 0.9);
-  --color-card-border: #77634b;
+  /* Светлая тема с лайм-акцентом. Канонические токены сайта — единственный
+     источник правды по цвету/радиусам, значения из отдельных demo-файлов
+     дизайнера НЕ хардкодить, брать эти переменные. */
+  --color-bg: #fbfbfa;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f4f4f2;
+  --color-black: #0a0a0a;
+  --color-text: #111111;
+  --color-muted: #777a7d;
+  --color-line: #dfe2df;
 
-  --font-heading: var(--font-heading-var), sans-serif;
-  --font-body: var(--font-body-var), sans-serif;
-  --font-hero: var(--font-hero-var), serif;
-  --font-hero-italic: var(--font-hero-italic-var), serif;
+  --color-lime: #c9ff1f;
+  --color-lime-soft: rgba(201, 255, 31, 0.28);
+  --color-lime-glow: rgba(201, 255, 31, 0.55);
+  /* Тёмный «чернильный» лайм — для ТЕКСТА-акцента на белом (яркий лайм как
+     текст нечитаем, контраст ~1.1:1). Декор/полосы/точки/glow — --color-lime,
+     текстовые акценты (активные пункты, подписи-eyebrow) — --color-lime-ink. */
+  --color-lime-ink: #7da900;
+
+  --radius-xl: 34px;
+  --radius-lg: 26px;
+  --radius-md: 16px;
+
+  /* Единый шрифт сайта — Manrope (весь диапазон 400–900), заведён в layout.tsx
+     через next/font/google в переменную --font-manrope-var. */
+  --font-heading: var(--font-manrope-var), sans-serif;
+  --font-body: var(--font-manrope-var), sans-serif;
 }
 
-/* Блик, бегущий по контуру star-button (кнопка «Все кейсы») */
+/* Блик, бегущий по контуру star-button + бегущая строка Marquee */
 @theme inline {
   --animate-star-btn: star-btn calc(var(--duration) * 1s) linear infinite;
   --animate-marquee: marquee calc(var(--duration) * 1s) linear infinite;
@@ -29,7 +47,7 @@
 
 /* Бесконечная бегущая строка (Marquee) — контент задублирован x2 внутри
    компонента, лента едет ровно на половину своей ширины и уходит в
-   бесшовный повтор. Используется в «Контактах» под учредителями. */
+   бесшовный повтор. */
 @keyframes marquee {
   from {
     transform: translateX(0);
@@ -40,42 +58,13 @@
 }
 
 :root {
-  --grad-brand: linear-gradient(180deg, #2e2e2e 0%, #cbcbcb 50%, #2e2e2e 100%);
-  /* Тень с цветом accent-cold — используется на hover у кейсов */
-  --shadow-accent-cold: 0 0 32px rgba(170, 210, 255, 0.15);
-}
-
-/* Металлический текст в hero: серебро — под холодный свет ламп,
-   бронза — под статую Фемиды. Градиент режется по буквам через
-   background-clip: text — это альфа-маска, а не заливка цветом.
-   Использовать ТОЛЬКО на неподвижном тексте: при активном скролле
-   Chromium растеризует GPU-тайлы в пониженном разрешении, и маска
-   градиента съезжает к тёмной части — текст выглядит потемневшим,
-   пока элемент едет по экрану внутри transform-анимации (GSAP) */
-.text-hero-silver,
-.text-hero-bronze {
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  transform: translateZ(0);
-}
-.text-hero-silver {
-  background-image: linear-gradient(180deg, #f4f5f7 0%, #c7ccd4 48%, #8e95a3 100%);
-}
-.text-hero-bronze {
-  background-image: linear-gradient(180deg, #dfb888 0%, #b98d5e 48%, #85603c 100%);
-}
-
-/* Бронза для текста, который физически едет по экрану (внутри
-   GSAP scrub-transform, напр. трек «Практик») — сплошная заливка
-   вместо альфа-маски, чтобы не темнеть при активном скролле */
-.text-bronze-solid {
-  color: #b98d5e;
+  /* Мягкая тень белой карточки с лёгким лайм-glow (см. Card.tsx / .case-card) */
+  --shadow-card: 0 24px 70px rgba(0, 0, 0, 0.05), 0 0 34px rgba(201, 255, 31, 0.1);
 }
 
 body {
-  background-color: #262424;
-  color: #ffffff;
+  background-color: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-body);
 }
 

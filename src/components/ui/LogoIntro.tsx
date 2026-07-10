@@ -96,7 +96,7 @@ export function LogoIntro() {
       aria-label="Логотип компании"
       aria-modal="true"
       tabIndex={-1}
-      className="fixed inset-0 z-[100] bg-[#262424] cursor-pointer"
+      className="fixed inset-0 z-[100] bg-[var(--color-bg)] cursor-pointer"
       onClick={dismiss}
       onKeyDown={(e) => e.key === 'Escape' && dismiss()}
     >
@@ -110,7 +110,7 @@ export function LogoIntro() {
         />
       </div>
 
-      <p className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/25 text-xs tracking-widest uppercase pointer-events-none select-none">
+      <p className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[var(--color-muted)] text-xs tracking-widest uppercase pointer-events-none select-none">
         Нажмите чтобы пропустить
       </p>
     </div>

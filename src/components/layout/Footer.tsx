@@ -6,7 +6,7 @@ import { CONTACT_INFO } from '@/constants/content/contacts'
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-[#1e1c1c]">
+    <footer className="border-t border-[var(--color-line)] bg-[var(--color-surface-soft)]">
       <div className="max-w-[1440px] mx-auto px-8 py-12">
         <div className="grid grid-cols-3 gap-12">
           {/* Лого + описание + соцсети */}
@@ -20,7 +20,7 @@ export function Footer() {
               />
             </Link>
             <p
-              className="text-sm text-white/50 leading-relaxed"
+              className="text-sm text-[var(--color-muted)] leading-relaxed"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               Шумская и Партнёры<br />
@@ -30,21 +30,21 @@ export function Footer() {
               <a
                 href="#"
                 aria-label="Twitter"
-                className="text-white/35 hover:text-white/70 transition-colors duration-200"
+                className="text-[var(--color-muted)] hover:text-[var(--color-lime-ink)] transition-colors duration-200"
               >
                 <X size={18} />
               </a>
               <a
                 href="#"
                 aria-label="Telegram"
-                className="text-white/35 hover:text-white/70 transition-colors duration-200"
+                className="text-[var(--color-muted)] hover:text-[var(--color-lime-ink)] transition-colors duration-200"
               >
                 <Send size={18} />
               </a>
               <a
                 href="#"
                 aria-label="Официальный сайт"
-                className="text-white/35 hover:text-white/70 transition-colors duration-200"
+                className="text-[var(--color-muted)] hover:text-[var(--color-lime-ink)] transition-colors duration-200"
               >
                 <ExternalLink size={18} />
               </a>
@@ -53,7 +53,7 @@ export function Footer() {
 
           {/* Навигация */}
           <div>
-            <p className="text-xs uppercase tracking-widest text-white/30 mb-5">
+            <p className="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-5">
               Навигация
             </p>
             <ul className="flex flex-col gap-3">
@@ -62,7 +62,7 @@ export function Footer() {
                   {/* Обычный <a> — якорный клик перехватывает Lenis (плавный скролл) */}
                   <a
                     href={item.href}
-                    className="text-sm text-white/55 hover:text-white/90 transition-colors duration-200"
+                    className="text-sm text-[var(--color-muted)] hover:text-[var(--color-lime-ink)] transition-colors duration-200"
                     style={{ fontFamily: 'var(--font-body)' }}
                   >
                     {item.label}
@@ -74,22 +74,22 @@ export function Footer() {
 
           {/* Контакты */}
           <div>
-            <p className="text-xs uppercase tracking-widest text-white/30 mb-5">
+            <p className="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-5">
               Контакты
             </p>
             <div
-              className="flex flex-col gap-3 text-sm text-white/55"
+              className="flex flex-col gap-3 text-sm text-[var(--color-muted)]"
               style={{ fontFamily: 'var(--font-body)' }}
             >
               <a
                 href={`tel:+${CONTACT_INFO.phone.replace(/\D/g, '')}`}
-                className="hover:text-white/90 transition-colors duration-200"
+                className="hover:text-[var(--color-lime-ink)] transition-colors duration-200"
               >
                 {CONTACT_INFO.phone}
               </a>
               <a
                 href={`mailto:${CONTACT_INFO.email}`}
-                className="hover:text-white/90 transition-colors duration-200"
+                className="hover:text-[var(--color-lime-ink)] transition-colors duration-200"
               >
                 {CONTACT_INFO.email}
               </a>
@@ -99,7 +99,7 @@ export function Footer() {
         </div>
 
         {/* Копирайт */}
-        <div className="mt-10 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-white/30">
+        <div className="mt-10 pt-6 border-t border-[var(--color-line)] flex items-center justify-between text-xs text-[var(--color-muted)]">
           <span>© {new Date().getFullYear()} Шумская и Партнёры. Все права защищены.</span>
           <span>Юридическая компания</span>
         </div>
