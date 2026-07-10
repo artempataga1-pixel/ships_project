@@ -1,112 +1,149 @@
-import Image from 'next/image'
-import { Award, Eye, Scale, Target } from 'lucide-react'
-import { SectionHeading } from '@/components/ui/SectionHeading'
-import { StatCounter } from '@/components/ui/StatCounter'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
-import { ABOUT, STATS, VALUES } from '@/constants/content/home'
-import type { ValueItem } from '@/types/content'
+import { ABOUT } from '@/constants/content/home'
 
-const VALUE_ICONS: Record<ValueItem['icon'], typeof Target> = {
-  target: Target,
-  eye: Eye,
-  award: Award,
-}
+/* Белые панели убывающей высоты со skew и лайм-торцом справа — тот же паттерн
+   сцены, что в Hero/референс-коде 01_about_company (.bars-scene/.bar). Значения
+   позиций/высот перенесены из демки дизайнера, декор — скрыт на мобиле. */
+const BARS = [
+  { left: 70, height: 148, opacity: 0.44 },
+  { left: 150, height: 214, opacity: 0.5 },
+  { left: 240, height: 298, opacity: 0.58 },
+  { left: 345, height: 405, opacity: 0.66 },
+  { left: 485, height: 545, opacity: 0.82 },
+]
 
 export function AboutSection() {
   return (
-    <section id="about" className="relative min-h-dvh bg-black">
-      {/* Блок 1: философия — маятник Ньютона на фоне, текст прижат вправо */}
-      <div className="relative flex min-h-[80vh] items-start overflow-hidden pb-24 pt-28">
-        <Image
-          src="/images/backgrounds/about.jpg"
-          alt=""
-          fill
-          sizes="100vw"
-          quality={100}
-          className="object-cover object-left-top"
+    <section
+      id="about"
+      className="relative flex min-h-dvh items-center overflow-hidden bg-[var(--color-bg)] py-24"
+    >
+      {/* Мягкий лайм-glow за сценой + светлый вертикальный градиент секции */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(circle at 30% 45%, var(--color-lime-soft), transparent 26%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
+          opacity: 0.6,
+        }}
+      />
+
+      {/* Сцена из белых панелей с орбитами и точками — декоративная, слева */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-[3%] top-1/2 hidden h-[720px] w-[760px] -translate-y-1/2 lg:block"
+      >
+        {/* линия-пол */}
+        <div
+          className="absolute bottom-[150px] left-0 right-[-90px] h-px"
+          style={{
+            background:
+              'linear-gradient(90deg,transparent,rgba(0,0,0,.09),transparent)',
+          }}
         />
-        {/* Затемнение справа налево — текст читается поверх кадра на любой ширине */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-black/70 to-black/90" />
-
-        <div className="relative mx-auto w-full max-w-[1440px] px-16">
-          <div className="ml-auto flex w-full max-w-3xl flex-col gap-8">
-            <RevealOnScroll className="self-start">
-              <div className="flex items-center gap-5">
-                <Scale
-                  className="h-[clamp(2.5rem,3.2vw,5.5rem)] w-[clamp(2.5rem,3.2vw,5.5rem)] shrink-0 text-[var(--color-card-border)]"
-                  strokeWidth={1.2}
-                />
-                <span className="min-w-0 font-heading text-[clamp(2.75rem,3.5vw,6rem)]/[1.05] font-extrabold uppercase text-hero-bronze md:whitespace-nowrap">
-                  {ABOUT.heading}
-                </span>
-              </div>
-            </RevealOnScroll>
-
-            <RevealOnScroll delay={0.1}>
-              <p className="font-heading text-3xl font-extrabold leading-snug text-white md:text-4xl">
-                {ABOUT.quoteLead}{' '}
-                <span className="font-hero-italic italic text-hero-bronze">
-                  {ABOUT.quoteAccent}
-                </span>
-              </p>
-            </RevealOnScroll>
-
-            <RevealOnScroll delay={0.2}>
-              <p className="text-lg leading-relaxed text-white/60 md:text-xl">
-                {ABOUT.quoteRest}
-              </p>
-            </RevealOnScroll>
-
-            <RevealOnScroll delay={0.3}>
-              <p className="max-w-lg text-base leading-relaxed text-white/40">
-                {ABOUT.description}
-              </p>
-            </RevealOnScroll>
-          </div>
-        </div>
+        {/* орбиты */}
+        <div
+          className="absolute left-[-20px] top-[35px] h-[575px] w-[675px] rounded-full border"
+          style={{ borderColor: 'var(--color-lime-soft)', transform: 'rotate(-28deg)' }}
+        />
+        <div
+          className="absolute left-[65px] top-[65px] h-[460px] w-[540px] rounded-full border"
+          style={{ borderColor: 'rgba(0,0,0,.08)', transform: 'rotate(-25deg)' }}
+        />
+        {/* панели */}
+        {BARS.map((bar) => (
+          <span
+            key={bar.left}
+            className="absolute bottom-[145px] w-[74px]"
+            style={{
+              left: bar.left,
+              height: bar.height,
+              opacity: bar.opacity,
+              transform: 'skewY(-7deg)',
+              background: 'linear-gradient(90deg,#f7f7f5,#fff 50%,#e8e8e6)',
+              boxShadow:
+                '22px 34px 42px rgba(0,0,0,.08),inset -3px 0 8px rgba(0,0,0,.08)',
+            }}
+          >
+            {/* лайм-торец справа */}
+            <span
+              className="absolute right-[-7px] top-0 h-full w-[7px]"
+              style={{
+                background:
+                  'linear-gradient(180deg,var(--color-lime),var(--color-lime-soft))',
+                filter: 'drop-shadow(0 0 18px var(--color-lime-glow))',
+              }}
+            />
+          </span>
+        ))}
+        {/* точки */}
+        {[
+          { left: 546, top: 54 },
+          { left: 632, top: 234 },
+          { left: 570, top: 610 },
+        ].map((dot) => (
+          <span
+            key={`${dot.left}-${dot.top}`}
+            className="absolute h-[10px] w-[10px] rounded-full"
+            style={{
+              left: dot.left,
+              top: dot.top,
+              background: 'var(--color-lime)',
+              boxShadow: '0 0 20px var(--color-lime-glow)',
+            }}
+          />
+        ))}
       </div>
 
-      {/* Блок 2: цифры — самый крупный визуальный акцент после hero */}
-      <div className="mx-auto max-w-[1440px] px-16 py-24">
-        <RevealOnScroll>
-          <StatCounter items={STATS} />
-        </RevealOnScroll>
-      </div>
+      {/* Контент — ghost-panel карточка, прижата вправо */}
+      <div className="relative mx-auto flex w-full max-w-[1440px] justify-end px-6 md:px-12 lg:px-16">
+        <div
+          className="w-full max-w-[720px] rounded-[var(--radius-xl)] border p-8 md:p-12 lg:p-16"
+          style={{
+            background: 'rgba(255,255,255,.64)',
+            borderColor: 'rgba(255,255,255,.85)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,.95),0 30px 90px rgba(0,0,0,.04)',
+          }}
+        >
+          <RevealOnScroll>
+            <h2 className="font-heading text-[clamp(2.5rem,5vw,5.375rem)] font-medium uppercase leading-[0.92] tracking-[-0.045em] text-[var(--color-text)]">
+              {ABOUT.heading}
+            </h2>
+          </RevealOnScroll>
 
-      {/* Блок 3: ценности/подход — 3 карточки с золотой обводкой на hover */}
-      <div className="mx-auto max-w-[1440px] px-16 pb-32">
-        <SectionHeading
-          title="Наш подход"
-          subtitle="Принципы, которые не меняются от дела к делу"
-        />
+          <RevealOnScroll delay={0.1} className="mt-10 md:mt-14">
+            <p className="font-heading text-[clamp(1.6rem,2.6vw,2.375rem)] leading-[1.18] tracking-[-0.03em]">
+              <strong className="font-extrabold text-[var(--color-text)]">
+                {ABOUT.quoteLead}
+              </strong>
+              <br />
+              <span className="font-semibold text-[var(--color-muted)]">
+                {ABOUT.quoteAccent}
+              </span>
+            </p>
+          </RevealOnScroll>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
-          {VALUES.map((value, i) => {
-            const Icon = VALUE_ICONS[value.icon]
-            return (
-              <RevealOnScroll key={value.title} delay={i * 0.1}>
-                <div
-                  className="
-                    group h-full rounded-lg border border-transparent bg-[#1A1A1D] p-8
-                    transition-all duration-300
-                    hover:-translate-y-1 hover:border-[var(--color-card-border)]/70
-                    hover:shadow-[0_12px_32px_rgba(0,0,0,0.45)]
-                  "
-                >
-                  <Icon
-                    className="h-8 w-8 text-[var(--color-card-border)]"
-                    strokeWidth={1.5}
-                  />
-                  <h3 className="mt-6 font-heading text-xl font-extrabold leading-snug text-white">
-                    {value.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-white/60">
-                    {value.description}
-                  </p>
-                </div>
-              </RevealOnScroll>
-            )
-          })}
+          <RevealOnScroll delay={0.2} className="mt-10 md:mt-14">
+            <p className="text-lg font-semibold leading-[1.62] text-[var(--color-text)] md:text-xl">
+              {ABOUT.quoteRest}
+            </p>
+          </RevealOnScroll>
+
+          <RevealOnScroll delay={0.3} className="mt-8">
+            <p
+              className="relative pl-6 text-base font-medium leading-[1.6] text-[var(--color-muted)] md:text-lg"
+              style={{
+                borderLeft: '3px solid var(--color-lime)',
+                boxShadow: '-10px 0 24px -10px var(--color-lime-glow)',
+              }}
+            >
+              {ABOUT.description}
+            </p>
+          </RevealOnScroll>
         </div>
       </div>
     </section>
