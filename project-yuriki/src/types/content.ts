@@ -10,14 +10,25 @@ export interface Stat {
 }
 
 export interface HeroContent {
-  /* «Когда на чаше» / «весов стоит» — капсом, серебро */
-  line1: string
-  line2: string
-  /* «будущее —» — италик, бронза */
-  line3: string
-  /* последняя строка: акцент капсом-серебром + хвост италиком-бронзой */
-  line4Accent: string
-  line4Rest: string
+  /* «Право» — первая строка заголовка */
+  titleLine1: string
+  /* «создаёт порядок.» — вторая строка */
+  titleLine2: string
+  /* «Мы — решения.» — третья строка, приглушённо-серая */
+  titleMuted: string
+  /* подзаголовок под заголовком */
+  subtitle: string
+  /* текст круглой лайм-кнопки */
+  ctaLabel: string
+  /* нижняя строка-слоган (uppercase) */
+  bottomLine: string
+}
+
+/* Счётчик Hero (10+ / 150+ / 30+). Значение — уже готовая строка с суффиксом,
+   без анимации-счёта: это отдельные данные, не путать со Stat/STATS. */
+export interface HeroStat {
+  value: string
+  label: string
 }
 
 export interface AboutContent {

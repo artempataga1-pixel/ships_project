@@ -1,12 +1,27 @@
-import type { Stat, HeroContent, AboutContent, ValueItem } from '@/types/content'
+import type {
+  Stat,
+  HeroContent,
+  HeroStat,
+  AboutContent,
+  ValueItem,
+} from '@/types/content'
 
 export const HERO: HeroContent = {
-  line1: 'Когда на чаше',
-  line2: 'весов стоит',
-  line3: 'будущее —',
-  line4Accent: 'важна',
-  line4Rest: 'каждая деталь',
+  titleLine1: 'Право',
+  titleLine2: 'создаёт порядок.',
+  titleMuted: 'Мы — решения.',
+  subtitle: 'Юридическая поддержка бизнеса и частных клиентов',
+  ctaLabel: 'Обсудить задачу',
+  bottomLine: 'Право движет бизнес вперёд',
 }
+
+/* Актуальные счётчики Hero (подтверждено пользователем). Не путать со STATS
+   ниже (17 лет/340 дел/…) — те признаны неактуальными и больше не рендерятся. */
+export const HERO_STATS: HeroStat[] = [
+  { value: '10+', label: 'лет на рынке' },
+  { value: '150+', label: 'успешных дел' },
+  { value: '30+', label: 'отраслей' },
+]
 
 export const ABOUT: AboutContent = {
   heading: 'О компании',
