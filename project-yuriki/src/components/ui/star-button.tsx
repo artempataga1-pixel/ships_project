@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 /* Кнопка со «звёздным небом» и бегущим по контуру бликом (21st.dev / star-button).
-   Адаптация под проект: тёмная плашка, бронзовый блик и бронзовый текст как в hero.
+   Адаптация под проект: тёмная плашка, лайм-блик и лайм-текст под новую тему.
    Умеет рендериться ссылкой (href) — для навигации между страницами. */
 
 interface StarBackgroundProps {
@@ -60,8 +60,8 @@ export function StarButton({
   href,
   lightWidth = 110,
   duration = 3,
-  lightColor = '#dfb888', // бронза как в hero
-  backgroundColor = '#111111',
+  lightColor = 'var(--color-lime)',
+  backgroundColor = '#111111', // тёмная плашка — лайм-текст читается на ней контрастно
   borderWidth = 2,
   className,
   ...props
@@ -112,8 +112,8 @@ export function StarButton({
       >
         <StarBackground color={backgroundColor} />
       </div>
-      {/* Текст — бронзовый градиент как в hero */}
-      <span className="z-10 relative text-hero-bronze">{children}</span>
+      {/* Текст — лайм на тёмной плашке */}
+      <span className="z-10 relative text-[var(--color-lime)]">{children}</span>
     </>
   )
 

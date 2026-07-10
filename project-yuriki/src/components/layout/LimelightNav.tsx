@@ -68,9 +68,10 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
 
   return (
     <>
-      {/* Лампа: полоска холодного света над кромкой пилюли + конус вниз.
-          Ширина тянется под текст пункта (длинные названия накрыты целиком),
-          позиция через translateX, координаты — от offsetParent (пилюля) */}
+      {/* Лампа: тонкая лайм-полоска над активным/наведённым пунктом. Конус и
+          свечение под текстом убраны — остаётся только полоска сверху (glow
+          на самой полоске допустим). Ширина тянется под текст пункта,
+          позиция через translateX, координаты — от offsetParent (nav). */}
       {(() => {
         const lampWidth = lamp
           ? Math.max(lamp.width - LINK_PADDING_X, LAMP_MIN_WIDTH)
@@ -81,9 +82,9 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
             className="pointer-events-none absolute left-0 top-0 h-[5px] rounded-full"
             style={{
               width: lampWidth,
-              backgroundColor: 'rgba(228, 229, 233, 0.95)',
+              backgroundColor: 'var(--color-lime)',
               boxShadow:
-                '0 0 12px rgba(228, 229, 233, 0.8), 0 0 28px rgba(228, 229, 233, 0.45)',
+                '0 0 10px var(--color-lime-glow), 0 0 20px var(--color-lime-soft)',
               transform: `translate(${
                 lamp ? lamp.x + lamp.width / 2 - lampWidth / 2 : 0
               }px, -50%)`,
@@ -92,18 +93,7 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
                 ? 'transform 0.4s ease, width 0.4s ease, opacity 0.3s ease'
                 : 'none',
             }}
-          >
-            {/* Конус — ширина в % от лампы, растягивается вместе с ней */}
-            <div
-              className="pointer-events-none absolute left-1/2 top-full h-11 -translate-x-1/2"
-              style={{
-                width: 'calc(100% + 12px)',
-                clipPath: 'polygon(5% 100%, 25% 0, 75% 0, 95% 100%)',
-                background:
-                  'linear-gradient(to bottom, rgba(228, 229, 233, 0.4), transparent)',
-              }}
-            />
-          </div>
+          />
         )
       })()}
 
@@ -124,7 +114,9 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
             <a
               href={item.href}
               className={`block rounded-full px-4 py-1.5 text-sm transition-colors duration-200 ${
-                i === targetIndex ? 'text-white' : 'text-white/70'
+                i === targetIndex
+                  ? 'text-[var(--color-text)]'
+                  : 'text-[var(--color-muted)]'
               }`}
             >
               {item.label}
