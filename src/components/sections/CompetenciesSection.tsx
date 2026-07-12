@@ -35,7 +35,13 @@ function orbitPoint(angleDeg: number, radius: { x: number; y: number }) {
   }
 }
 
-export function CompetenciesSection() {
+interface CompetenciesSectionProps {
+  /** 'flow' — обычная секция потока; 'story' — оверлей внутри ScrollStory. */
+  variant?: 'flow' | 'story'
+}
+
+export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionProps) {
+  const isStory = variant === 'story'
   const stageRef = useRef<HTMLDivElement>(null)
   const orbitRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
@@ -55,17 +61,23 @@ export function CompetenciesSection() {
       const mm = gsap.matchMedia()
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.set(orbitRef.current, { opacity: 0 })
-        gsap.to(orbitRef.current, {
-          opacity: 1,
-          duration: 1.2,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: stageRef.current,
-            start: 'top 75%',
-            once: true,
-          },
-        })
+        // В story появлением рулит таймлайн стори (opacity оверлея) — орбита
+        // видна сразу и уже в движении. В потоке — мягкий fade-in по вьюпорту.
+        if (isStory) {
+          gsap.set(orbitRef.current, { opacity: 1 })
+        } else {
+          gsap.set(orbitRef.current, { opacity: 0 })
+          gsap.to(orbitRef.current, {
+            opacity: 1,
+            duration: 1.2,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: stageRef.current,
+              start: 'top 75%',
+              once: true,
+            },
+          })
+        }
 
         cards.forEach((card, i) => {
           const startAngle = (360 / PRACTICES.length) * i - 90
@@ -111,10 +123,15 @@ export function CompetenciesSection() {
 
   return (
     <section
-      id="competencies"
-      className="relative min-h-dvh flex items-center overflow-hidden bg-[var(--color-bg)]"
+      {...(!isStory && { id: 'competencies' })}
+      className={
+        isStory
+          ? 'relative flex h-full w-full items-center overflow-hidden'
+          : 'relative min-h-dvh flex items-center overflow-hidden bg-[var(--color-bg)]'
+      }
     >
-      {/* Мягкий лайм-glow за заголовком — по референсу 03_competencies_block */}
+      {/* Мягкий лайм-glow за заголовком — по референсу 03_competencies_block.
+          Радиальный, края прозрачные → под ним виден замерший кадр видео. */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -123,9 +140,14 @@ export function CompetenciesSection() {
         }}
       />
 
-      <div className="relative max-w-[1440px] w-full mx-auto px-16 py-32">
-        {/* Сцена: заголовок неподвижен в центре (десктоп — внутри орбиты, мобильный — обычным блоком) */}
-        <div ref={stageRef} className="relative lg:h-[920px]">
+      <div
+        className={`relative max-w-[1440px] w-full mx-auto px-16 ${
+          isStory ? 'py-10' : 'py-32'
+        }`}
+      >
+        {/* Сцена: заголовок неподвижен в центре (десктоп — внутри орбиты, мобильный — обычным блоком).
+            В story сцена ниже — вся орбита должна уместиться в 100dvh оверлея. */}
+        <div ref={stageRef} className={`relative ${isStory ? 'lg:h-[760px]' : 'lg:h-[920px]'}`}>
           <div className="flex items-center justify-center lg:absolute lg:inset-0 lg:z-10">
             <SectionHeading
               title="Наши компетенции"

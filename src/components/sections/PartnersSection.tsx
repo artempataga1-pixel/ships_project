@@ -84,7 +84,13 @@ function PartnerCard() {
   )
 }
 
-export function PartnersSection() {
+interface PartnersSectionProps {
+  /** 'flow' — обычная секция потока; 'story' — оверлей внутри ScrollStory. */
+  variant?: 'flow' | 'story'
+}
+
+export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
+  const isStory = variant === 'story'
   const arcRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
   const captionNameRef = useRef<HTMLHeadingElement>(null)
@@ -111,8 +117,27 @@ export function PartnersSection() {
         const listeners: Array<{ el: HTMLDivElement; enter: () => void; leave: () => void }> = []
         const positions = cards.map((_, i) => fanPosition(i, TEAM.length))
 
+        const startWobble = (card: HTMLDivElement, i: number, rotate: number) => {
+          idleTweens[i] = gsap.to(card, {
+            rotate: rotate + (i % 2 === 0 ? 5 : -5),
+            duration: IDLE_WOBBLE_DURATION,
+            delay: i * 0.25,
+            ease: 'sine.inOut',
+            yoyo: true,
+            repeat: -1,
+          })
+        }
+
         cards.forEach((card, i) => {
           const { x, y, rotate, z, opacity } = positions[i]
+
+          if (isStory) {
+            // В story появлением рулит таймлайн стори (opacity оверлея) — веер
+            // сразу разложен и покачивается, без scroll-триггерного въезда.
+            gsap.set(card, { x, y, rotate, opacity, zIndex: z })
+            startWobble(card, i, rotate)
+            return
+          }
 
           gsap.set(card, { x: x * 1.6, y: y - 170, rotate: rotate * 2.2, opacity: 0, zIndex: z })
 
@@ -129,16 +154,7 @@ export function PartnersSection() {
               start: 'top 75%',
               once: true,
             },
-            onComplete: () => {
-              idleTweens[i] = gsap.to(card, {
-                rotate: rotate + (i % 2 === 0 ? 5 : -5),
-                duration: IDLE_WOBBLE_DURATION,
-                delay: i * 0.25,
-                ease: 'sine.inOut',
-                yoyo: true,
-                repeat: -1,
-              })
-            },
+            onComplete: () => startWobble(card, i, rotate),
           })
         })
 
@@ -212,12 +228,24 @@ export function PartnersSection() {
 
   return (
     <section
-      id="partners"
-      className="relative min-h-dvh flex flex-col justify-center overflow-hidden"
-      style={{
-        background:
-          'radial-gradient(circle at 63% 48%, var(--color-lime-soft), transparent 26%), linear-gradient(180deg,#ffffff 0%,#f9f9f8 72%,var(--color-surface-soft) 100%)',
-      }}
+      {...(!isStory && { id: 'partners' })}
+      className={
+        isStory
+          ? 'relative flex h-full w-full flex-col justify-center overflow-hidden'
+          : 'relative min-h-dvh flex flex-col justify-center overflow-hidden'
+      }
+      style={
+        isStory
+          ? // прозрачный радиальный glow — под ним виден замерший кадр видео
+            {
+              background:
+                'radial-gradient(circle at 63% 48%, var(--color-lime-soft), transparent 30%)',
+            }
+          : {
+              background:
+                'radial-gradient(circle at 63% 48%, var(--color-lime-soft), transparent 26%), linear-gradient(180deg,#ffffff 0%,#f9f9f8 72%,var(--color-surface-soft) 100%)',
+            }
+      }
     >
       {/* Декоративные фоновые орбиты и точки — как в остальных блоках */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
