@@ -67,7 +67,9 @@ export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
         }
       />
 
-      {/* Сцена из белых панелей с орбитами и точками — декоративная, слева */}
+      {/* Сцена из белых панелей с орбитами и точками — декоративная, слева.
+          В story её роль играют реальные панели из видео → CSS-декор не рендерим. */}
+      {!isStory && (
       <div
         aria-hidden
         className="pointer-events-none absolute left-[3%] top-1/2 hidden h-[720px] w-[760px] -translate-y-1/2 lg:block"
@@ -133,9 +135,14 @@ export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
           />
         ))}
       </div>
+      )}
 
       {/* Контент — ghost-panel карточка, прижата вправо */}
-      <div className="relative mx-auto flex w-full max-w-[1440px] justify-end px-6 md:px-12 lg:px-16">
+      <div
+        className={`relative mx-auto flex w-full max-w-[1440px] px-6 md:px-12 lg:px-16 ${
+          isStory ? 'justify-center' : 'justify-end'
+        }`}
+      >
         <div
           className="w-full max-w-[720px] rounded-[var(--radius-xl)] border p-8 md:p-12 lg:p-16"
           style={{
@@ -149,7 +156,7 @@ export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
           }}
         >
           <Reveal>
-            <h2 className="font-heading text-[clamp(2.5rem,5vw,5.375rem)] font-medium uppercase leading-[0.92] tracking-[-0.045em] text-[var(--color-text)]">
+            <h2 className="font-heading text-[clamp(2.5rem,5vw,5.375rem)] font-medium uppercase leading-[0.92] tracking-[-0.045em] [word-spacing:0.4em] text-[var(--color-text)]">
               {ABOUT.heading}
             </h2>
           </Reveal>

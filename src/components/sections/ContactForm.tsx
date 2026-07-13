@@ -35,9 +35,9 @@ function CustomSelect({
         type="button"
         id={id}
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between bg-white/[0.04] border border-[var(--color-card-border)]/40 rounded px-4 py-3 text-left transition-colors duration-200 focus:outline-none focus:border-[var(--color-accent-cold)]/50"
+        className="flex w-full items-center justify-between rounded-sm border border-[var(--color-lime-ink)]/35 bg-white px-4 py-3.5 text-left transition-colors duration-200 focus:border-[var(--color-lime-ink)] focus:outline-none"
       >
-        <span className={value ? 'text-white' : 'text-white/25'}>
+        <span className={value ? 'text-[var(--color-text)]' : 'text-[var(--color-muted)]'}>
           {value || placeholder}
         </span>
         <svg
@@ -45,19 +45,19 @@ function CustomSelect({
           height="14"
           viewBox="0 0 14 14"
           fill="none"
-          className={`text-white/40 transition-transform duration-200 shrink-0 ${open ? 'rotate-180' : ''}`}
+          className={`shrink-0 text-[var(--color-muted)] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         >
           <path d="M2 5l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
 
       {open && (
-        <ul className="absolute z-50 w-full mt-1 bg-[#1e1c1c] border border-[var(--color-card-border)]/40 rounded overflow-hidden">
+        <ul className="absolute z-50 mt-1 w-full overflow-hidden rounded-sm border border-[var(--color-line)] bg-white shadow-[0_20px_50px_rgba(0,0,0,.10)]">
           <li>
             <button
               type="button"
               onClick={() => { onChange(''); setOpen(false) }}
-              className="w-full text-left px-4 py-3 text-white/30 text-sm hover:bg-white/[0.06] transition-colors duration-150"
+              className="w-full px-4 py-3 text-left text-sm text-[var(--color-muted)] transition-colors duration-150 hover:bg-[var(--color-surface-soft)]"
             >
               {placeholder}
             </button>
@@ -67,8 +67,8 @@ function CustomSelect({
               <button
                 type="button"
                 onClick={() => { onChange(opt); setOpen(false) }}
-                className={`w-full text-left px-4 py-3 text-sm transition-colors duration-150 hover:bg-white/[0.06] hover:text-[var(--color-accent-cold)] ${
-                  value === opt ? 'text-[var(--color-accent-cold)]' : 'text-white/80'
+                className={`w-full px-4 py-3 text-left text-sm transition-colors duration-150 hover:bg-[var(--color-surface-soft)] hover:text-[var(--color-lime-ink)] ${
+                  value === opt ? 'text-[var(--color-lime-ink)]' : 'text-[var(--color-text)]'
                 }`}
               >
                 {opt}
@@ -94,8 +94,8 @@ const formatPhone = (v: string): string => {
 }
 
 const inputClass =
-  'bg-white/[0.04] border rounded px-4 py-3 text-white placeholder:text-white/25 focus:outline-none transition-colors duration-200'
-const labelClass = 'text-xs text-white/45 uppercase tracking-wider'
+  'rounded-sm border bg-white px-4 py-3.5 text-[var(--color-text)] font-medium placeholder:text-[var(--color-muted)] focus:outline-none transition-colors duration-200'
+const labelClass = 'text-xs font-extrabold uppercase tracking-[0.03em] text-[var(--color-text)]/75'
 
 export function ContactForm() {
   const [phone, setPhone] = useState('+7')
@@ -142,21 +142,23 @@ export function ContactForm() {
   if (submitted) {
     return (
       <div ref={thankRef} className="flex flex-col items-center justify-center gap-6 py-16 text-center">
-        <div className="w-16 h-16 rounded-full border border-[var(--color-accent-cold)]/50 flex items-center justify-center">
+        <div
+          className="flex h-16 w-16 items-center justify-center rounded-full text-[var(--color-lime-ink)]"
+          style={{ background: 'rgba(201,255,31,.18)' }}
+        >
           <svg
             width="28"
             height="28"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.5"
-            className="text-[var(--color-accent-cold)]"
+            strokeWidth="2"
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <h3 className="font-heading text-2xl font-extrabold">Спасибо!</h3>
-        <p className="text-white/55">Свяжемся с вами в течение рабочего дня</p>
+        <h3 className="font-heading text-2xl font-extrabold text-[var(--color-text)]">Ваша заявка оформлена!</h3>
+        <p className="text-[var(--color-muted)]">Свяжемся с вами в течение рабочего дня</p>
       </div>
     )
   }
@@ -172,15 +174,15 @@ export function ContactForm() {
           id="name"
           type="text"
           name="name"
-          placeholder="Иван Иванов"
+          placeholder="Ваше имя"
           className={`${inputClass} ${
             nameError
-              ? 'border-red-400/60 focus:border-red-400/80'
-              : 'border-[var(--color-card-border)]/40 focus:border-[var(--color-accent-cold)]/50'
+              ? 'border-red-400/70 focus:border-red-500'
+              : 'border-[var(--color-lime-ink)]/35 focus:border-[var(--color-lime-ink)]'
           }`}
         />
         {nameError && (
-          <p role="alert" className="text-xs text-red-400/80">
+          <p role="alert" className="text-xs text-red-500">
             {nameError}
           </p>
         )}
@@ -198,15 +200,15 @@ export function ContactForm() {
           required
           value={phone}
           onChange={handlePhoneChange}
-          placeholder="+7 (XXX) XXX-XX-XX"
+          placeholder="+7 (___) ___-__-__"
           className={`${inputClass} ${
             phoneError
-              ? 'border-red-400/60 focus:border-red-400/80'
-              : 'border-[var(--color-card-border)]/40 focus:border-[var(--color-accent-cold)]/50'
+              ? 'border-red-400/70 focus:border-red-500'
+              : 'border-[var(--color-lime-ink)]/35 focus:border-[var(--color-lime-ink)]'
           }`}
         />
         {phoneError && (
-          <p role="alert" className="text-xs text-red-400/80">
+          <p role="alert" className="text-xs text-red-500">
             {phoneError}
           </p>
         )}
@@ -234,15 +236,15 @@ export function ContactForm() {
         <textarea
           id="message"
           name="message"
-          rows={5}
+          rows={4}
           placeholder="Опишите вашу ситуацию..."
-          className={`${inputClass} border-[var(--color-card-border)]/40 focus:border-[var(--color-accent-cold)]/50 resize-none`}
+          className={`${inputClass} resize-none border-[var(--color-lime-ink)]/35 focus:border-[var(--color-lime-ink)]`}
         />
       </div>
 
       <button
         type="submit"
-        className="self-start px-10 py-4 text-sm uppercase tracking-widest border border-[var(--color-accent-cold)]/50 text-[var(--color-accent-cold)] hover:bg-[var(--color-accent-cold)]/10 transition-colors duration-300"
+        className="btn-lime-fill mt-1 h-14 w-full rounded-sm text-sm font-extrabold uppercase tracking-[0.08em] sm:w-[280px]"
       >
         Отправить заявку
       </button>

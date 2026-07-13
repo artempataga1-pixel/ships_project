@@ -1,6 +1,7 @@
 'use client'
 
 import { Fragment, useRef } from 'react'
+import Image from 'next/image'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import {
@@ -10,11 +11,14 @@ import {
 } from '@/constants/content/practice'
 import type { PracticeArea } from '@/types/content'
 
-/* Референс — landonorris.com (reference 2/praktiki.mp4): сначала экран-заголовок,
-   затем секция прилипает и вертикальный скролл превращается в горизонтальный
-   проезд коллажа: фото разных размеров на разной высоте, подписи-ярлыки над ними,
-   между карточками — цитаты. Когда коллаж доехал до конца, пин отпускает
-   страницу и вертикальный скролл плавно продолжается к следующему блоку. */
+/* Референс — dizain5.jpg + 03_practices_intro (заголовочный экран). Сначала
+   светлый экран-заголовок с ghost-panel, орбитами и лайм-glow; затем секция
+   прилипает и вертикальный скролл превращается в горизонтальный проезд коллажа:
+   карточки разных размеров на разной высоте, подписи-ярлыки над ними, между
+   карточками — цитаты. Когда коллаж доехал до конца, пин отпускает и
+   вертикальный скролл плавно продолжается к следующему блоку.
+   Механика скролла/пина/параллакса сохранена с тёмной версии — меняется
+   только палитра/шрифт под лайм-редизайн. */
 
 interface CardVariant {
   /* вертикальная посадка в коллаже: верх / центр / низ со сдвигами */
@@ -25,40 +29,80 @@ interface CardVariant {
   muted: boolean
 }
 
+/* ratio каждой карточки совпадает с пропорцией её фото (practice-1..6),
+   чтобы object-cover не резал кадр — форма рамки повторяет форму снимка */
 const CARD_VARIANTS: CardVariant[] = [
-  { align: 'self-center', width: 'w-[24vw] min-w-[280px]', ratio: 'aspect-[3/4]', muted: false },
-  { align: 'self-start mt-[10dvh]', width: 'w-[34vw] min-w-[360px]', ratio: 'aspect-[16/10]', muted: false },
-  { align: 'self-end mb-[14dvh]', width: 'w-[18vw] min-w-[240px]', ratio: 'aspect-square', muted: true },
-  { align: 'self-start mt-[8dvh]', width: 'w-[27vw] min-w-[320px]', ratio: 'aspect-[4/5]', muted: false },
-  { align: 'self-center', width: 'w-[17vw] min-w-[230px]', ratio: 'aspect-[3/4]', muted: true },
-  { align: 'self-end mb-[12dvh]', width: 'w-[36vw] min-w-[380px]', ratio: 'aspect-[16/9]', muted: false },
+  { align: 'self-center', width: 'w-[24vw] min-w-[280px]', ratio: 'aspect-[2/3]', muted: false },   // practice-1 · 1024×1536
+  { align: 'self-start mt-[10dvh]', width: 'w-[34vw] min-w-[360px]', ratio: 'aspect-[3/2]', muted: false }, // practice-2 · 1536×1024
+  { align: 'self-end mb-[14dvh]', width: 'w-[18vw] min-w-[240px]', ratio: 'aspect-[10/13]', muted: true },  // practice-3 · 1100×1430
+  { align: 'self-start mt-[8dvh]', width: 'w-[27vw] min-w-[320px]', ratio: 'aspect-[4/3]', muted: false },  // practice-4 · 1448×1086
+  { align: 'self-center', width: 'w-[17vw] min-w-[230px]', ratio: 'aspect-[9/16]', muted: true },   // practice-5 · 941×1672
+  { align: 'self-end mb-[12dvh]', width: 'w-[30vw] min-w-[360px]', ratio: 'aspect-[4/3]', muted: false },   // practice-6 · 1448×1086
 ]
+
+/* Контурный логотип-скобка (декор фона заголовочного экрана, ~16% opacity) —
+   угловые border-рамки + три бара, как .logo-outline в референс-коде. */
+function LogoOutline({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={`pointer-events-none absolute hidden h-[230px] w-[230px] opacity-[0.16] lg:block ${className ?? ''}`}
+    >
+      <span
+        className="absolute bottom-0 left-0 h-[136px] w-[86px] border-b border-l"
+        style={{ borderColor: '#bfdc54' }}
+      />
+      <span
+        className="absolute right-0 top-0 h-[136px] w-[86px] border-r border-t"
+        style={{ borderColor: '#bfdc54' }}
+      />
+      {[76, 124, 170].map((left) => (
+        <span
+          key={left}
+          className="absolute bottom-[66px] h-[118px] w-[28px] border"
+          style={{ left, borderColor: '#bfdc54' }}
+        />
+      ))}
+    </div>
+  )
+}
 
 function PracticeCard({ item, variant }: { item: PracticeArea; variant: CardVariant }) {
   return (
     <figure className={`shrink-0 ml-[5vw] ${variant.align} ${variant.width}`}>
       {/* Ярлык над фото — как «QATAR, 2024» в референсе */}
-      <figcaption className="mb-3 text-xs tracking-[0.25em] uppercase text-white/50">
+      <figcaption className="mb-3 text-xs tracking-[0.25em] uppercase text-[var(--color-muted)]">
         {item.num} / {item.label}
       </figcaption>
 
-      <div className={`relative overflow-hidden ${variant.ratio} ${variant.muted ? 'opacity-75' : ''}`}>
-        {/* Заглушка вместо фото — потом заменим на реальные изображения.
-            Растянута шире рамки, чтобы параллакс не оголял края */}
-        <div
-          data-parallax
-          className="absolute inset-y-0 -inset-x-[8%] bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900"
-        >
-          <span className="absolute inset-0 flex items-center justify-center font-hero text-[clamp(3rem,6vw,5.5rem)] text-bronze-solid">
-            {item.num}
-          </span>
+      <div
+        className={`relative overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] ${variant.ratio} ${variant.muted ? 'opacity-80' : ''}`}
+        style={{ boxShadow: 'var(--shadow-card)' }}
+      >
+        {/* Фото направления. Пропорция рамки = пропорция фото, поэтому кадр
+            садится целиком; лёгкий зум (scale-112) даёт запас, чтобы
+            горизонтальный параллакс не оголял края при сдвиге */}
+        <div data-parallax className="absolute inset-0">
+          <Image
+            src={item.image}
+            alt={item.title}
+            fill
+            sizes="(max-width: 768px) 80vw, 36vw"
+            className="scale-[1.12] object-cover"
+          />
         </div>
+
+        {/* Лайм-полоса у правого края — общая схема карточки редизайна */}
+        <span
+          className="pointer-events-none absolute right-0 top-0 h-full w-[3px] bg-[var(--color-lime)]"
+          style={{ boxShadow: '0 0 22px var(--color-lime-glow)' }}
+        />
       </div>
 
-      <h3 className="mt-5 font-heading text-xl md:text-2xl font-extrabold leading-snug">
+      <h3 className="mt-5 font-heading text-xl md:text-2xl font-extrabold leading-snug text-[var(--color-text)]">
         {item.title}
       </h3>
-      <p className="mt-2 text-sm text-white/50">
+      <p className="mt-2 text-sm text-[var(--color-muted)]">
         {item.desc}
       </p>
     </figure>
@@ -68,7 +112,7 @@ function PracticeCard({ item, variant }: { item: PracticeArea; variant: CardVari
 function QuoteBlock({ text }: { text: string }) {
   return (
     <div className="shrink-0 self-center ml-[7vw] w-[26vw] min-w-[300px]">
-      <p className="font-hero-italic italic text-bronze-solid text-[clamp(1.25rem,1.8vw,1.75rem)] leading-snug">
+      <p className="font-heading italic font-semibold text-[var(--color-lime-ink)] text-[clamp(1.25rem,1.8vw,1.75rem)] leading-snug">
         {text}
       </p>
     </div>
@@ -137,25 +181,86 @@ export function PracticesSection() {
   )
 
   return (
-    <section id="practices" ref={sectionRef} className="relative bg-black">
+    <section id="practices" ref={sectionRef} className="relative bg-[var(--color-bg)]">
       {/* Экран-заголовок: уезжает вверх обычным скроллом, как интро в референсе */}
-      <div className="flex h-dvh flex-col items-center justify-center gap-8 px-6 text-center">
-        <span className="text-sm md:text-base tracking-[0.3em] uppercase text-hero-bronze">
-          ( 06 направлений )
-        </span>
-        <h2
-          className="
-            font-heading font-extrabold uppercase
-            text-[clamp(3rem,9vw,8.5rem)] leading-[0.98]
-          "
-        >
-          Наши
-          <br />
-          практики
-        </h2>
-        <p className="max-w-3xl font-hero-italic italic text-hero-bronze text-[clamp(1.25rem,2vw,1.9rem)]">
-          {PRACTICES_SLOGAN}
-        </p>
+      <div className="relative flex h-dvh flex-col items-center justify-center overflow-hidden px-6 text-center">
+        {/* Светлый градиент секции + мягкий лайм-glow за заголовком */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(circle at 52% 48%, var(--color-lime-soft), transparent 30%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
+          }}
+        />
+
+        {/* Ghost-panel за заголовком — полупрозрачная скруглённая панель */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 hidden h-[560px] w-[min(1230px,86vw)] -translate-x-1/2 -translate-y-1/2 rounded-[42px] lg:block"
+          style={{
+            background: 'rgba(255,255,255,.64)',
+            border: '1px solid rgba(255,255,255,.85)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,.95),0 30px 90px rgba(0,0,0,.04)',
+          }}
+        />
+
+        {/* Фоновые эллиптические орбиты */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[560px] w-[96%] max-w-[1530px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[-15deg]"
+          style={{ borderColor: 'rgba(201,255,31,.42)' }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[510px] w-[86%] max-w-[1380px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[-11deg]"
+          style={{ borderColor: 'rgba(0,0,0,.08)' }}
+        />
+
+        {/* Лайм-точки по периметру орбит */}
+        {[
+          'left-[10%] top-[46%]',
+          'right-[11%] top-[22%]',
+          'left-[38%] bottom-[8%]',
+          'right-[14%] top-[56%]',
+          'right-[24%] bottom-[16%]',
+          'left-[16%] top-[26%]',
+        ].map((pos) => (
+          <span
+            key={pos}
+            aria-hidden
+            className={`pointer-events-none absolute ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)]`}
+            style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
+          />
+        ))}
+
+        {/* Контурные лого-скобки — декор по углам, как в референсе */}
+        <LogoOutline className="bottom-[8%] left-[10%]" />
+        <LogoOutline className="right-[9%] top-[24%]" />
+
+        {/* Контент заголовочного экрана */}
+        <div className="relative z-[4]">
+          <span className="text-sm md:text-base tracking-[0.3em] uppercase text-[var(--color-muted)]">
+            ( {String(PRACTICE_AREAS.length).padStart(2, '0')} направлений )
+          </span>
+          <h2
+            className="
+              mt-8 font-heading font-black uppercase
+              text-[clamp(3rem,9vw,8.5rem)] leading-[0.9] tracking-[-0.06em]
+              text-[var(--color-text)]
+            "
+          >
+            Наши
+            <br />
+            практики
+          </h2>
+          <p className="mx-auto mt-10 max-w-3xl font-heading italic text-[var(--color-muted)] text-[clamp(1.25rem,2vw,1.9rem)] leading-snug">
+            {PRACTICES_SLOGAN}
+          </p>
+        </div>
       </div>
 
       {/* Пин-экран: коллаж карточек, едущий горизонтально */}

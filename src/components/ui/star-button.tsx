@@ -5,7 +5,9 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 /* Кнопка со «звёздным небом» и бегущим по контуру бликом (21st.dev / star-button).
-   Адаптация под проект: тёмная плашка, лайм-блик и лайм-текст под новую тему.
+   Адаптация под проект: по умолчанию тёмная плашка с лайм-текстом, но через
+   backgroundColor/textColor/borderColor собирается и светлая версия (белый фон,
+   тёмный текст, лаймовый перелив) под лайм-тему сайта.
    Умеет рендериться ссылкой (href) — для навигации между страницами. */
 
 interface StarBackgroundProps {
@@ -51,6 +53,10 @@ interface StarButtonProps {
   duration?: number
   lightColor?: string
   backgroundColor?: string
+  /** Цвет текста. По умолчанию лайм (для тёмной плашки); для белой версии — тёмный. */
+  textColor?: string
+  /** Цвет рамки. По умолчанию под тёмную плашку; для белой версии — тёмный/лайм. */
+  borderColor?: string
   borderWidth?: number
   className?: string
 }
@@ -62,6 +68,8 @@ export function StarButton({
   duration = 3,
   lightColor = 'var(--color-lime)',
   backgroundColor = '#111111', // тёмная плашка — лайм-текст читается на ней контрастно
+  textColor = 'var(--color-lime)',
+  borderColor = 'rgba(255,255,255,.15)',
   borderWidth = 2,
   className,
   ...props
@@ -104,16 +112,18 @@ export function StarButton({
           } as CSSProperties
         }
       />
-      {/* Тёмная плашка со «звёздами»-просветами */}
+      {/* Плашка со «звёздами»-просветами */}
       <div
-        className="absolute inset-0 border-white/15 z-[4] overflow-hidden rounded-[inherit]"
-        style={{ borderWidth: 'var(--border-width)' }}
+        className="absolute inset-0 z-[4] overflow-hidden rounded-[inherit]"
+        style={{ borderWidth: 'var(--border-width)', borderStyle: 'solid', borderColor }}
         aria-hidden="true"
       >
         <StarBackground color={backgroundColor} />
       </div>
-      {/* Текст — лайм на тёмной плашке */}
-      <span className="z-10 relative text-[var(--color-lime)]">{children}</span>
+      {/* Текст поверх плашки */}
+      <span className="z-10 relative" style={{ color: textColor }}>
+        {children}
+      </span>
     </>
   )
 

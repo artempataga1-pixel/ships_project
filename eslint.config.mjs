@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Временные скрипты/скриншоты — не продакшн-код, линтить не нужно
+    "tmp/**",
   ]),
 ]);
 

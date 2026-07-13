@@ -51,6 +51,8 @@ export interface ValueItem {
 export interface TeamMember {
   name: string
   role: string
+  /** Готовая карточка-визитка (фото + имя + роль впечатаны в изображение). */
+  photo?: string
 }
 
 export interface Practice {
@@ -66,6 +68,8 @@ export interface PracticeArea {
   label: string
   title: string
   desc: string
+  /* фото-заглушка карточки в коллаже (public/reference3/…) */
+  image: string
 }
 
 export interface Case {
@@ -79,6 +83,8 @@ export interface MediaItem {
   publisher: string
   title: string
   date: string
+  /* готовое фото-превью статьи (public/images/articles/…) */
+  image: string
 }
 
 export interface CaseStudy {

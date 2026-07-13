@@ -3,9 +3,11 @@ import { CASE_STUDIES } from '@/constants/content/case-studies'
 import { CaseAnchorScroll } from './CaseAnchorScroll'
 import type { CaseStudy } from '@/types/content'
 
-/* Референс — nudot.com.tw (reference 2/keys.mp4): заголовок прилипает
-   по центру экрана, а карточки кейсов обычным потоком проезжают ПОВЕРХ
-   него снизу вверх. Раскладка чередуется: слева → справа → по центру. */
+/* Референс — dizain6.jpg + 02_cases_archive (заголовочный экран). Механика
+   прежняя: заголовок прилипает по центру экрана (sticky), а карточки кейсов
+   обычным потоком проезжают ПОВЕРХ него снизу вверх. Раскладка чередуется:
+   слева → справа → по центру. Меняется только палитра/форма карточек под
+   лайм-редизайн — светлый фон, белые панели с лайм-полосой справа. */
 
 type Align = 'left' | 'right' | 'center'
 
@@ -17,6 +19,33 @@ const ALIGN_CLASSES: Record<Align, string> = {
   center: 'self-center w-[80vw] md:w-[44vw]',
 }
 
+/* Контурный логотип-скобка (декор фона заголовочного экрана, ~16% opacity) —
+   угловые border-рамки + три бара, как .logo-outline в референс-коде. */
+function LogoOutline({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={`pointer-events-none absolute hidden h-[230px] w-[230px] opacity-[0.16] lg:block ${className ?? ''}`}
+    >
+      <span
+        className="absolute bottom-0 left-0 h-[136px] w-[86px] border-b border-l"
+        style={{ borderColor: '#bfdc54' }}
+      />
+      <span
+        className="absolute right-0 top-0 h-[136px] w-[86px] border-r border-t"
+        style={{ borderColor: '#bfdc54' }}
+      />
+      {[76, 124, 170].map((left) => (
+        <span
+          key={left}
+          className="absolute bottom-[66px] h-[118px] w-[28px] border"
+          style={{ left, borderColor: '#bfdc54' }}
+        />
+      ))}
+    </div>
+  )
+}
+
 function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
   return (
     <Link
@@ -25,56 +54,78 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
       aria-label={`Кейс «${item.title}» — подробнее`}
       className={`group block scroll-mt-[30dvh] ${ALIGN_CLASSES[align]}`}
     >
-      {/* Заглушка вместо фото — потом заменим на реальные изображения */}
-      <div className="relative aspect-[16/10] overflow-hidden">
-        <div
-          className="
-            absolute inset-0
-            bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900
-            transition-transform duration-700 ease-out
-            group-hover:scale-[1.04]
-          "
-        >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="font-heading text-4xl md:text-5xl font-extrabold text-hero-bronze">
-              {item.amount}
-            </span>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        </div>
+      {/* Белая панель с лайм-полосой справа — общая схема карточки редизайна */}
+      <div
+        className="
+          relative aspect-[16/10] overflow-hidden
+          rounded-[var(--radius-lg)] border border-[var(--color-line)]
+          bg-gradient-to-b from-white to-[var(--color-surface-soft)]
+          transition-transform duration-500 ease-out
+          group-hover:scale-[1.02]
+        "
+        style={{ boxShadow: 'var(--shadow-card)' }}
+      >
+        {/* Мягкий лайм-glow из нижнего правого угла (декор ::after в референсе) */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(201,255,31,.28), transparent 62%)',
+          }}
+        />
 
+        {/* Лайм-полоса у правого края + glow */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-[8%] h-[84%] w-[5px] bg-[var(--color-lime)]"
+          style={{ boxShadow: '0 0 34px var(--color-lime-glow)' }}
+        />
+
+        {/* Плашка категории — пилюля с лайм-квадратиком */}
         <span
           className="
-            absolute top-4 left-4
-            text-xs font-heading tracking-[0.15em] uppercase
-            text-white/80 bg-black/50 backdrop-blur-sm
-            px-3 py-1.5 rounded
+            absolute left-[6%] top-[9%]
+            inline-flex items-center gap-3
+            rounded-md border border-[var(--color-line)] bg-white
+            px-4 py-2
+            text-[0.7rem] font-heading font-black uppercase tracking-[0.12em]
+            text-[var(--color-text)]
           "
         >
           {item.category}
+          <i
+            aria-hidden
+            className="block h-[9px] w-[9px] rounded-[2px] bg-[var(--color-lime)]"
+            style={{ boxShadow: '0 0 12px var(--color-lime-glow)' }}
+          />
         </span>
 
-        {/* Название дела и год — в углах карточки, плашки как у категории */}
-        <span
-          className="
-            absolute bottom-4 left-4 max-w-[calc(100%-8rem)]
-            text-sm font-heading tracking-[0.15em] uppercase
-            text-hero-bronze bg-black/50 backdrop-blur-sm
-            px-3 py-1.5 rounded
-          "
-        >
-          {item.title}
-        </span>
-        <span
-          className="
-            absolute bottom-4 right-4
-            text-sm font-heading tracking-[0.15em] uppercase
-            text-hero-bronze bg-black/50 backdrop-blur-sm
-            px-3 py-1.5 rounded
-          "
-        >
+        {/* Год — приглушённо в правом верхнем углу */}
+        <span className="absolute right-[8%] top-[10%] text-sm font-medium text-[var(--color-muted)]">
           {item.year}
         </span>
+
+        {/* Сумма — крупным чёрным текстом по центру карточки */}
+        <span
+          className="
+            absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2
+            whitespace-nowrap font-heading font-black tracking-[-0.03em]
+            text-[clamp(1.75rem,4vw,3rem)] text-[var(--color-text)]
+          "
+        >
+          {item.amount}
+        </span>
+
+        {/* Название дела + «Подробнее» — снизу карточки */}
+        <div className="absolute inset-x-[6%] bottom-[9%] flex items-end justify-between gap-4">
+          <span className="max-w-[70%] font-heading text-sm md:text-base font-semibold leading-snug text-[var(--color-text)]">
+            {item.title}
+          </span>
+          <span className="shrink-0 text-sm font-semibold text-[var(--color-lime-ink)] transition-transform duration-300 group-hover:translate-x-1">
+            Подробнее →
+          </span>
+        </div>
       </div>
     </Link>
   )
@@ -82,34 +133,77 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
 
 export function CasesSection() {
   return (
-    <section id="cases" className="relative bg-black">
+    <section
+      id="cases"
+      className="relative bg-[var(--color-bg)]"
+      style={{
+        background:
+          'radial-gradient(circle at 72% 42%, rgba(201,255,31,.08), transparent 24%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
+      }}
+    >
       <CaseAnchorScroll />
       {/* Прилипающий заголовок: стоит по центру экрана, пока мимо едут карточки */}
       <div
         className="
-          sticky top-0 z-0 h-dvh
+          sticky top-0 z-0 h-dvh overflow-hidden
           flex flex-col items-center justify-center gap-6
           text-center px-6
         "
       >
-        <span className="text-sm md:text-base tracking-[0.3em] uppercase text-hero-bronze">
-          ( Кейсы )
-        </span>
-        <h2
-          className="
-            font-heading font-extrabold uppercase
-            text-[clamp(2.5rem,6vw,5.5rem)] leading-[1.02]
-          "
-        >
-          Архив
-          <br />
-          избранных дел
-          <br />
-          бюро
-        </h2>
-        <span className="text-base md:text-lg text-hero-bronze">
-          Отрасли, суммы и результаты
-        </span>
+        {/* Фоновые эллиптические орбиты */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[96%] max-w-[1530px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[4deg]"
+          style={{ borderColor: 'rgba(201,255,31,.42)' }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[340px] w-[72%] max-w-[1100px] -translate-x-1/2 -translate-y-[42%] rounded-[50%] border rotate-[8deg]"
+          style={{ borderColor: 'rgba(0,0,0,.08)' }}
+        />
+
+        {/* Лайм-точки по периметру орбит */}
+        {[
+          'left-[10%] top-[46%]',
+          'right-[11%] top-[22%]',
+          'left-[38%] bottom-[8%]',
+          'right-[14%] top-[56%]',
+          'right-[24%] bottom-[16%]',
+          'left-[16%] top-[26%]',
+        ].map((pos) => (
+          <span
+            key={pos}
+            aria-hidden
+            className={`pointer-events-none absolute ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)]`}
+            style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
+          />
+        ))}
+
+        {/* Контурная лого-скобка — декор справа, как в референсе */}
+        <LogoOutline className="right-[9%] top-[24%]" />
+
+        {/* Контент заголовочного экрана */}
+        <div className="relative z-[4] flex flex-col items-center gap-6">
+          <span className="text-sm md:text-base tracking-[0.3em] uppercase text-[var(--color-muted)]">
+            ( кейсы )
+          </span>
+          <h2
+            className="
+              font-heading font-black uppercase
+              text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.95] tracking-[-0.045em]
+              text-[var(--color-text)]
+            "
+          >
+            Архив
+            <br />
+            избранных дел
+            <br />
+            бюро
+          </h2>
+          <span className="text-base md:text-lg text-[var(--color-muted)]">
+            Отрасли, суммы и результаты
+          </span>
+        </div>
       </div>
 
       {/* Поток карточек: поднят на высоту экрана, чтобы ехать поверх заголовка */}

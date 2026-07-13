@@ -1,19 +1,22 @@
 'use client'
 
 import { useRef } from 'react'
+import Image from 'next/image'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { MEDIA } from '@/constants/content/media'
 import type { MediaItem } from '@/types/content'
 
-/* Референс — hildenkaira.fi (reference 2/stati.mp4): секция пинится. Первая карточка
-   въезжает снизу вверх и занимает экран. Дальше все следующие карточки уже лежат
-   статично друг под другом (стопкой), и при скролле верхняя улетает вверх с лёгким
-   поворотом, открывая под собой следующую — та никуда не едет, просто открывается.
-   Цвета — не их (лайм/мята), а бронза и холодный акцент нашего сайта.
-   На мобильных пин отключён (scroll-jacking там неуместен) — карточки идут
-   обычным вертикальным списком. */
+/* Референс — dizain7/8.jpg + 04_article_card_01/05_article_card_02 (одна и та же
+   карточка с разным контентом). Секция пинится: первая карточка въезжает снизу
+   вверх и занимает экран. Дальше все следующие карточки уже лежат статично друг
+   под другом (стопкой), и при скролле верхняя улетает вверх с лёгким поворотом,
+   открывая под собой следующую — та никуда не едет, просто открывается.
+   На мобильных пин отключён — карточки идут обычным вертикальным списком.
+   Механика пина/скраба/прогресса сохранена с тёмной версии — меняется только
+   палитра/структура карточки под лайм-редизайн (единый лайм-акцент, без
+   чередования цвета). */
 
 // Каждая следующая карточка в стопке чуть смещена вниз-вправо — веером,
 // чтобы её край выглядывал из-под текущей, а не пряталась ровно под ней
@@ -26,71 +29,76 @@ const PEEK_STEPS = [
 
 function ArticleCard({ item, index, total }: { item: MediaItem; index: number; total: number }) {
   const num = String(index + 1).padStart(2, '0')
-  const cold = index % 2 === 1
-  const accentClass = cold ? 'text-[var(--color-accent-cold)]' : 'text-hero-bronze'
-  const borderClass = cold ? 'border-[var(--color-accent-cold)]/40' : 'border-[var(--color-card-border)]/50'
+  const totalStr = String(total).padStart(2, '0')
 
   return (
     <article
-      className={`
+      className="
         relative flex flex-col justify-center
         min-h-[82dvh] md:min-h-0 md:h-full w-full
-        rounded-2xl md:rounded-3xl border ${borderClass}
-        bg-gradient-to-b from-zinc-800 to-zinc-900
-        shadow-[0_25px_70px_-15px_rgba(0,0,0,0.75)]
+        rounded-2xl md:rounded-[28px]
+        border border-[var(--color-line)]
+        bg-[var(--color-surface)]
         overflow-hidden
-      `}
+      "
+      style={{ boxShadow: 'var(--shadow-card)' }}
     >
+      {/* Лайм-полоса слева с glow — единый акцент карточки редизайна (::before в референсе) */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-7 bottom-7 w-[4px] bg-[var(--color-lime)]"
+        style={{ boxShadow: '0 0 42px var(--color-lime)' }}
+      />
+
       <div className="max-w-[1440px] w-full mx-auto px-8 md:px-16 py-14 md:py-0 grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+        {/* Левая колонка — копия статьи */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <span className="text-xs font-heading tracking-[0.2em] uppercase text-white/50">
+          <div className="flex items-center justify-between gap-6 mb-8">
+            <span className="font-heading text-xs font-black tracking-[0.22em] uppercase text-[var(--color-text)]">
               {item.publisher}
             </span>
-            <span className={`font-hero-italic italic text-2xl md:text-3xl leading-none ${accentClass}`}>
-              {num}
-              <span className="ml-1 font-heading text-xs not-italic align-top text-white/30">
-                /{String(total).padStart(2, '0')}
-              </span>
+            {/* Счётчик 01/04 — текущий номер лайм, знаменатель приглушённый */}
+            <span className="font-heading text-base font-black leading-none">
+              <b className="font-medium text-2xl text-[var(--color-lime-ink)]">{num}</b>
+              <span className="text-[var(--color-muted)]">/{totalStr}</span>
             </span>
           </div>
 
-          <h3 className="font-heading text-[clamp(1.75rem,3.2vw,3rem)] font-extrabold leading-[1.05]">
+          <h3 className="font-heading text-[clamp(1.75rem,3.4vw,3.1rem)] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-text)]">
             {item.title}
           </h3>
 
-          <div className="mt-8 flex items-center gap-6">
-            <span className="text-sm text-white/40">{item.date}</span>
+          <div className="mt-9 flex items-center gap-6 text-[var(--color-text)]">
+            <span className="text-sm md:text-base">{item.date}</span>
+            <span aria-hidden className="h-[22px] w-px bg-[var(--color-line)]" />
             <a
               href="#"
               aria-label={`Читать статью «${item.title}»`}
-              className={`text-sm flex items-center gap-1 hover:underline underline-offset-4 ${accentClass}`}
+              className="flex items-center gap-1.5 text-sm md:text-base font-extrabold hover:underline underline-offset-4"
             >
-              Читать <span aria-hidden="true">→</span>
+              Читать{' '}
+              <span aria-hidden className="text-xl text-[var(--color-lime-ink)]">
+                →
+              </span>
             </a>
           </div>
         </div>
 
-        {/* Превью — заглушка вместо фото, потом заменим на реальные изображения */}
-        <div className={`relative aspect-[4/3] md:aspect-[16/11] overflow-hidden rounded-lg border ${borderClass}`}>
-          <div className="absolute inset-0 bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className={`font-hero text-[clamp(3rem,7vw,6rem)] opacity-70 ${accentClass}`}>
-                {num}
-              </span>
-            </div>
-            <div className="absolute bottom-4 left-4">
-              <span
-                className="
-                  text-xs font-heading tracking-[0.15em] uppercase
-                  text-white/80 bg-black/50 backdrop-blur-sm
-                  px-3 py-1.5 rounded
-                "
-              >
-                {item.publisher}
-              </span>
-            </div>
-          </div>
+        {/* Правая колонка — готовое фото-превью статьи. Пропорция рамки = 3/2
+            (как у фото), object-contain вписывает кадр целиком, не обрезая;
+            для 16:9-кадра остаются лишь узкие поля в цвет подложки. */}
+        <div className="relative aspect-[3/2] overflow-hidden rounded-[6px] border border-[var(--color-line)] bg-[var(--color-surface-soft)]">
+          <Image
+            src={item.image}
+            alt={item.title}
+            fill
+            sizes="(max-width: 768px) 80vw, 40vw"
+            className="object-contain"
+          />
+          <span className="absolute left-5 bottom-5 flex items-center gap-2.5 h-[34px] px-3.5 rounded-[7px] bg-[var(--color-surface)] text-[11px] font-black tracking-[0.13em] uppercase text-[var(--color-text)] shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
+            {item.publisher}
+            <i aria-hidden className="h-2 w-2 rounded-[2px] bg-[var(--color-lime)]" />
+          </span>
         </div>
       </div>
     </article>
@@ -102,6 +110,7 @@ export function ArticlesSection() {
   const pinRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
   const progressRef = useRef<HTMLDivElement>(null)
+  const headingRef = useRef<HTMLDivElement>(null)
 
   useGSAP(
     () => {
@@ -118,6 +127,7 @@ export function ArticlesSection() {
         gsap.set(cards[0], { yPercent: 100, rotate: 0 })
         gsap.set(cards.slice(1), { yPercent: 0, rotate: 0, autoAlpha: 0 })
         if (progressRef.current) gsap.set(progressRef.current, { scaleX: 0 })
+        if (headingRef.current) gsap.set(headingRef.current, { autoAlpha: 1 })
 
         const tl = gsap.timeline({
           scrollTrigger: {
@@ -134,6 +144,12 @@ export function ArticlesSection() {
         // Въезд первой карточки снизу вверх, следом открываем лежащую под ней стопку
         tl.to(cards[0], { yPercent: 0, ease: 'none' }, 0)
         tl.set(cards.slice(1), { autoAlpha: 1 }, 1)
+
+        // Заголовок секции виден только на старте (пока верх пуст). Как только
+        // пошёл скролл и карточка поехала — он уходит и при прокрутке его нет.
+        if (headingRef.current) {
+          tl.to(headingRef.current, { autoAlpha: 0, ease: 'none', duration: 0.5 }, 0)
+        }
 
         // Каждая карточка, кроме последней, улетает вверх с лёгким поворотом,
         // открывая статично лежащую под ней следующую
@@ -155,10 +171,9 @@ export function ArticlesSection() {
   )
 
   return (
-    <section id="articles" ref={sectionRef} className="relative bg-black">
-      {/* На мобильных — обычный заголовок сверху, как и раньше. На десктопе он
-          скрыт: вместо него внутри пина работает вариант, который доезжает
-          снизу вместе со страницей и оседает в нижней полосе (см. ниже) */}
+    <section id="articles" ref={sectionRef} className="relative bg-[var(--color-bg)]">
+      {/* На мобильных — обычный заголовок сверху. На десктопе он скрыт: вместо
+          него внутри пина работает вариант, оседающий в нижней полосе (см. ниже) */}
       <div className="md:hidden max-w-[1440px] w-full mx-auto px-8 pt-24">
         <SectionHeading title="Статьи" subtitle="Публикации и комментарии экспертов компании" />
       </div>
@@ -167,6 +182,33 @@ export function ArticlesSection() {
         ref={pinRef}
         className="relative mt-12 md:mt-0 flex flex-col gap-6 md:gap-0 md:h-dvh md:overflow-hidden"
       >
+        {/* Фоновый декор экрана — светлый градиент + эллиптические орбиты и лайм-точки,
+            видны в полях вокруг стопки (как в референс-коде .card-orbit/.dot) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 hidden md:block"
+          style={{
+            background:
+              'radial-gradient(circle at 72% 42%, var(--color-lime-soft), transparent 24%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
+          }}
+        >
+          <span
+            className="absolute left-[-6%] top-[34%] h-[62%] w-[112%] rounded-[50%] border rotate-[-8deg]"
+            style={{ borderColor: 'rgba(201,255,31,.42)' }}
+          />
+          <span
+            className="absolute left-[2%] top-[52%] h-[52%] w-[104%] rounded-[50%] border rotate-[-6deg]"
+            style={{ borderColor: 'rgba(0,0,0,.08)' }}
+          />
+          {['left-[9%] top-[54%]', 'right-[6%] top-[26%]', 'left-[62%] bottom-[15%]'].map((pos) => (
+            <span
+              key={pos}
+              className={`absolute ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)]`}
+              style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
+            />
+          ))}
+        </div>
+
         {MEDIA.map((item, i) => (
           <div
             key={item.title}
@@ -180,27 +222,29 @@ export function ArticlesSection() {
           </div>
         ))}
 
-        {/* Заголовок доезжает вместе со страницей и остаётся в нижней полосе пина,
-            пока карточки сменяют друг друга — z-30, чтобы быть поверх стопки всегда */}
+        {/* Заголовок секции — по центру верхней свободной зоны пина, пока снизу
+            сменяются карточки. z-30 — всегда поверх стопки (карточки уезжают вверх
+            за ним). Позиция фиксированная, при скролле не двигается. */}
         <div
+          ref={headingRef}
           className="
-            hidden md:flex absolute inset-x-[18%] bottom-[6%] z-30
-            items-baseline justify-between gap-6
+            hidden md:flex absolute inset-x-0 top-[8%] z-30
+            flex-col items-center gap-3 text-center
           "
         >
-          <h2 className="font-heading text-2xl lg:text-3xl font-extrabold uppercase">
+          <h2 className="font-heading text-[clamp(2.5rem,4vw,4.25rem)] font-black uppercase leading-[0.9] tracking-[-0.04em] text-[var(--color-text)]">
             Статьи
           </h2>
-          <p className="text-sm lg:text-base text-white/50">
-            Публикации и комментарии экспертов компании
+          <p className="text-base lg:text-lg text-[var(--color-muted)]">
+            Что о нас говорят в медиа
           </p>
         </div>
 
         {/* Полоска прогресса пина — заполняется по мере смены карточек (только десктоп) */}
-        <div className="hidden md:block absolute bottom-0 inset-x-0 h-[3px] bg-white/10 z-20">
+        <div className="hidden md:block absolute bottom-0 inset-x-0 h-[3px] bg-[var(--color-line)] z-20">
           <div
             ref={progressRef}
-            className="h-full w-full origin-left bg-gradient-to-r from-[var(--color-card-border)] to-[var(--color-accent-cold)]"
+            className="h-full w-full origin-left bg-gradient-to-r from-[var(--color-lime-ink)] to-[var(--color-lime)]"
           />
         </div>
       </div>

@@ -1,86 +1,115 @@
-import Image from 'next/image'
-import { SectionHeading } from '@/components/ui/SectionHeading'
+import { Phone, Mail, MapPin, Clock } from 'lucide-react'
+import type { ComponentType } from 'react'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { Marquee } from '@/components/ui/Marquee'
 import { CONTACT_INFO, MEDIA_MENTIONS } from '@/constants/content/contacts'
 import { ContactForm } from './ContactForm'
 
-/* Бегущая строка СМИ и рейтингов — full-bleed на всю ширину экрана
-   (вырывается за пределы max-w контейнера через left-1/2 -translate-x-1/2
-   w-screen), тонкая полоса без остановки. Логотипы перекрашены в единый
-   holodный accent-cold ПРЯМО В ФАЙЛАХ (pillow для PNG, fill в разметке
-   SVG) — так бренд-цвета изданий не спорят со стилистикой сайта. Не через
-   CSS filter: Next Image Optimizer пережимает эти PNG в paletted PNG, а
-   Chrome ломает альфа-прозрачность при filter поверх paletted PNG
-   (сплошная плашка вместо текста). unoptimized — файлы весят пару
-   килобайт, оптимизация всё равно не нужна. */
-
-const mediaItems = MEDIA_MENTIONS.map((mention) =>
-  mention.logo ? (
-    <Image
-      key={mention.name}
-      src={mention.logo}
-      alt={mention.name}
-      width={mention.logoWidth}
-      height={mention.logoHeight}
-      unoptimized
-      className="h-7 md:h-9 w-auto opacity-70"
-    />
-  ) : (
-    <span
-      key={mention.name}
-      className="font-heading text-xl md:text-2xl font-extrabold uppercase tracking-wide text-[var(--color-accent-cold)]/70"
-    >
-      {mention.name}
-    </span>
-  ),
-)
+/* Бегущая строка СМИ — full-bleed на всю ширину экрана (вырывается за max-w
+   контейнера через left-1/2 -translate-x-1/2 w-screen). Механика Marquee
+   сохранена (CSS-анимация, дублирование x2). Рендерим единым uppercase-текстом:
+   логотипы-файлы вшиты старым холодным цветом #AAD2FF (голубой прошлой тёмной
+   темы) и на светлой лайм-теме смотрелись бы чужеродно — на dizain9 это ровный
+   текстовый ряд, первый пункт — лайм-акцентом. */
+const mediaItems = MEDIA_MENTIONS.map((mention) => (
+  <span
+    key={mention.name}
+    className="font-heading text-sm md:text-base font-extrabold uppercase tracking-[0.02em] whitespace-nowrap text-[var(--color-lime-ink)]"
+  >
+    {mention.name}
+  </span>
+))
 
 export function ContactsSection() {
   return (
-    <section id="contacts" className="min-h-dvh flex items-center bg-black overflow-x-hidden">
-      <div className="max-w-[1440px] w-full mx-auto px-8 md:px-16 py-24 md:py-32">
-        <SectionHeading
-          title="Контакты"
-          subtitle="Свяжитесь с нами — ответим в течение рабочего дня"
-          className="text-center"
-        />
+    <section
+      id="contacts"
+      className="relative flex min-h-dvh items-center overflow-hidden bg-[var(--color-bg)] py-24 md:py-28"
+    >
+      {/* Мягкий лайм-glow + светлый вертикальный градиент секции */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(circle at 72% 38%, var(--color-lime-soft), transparent 24%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
+          opacity: 0.6,
+        }}
+      />
 
-        {/* Строка СМИ — на всю ширину экрана, от края до края */}
-        <div className="relative left-1/2 -translate-x-1/2 w-screen mt-16 py-4 border-y border-[var(--color-card-border)]/20">
+      <div className="relative mx-auto w-full max-w-[1440px] px-6 md:px-12 lg:px-16">
+        {/* Заголовок по центру с короткой лайм-чертой */}
+        <RevealOnScroll className="text-center">
+          <h2 className="font-heading text-[clamp(2.75rem,7vw,4.5rem)] font-extrabold uppercase leading-[1] tracking-[-0.055em] text-[var(--color-text)]">
+            Контакты
+          </h2>
+          <span
+            aria-hidden
+            className="mx-auto mt-5 block h-[2px] w-12"
+            style={{
+              background: 'var(--color-lime)',
+              boxShadow: '0 0 14px var(--color-lime-glow)',
+            }}
+          />
+          <p className="mt-5 text-lg font-medium text-[var(--color-text)] md:text-xl">
+            Свяжитесь с нами — и ответим в течение рабочего дня
+          </p>
+        </RevealOnScroll>
+
+        {/* Строка СМИ — на всю ширину экрана, механика Marquee сохранена */}
+        <div className="relative left-1/2 mt-14 w-screen -translate-x-1/2 border-y border-[var(--color-line)] py-4">
           <Marquee
             items={mediaItems}
-            duration={30}
+            duration={34}
+            separator={<span className="text-[var(--color-lime-ink)]">·</span>}
             srLabel={`СМИ и рейтинги о нас: ${MEDIA_MENTIONS.map((m) => m.name).join(', ')}`}
           />
         </div>
 
-        <div className="mt-20 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
+        <div className="mt-14 grid grid-cols-1 items-stretch gap-8 lg:grid-cols-[1fr_1.18fr] lg:gap-10">
+          {/* Левая карточка — контактная информация */}
           <RevealOnScroll delay={0}>
-            <div className="flex flex-col gap-10">
-              <div className="flex flex-col gap-8">
-                <ContactInfoItem
-                  label="Телефон"
-                  value={CONTACT_INFO.phone}
-                  href={`tel:+${CONTACT_INFO.phone.replace(/\D/g, '')}`}
-                />
-                <ContactInfoItem
-                  label="Email"
-                  value={CONTACT_INFO.email}
-                  href={`mailto:${CONTACT_INFO.email}`}
-                />
-                <ContactInfoItem label="Адрес" value={CONTACT_INFO.address} />
-              </div>
+            <div
+              className="relative flex h-full flex-col justify-center gap-9 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-surface)] p-8 sm:p-12"
+              style={{
+                borderRight: '4px solid var(--color-lime)',
+                boxShadow:
+                  '0 28px 80px rgba(0,0,0,.06), 0 0 34px rgba(201,255,31,.10)',
+              }}
+            >
+              <ContactInfoRow
+                icon={Phone}
+                label="Телефон"
+                value={CONTACT_INFO.phone}
+                href={`tel:+${CONTACT_INFO.phone.replace(/\D/g, '')}`}
+              />
+              <ContactInfoRow
+                icon={Mail}
+                label="E-mail"
+                value={CONTACT_INFO.email}
+                href={`mailto:${CONTACT_INFO.email}`}
+              />
+              <ContactInfoRow icon={MapPin} label="Адрес" value={CONTACT_INFO.address} />
+              <ContactInfoRow icon={Clock} label="Режим работы" value="Пн–Пт: 9:00 – 18:00" />
 
-              <div className="pt-8 border-t border-[var(--color-card-border)]/20">
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-3">Режим работы</p>
-                <p className="text-white/70">Пн–Пт: 9:00 — 19:00</p>
-              </div>
+              {/* Нижняя лайм-полоса карточки */}
+              <span
+                aria-hidden
+                className="absolute inset-x-0 bottom-0 h-[3px] rounded-b-[var(--radius-md)]"
+                style={{ background: 'var(--color-lime)' }}
+              />
             </div>
           </RevealOnScroll>
 
+          {/* Правая карточка — форма */}
           <RevealOnScroll delay={0.15}>
-            <div className="border border-[var(--color-card-border)]/30 bg-white/[0.02] backdrop-blur-sm rounded-lg p-6 sm:p-10">
+            <div
+              className="h-full rounded-[var(--radius-md)] border border-[var(--color-line)] p-6 sm:p-10"
+              style={{
+                background: 'linear-gradient(180deg,#ffffff,#fbfbfa)',
+                boxShadow: '0 24px 70px rgba(0,0,0,.05)',
+              }}
+            >
               <ContactForm />
             </div>
           </RevealOnScroll>
@@ -90,26 +119,39 @@ export function ContactsSection() {
   )
 }
 
-interface ContactInfoItemProps {
+interface ContactInfoRowProps {
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>
   label: string
   value: string
   href?: string
 }
 
-function ContactInfoItem({ label, value, href }: ContactInfoItemProps) {
+function ContactInfoRow({ icon: Icon, label, value, href }: ContactInfoRowProps) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <p className="text-xs text-white/40 uppercase tracking-wider">{label}</p>
-      {href ? (
-        <a
-          href={href}
-          className="text-lg text-white/85 hover:text-[var(--color-accent-cold)] transition-colors duration-200"
-        >
-          {value}
-        </a>
-      ) : (
-        <p className="text-lg text-white/85">{value}</p>
-      )}
+    <div className="grid grid-cols-[48px_1fr] items-center gap-5">
+      <span
+        className="flex h-12 w-12 items-center justify-center rounded-full text-[var(--color-lime-ink)]"
+        style={{ background: 'rgba(201,255,31,.18)' }}
+      >
+        <Icon className="h-[22px] w-[22px]" strokeWidth={2} />
+      </span>
+      <div>
+        <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.06em] text-[var(--color-lime-ink)]">
+          {label}
+        </p>
+        {href ? (
+          <a
+            href={href}
+            className="block text-xl font-extrabold leading-tight text-[var(--color-text)] transition-colors duration-200 hover:text-[var(--color-lime-ink)] md:text-2xl"
+          >
+            {value}
+          </a>
+        ) : (
+          <p className="text-xl font-extrabold leading-tight text-[var(--color-text)] md:text-2xl">
+            {value}
+          </p>
+        )}
+      </div>
     </div>
   )
 }

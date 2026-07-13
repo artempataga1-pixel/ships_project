@@ -33,16 +33,13 @@ export function Header() {
 
         {/* CTA — обычный <a>: на главной клик перехватывает Lenis (плавный скролл),
             с внутренних страниц «/#contacts» уводит на главную к секции.
-            Белый фон, тонкая чёрная обводка, лайм-индикатор справа (см. .contact-btn) */}
+            Эффект .btn-lime-fill: залита лаймом → при наведении белеет + лайм-glow. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- намеренно нативный <a>: на главной клик перехватывает Lenis (плавный скролл к #contacts), Link здесь не нужен */}
         <a
           href="/#contacts"
-          className="shrink-0 inline-flex items-center gap-3 h-11 px-5 rounded-md border border-[var(--color-black)] bg-[var(--color-surface)] text-sm font-semibold text-[var(--color-text)] transition-colors duration-200 hover:bg-[var(--color-surface-soft)]"
+          className="btn-lime-fill btn-outline-thin shrink-0 inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
         >
           Связаться
-          <span
-            aria-hidden="true"
-            className="w-2.5 h-2.5 rounded-[3px] bg-[var(--color-lime)] shadow-[0_0_16px_var(--color-lime-glow)]"
-          />
         </a>
       </div>
     </header>

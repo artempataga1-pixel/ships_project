@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { LogoIntro } from "@/components/ui/LogoIntro";
 import "./globals.css";
 
 // Единый шрифт сайта — Manrope. Google Fonts отдаёт диапазон 200–800,
@@ -40,6 +41,7 @@ export default function RootLayout({
       className={`${manrope.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased">
+        <LogoIntro />
         <SmoothScrollProvider>
           <Header />
           <main className="flex-1">{children}</main>

@@ -62,7 +62,7 @@ function AnimatedStat({ item }: AnimatedStatProps) {
       observer.disconnect()
       cancelAnimationFrame(rafRef.current)
     }
-  }, [])
+  }, [item.value])
 
   return (
     <div className="flex flex-col items-center text-center gap-3">

@@ -1,43 +1,40 @@
 'use client'
 
 import { useRef } from 'react'
+import Image from 'next/image'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
-import { Card } from '@/components/ui/Card'
 import { TEAM } from '@/constants/content/team'
+import type { TeamMember } from '@/types/content'
 
-/* Референс — dizain3.jpg + 02_partners_block (index.html/style.css):
-   плотная колода крупных портретных карточек раскрывается тесным веером-дугой
-   при входе в вьюпорт и бесконечно покачивается на месте. Подпись с именем —
-   одна, под колодой, и переключается на наведённую карточку. Наведение НЕ
-   поднимает карточку поверх соседей через z-index — вместо этого соседние
-   карточки раздвигаются в стороны, освобождая ей место, а сама наведённая
-   карточка просто выезжает вверх на своём месте.
-   Геометрия веера взята 1-в-1 из референс-кода .person-card / card-center /
-   card-left-1/2 / card-right-1/2 (translateX/Y + rotate + opacity). */
+/* Блок «Партнёры» — колода из 3 готовых карточек-визиток (фото + имя + роль
+   впечатаны в PNG, public/images/team). Карточки раскрываются тесным веером
+   при входе в вьюпорт и покачиваются на месте. При наведении — магнитное
+   отталкивание (референс mt-webdesign.ru/repulsion, адаптирован с jQuery+Tilda
+   на GSAP): активная карточка встаёт ровно и вырастает, соседи разлетаются в
+   стороны с 3D-наклоном и уменьшаются. Управляющий партнёр Шумская — по центру. */
 
 const IDLE_WOBBLE_DURATION = 7
-const HOVER_GAP = 64
-const CENTER_INDEX = Math.floor((TEAM.length - 1) / 2)
+// Магнитное отталкивание: на сколько px сосед отъезжает от активной карточки.
+const REPEL_X = 120
+const REPEL_Y = 30
 
-// Целевые позиции веера из референс-кода 02_partners_block (для 5 карточек).
+// Целевые позиции веера для 3 горизонтальных карточек (центр — управляющий).
 type FanPos = { x: number; y: number; rotate: number; z: number; opacity: number }
 const FAN: FanPos[] = [
-  { x: -460, y: 102, rotate: -20, z: 3, opacity: 0.82 }, // card-left-2
-  { x: -245, y: 58, rotate: -11, z: 4, opacity: 0.9 }, //  card-left-1
-  { x: 0, y: -15, rotate: 0, z: 5, opacity: 1 }, //         card-center
-  { x: 245, y: 58, rotate: 11, z: 4, opacity: 0.9 }, //     card-right-1
-  { x: 460, y: 102, rotate: 20, z: 3, opacity: 0.82 }, //   card-right-2
+  { x: -300, y: 48, rotate: -9, z: 3, opacity: 0.94 }, // левая
+  { x: 0, y: -8, rotate: 0, z: 5, opacity: 1 }, //        центр (Шумская)
+  { x: 300, y: 48, rotate: 9, z: 4, opacity: 0.94 }, //   правая
 ]
 
-// Fallback-геометрия на случай, если состав TEAM изменят (не 5 персон).
+// Fallback-геометрия на случай, если состав TEAM изменят (не 3 персоны).
 function arcFallback(index: number, total: number): FanPos {
   const offset = index - (total - 1) / 2
   return {
-    x: offset * 210,
+    x: offset * 300,
     y: Math.abs(offset) * 48,
-    rotate: offset * 11,
+    rotate: offset * 9,
     z: Math.round(total - Math.abs(offset)),
     opacity: 1 - Math.abs(offset) * 0.06,
   }
@@ -47,38 +44,18 @@ function fanPosition(index: number, total: number): FanPos {
   return total === FAN.length ? FAN[index] : arcFallback(index, total)
 }
 
-// Серый силуэт-плейсхолдер (реальных фото партнёров нет).
-function SilhouetteIcon({ className }: { className?: string }) {
+// Готовая карточка-визитка: контент (фото, имя, роль) впечатан в JPG,
+// а «карточность» — скругление, белую подложку и тень — даёт обёртка.
+function PartnerCard({ member }: { member: TeamMember }) {
   return (
-    <svg
-      viewBox="0 0 100 120"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden="true"
-    >
-      <circle cx="50" cy="40" r="24" fill="#dadada" />
-      <path d="M8 120 C8 82 92 82 92 120 Z" fill="#dadada" />
-    </svg>
-  )
-}
-
-// Светлая карточка партнёра: белый градиент, тонкая рамка, мягкая тень,
-// вертикальная лайм-полоса у ПРАВОГО края (референс .person-card::before).
-function PartnerCard() {
-  return (
-    <div
-      className="relative w-full h-full rounded-[28px] border border-[var(--color-line)] flex items-center justify-center overflow-visible"
-      style={{
-        background: 'linear-gradient(135deg,#ffffff,#f4f4f3)',
-        boxShadow: '0 34px 85px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.95)',
-      }}
-    >
-      <SilhouetteIcon className="w-28 h-32 -translate-y-2" />
-      {/* лайм-полоса у правого края */}
-      <span
-        className="absolute right-[-2px] top-8 bottom-8 w-1 rounded-full bg-[var(--color-lime)]"
-        style={{ boxShadow: '0 0 28px var(--color-lime)' }}
+    <div className="pointer-events-none absolute inset-0 select-none overflow-hidden rounded-2xl bg-white shadow-[0_30px_60px_-18px_rgba(25,35,10,0.35)] ring-1 ring-black/[0.06]">
+      <Image
+        src={member.photo!}
+        alt={`${member.name} — ${member.role}`}
+        fill
+        sizes="460px"
+        className="object-cover"
+        draggable={false}
       />
     </div>
   )
@@ -93,8 +70,6 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
   const isStory = variant === 'story'
   const arcRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
-  const captionNameRef = useRef<HTMLHeadingElement>(null)
-  const captionRoleRef = useRef<HTMLParagraphElement>(null)
 
   useGSAP(
     () => {
@@ -102,15 +77,6 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
       if (!cards.length) return
 
       const mm = gsap.matchMedia()
-
-      const showCaption = (i: number) => {
-        const nameEl = captionNameRef.current
-        const roleEl = captionRoleRef.current
-        if (!nameEl || !roleEl) return
-        nameEl.textContent = TEAM[i].name
-        roleEl.textContent = TEAM[i].role
-        gsap.fromTo([nameEl, roleEl], { opacity: 0.3, y: 4 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' })
-      }
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         const idleTweens: gsap.core.Tween[] = []
@@ -158,48 +124,69 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
           })
         })
 
-        // При наведении карточка выезжает вверх относительно своего положения,
-        // а соседние карточки раздвигаются в стороны, освобождая место.
+        // Магнитное отталкивание: активная встаёт ровно и вырастает, соседи
+        // разлетаются с 3D-наклоном. Перспективу даёт arcRef (perspective в стиле).
         cards.forEach((card, i) => {
           const onEnter = () => {
-            idleTweens[i]?.pause()
-            const lift = card.offsetHeight / 3
-            gsap.to(card, {
-              y: positions[i].y - lift,
-              duration: 0.4,
-              ease: 'power3.out',
-              overwrite: 'auto',
-            })
+            idleTweens.forEach((tween) => tween?.pause())
+
             cards.forEach((other, j) => {
-              if (j === i) return
-              const { x } = positions[j]
+              gsap.killTweensOf(other)
+              if (j === i) {
+                // активная — прямо, крупнее, поверх соседей, чуть выше
+                other.style.zIndex = '100'
+                gsap.to(other, {
+                  x: positions[j].x,
+                  y: positions[j].y - 26,
+                  rotate: 0,
+                  rotationX: 0,
+                  rotationY: 0,
+                  scale: 1.12,
+                  transformOrigin: 'center center',
+                  duration: 1.1,
+                  ease: 'elastic.out(0.5, 0.3)',
+                  overwrite: 'auto',
+                })
+                return
+              }
+              // сосед — отталкивается от активной, наклоняется, уменьшается
+              const dirX = j < i ? -1 : 1
+              const dirY = j % 2 === 0 ? -1 : 1
+              const distance = Math.abs(i - j)
+              const tiltX = dirY * Math.max(3, 10 - distance * 2)
+              const tiltY = -dirX * Math.max(8, 30 - distance * 6)
+              other.style.zIndex = String(positions[j].z)
               gsap.to(other, {
-                x: x + (j < i ? -HOVER_GAP : HOVER_GAP),
-                duration: 0.4,
-                ease: 'power3.out',
+                x: positions[j].x + dirX * REPEL_X,
+                y: positions[j].y + dirY * REPEL_Y,
+                rotate: positions[j].rotate,
+                rotationX: tiltX,
+                rotationY: tiltY,
+                scale: 0.9,
+                transformOrigin: 'center center',
+                duration: 1.1,
+                ease: 'elastic.out(0.5, 0.3)',
                 overwrite: 'auto',
               })
             })
-            showCaption(i)
           }
           const onLeave = () => {
-            gsap.to(card, {
-              y: positions[i].y,
-              duration: 0.5,
-              ease: 'power3.out',
-              overwrite: 'auto',
-              onComplete: () => idleTweens[i]?.resume(),
-            })
             cards.forEach((other, j) => {
-              if (j === i) return
+              gsap.killTweensOf(other)
+              other.style.zIndex = String(positions[j].z)
               gsap.to(other, {
                 x: positions[j].x,
-                duration: 0.5,
-                ease: 'power3.out',
+                y: positions[j].y,
+                rotate: positions[j].rotate,
+                rotationX: 0,
+                rotationY: 0,
+                scale: 1,
+                duration: 1.1,
+                ease: 'elastic.out(0.5, 0.3)',
                 overwrite: 'auto',
+                onComplete: () => idleTweens[j]?.resume(),
               })
             })
-            showCaption(CENTER_INDEX)
           }
 
           card.addEventListener('mouseenter', onEnter)
@@ -265,51 +252,40 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
         />
 
         {/* Плотная дуга-веер карточек — только десктоп */}
-        <div ref={arcRef} className="relative mt-20 h-[560px] hidden lg:block">
+        <div
+          ref={arcRef}
+          className="relative mt-20 h-[460px] hidden lg:block"
+          style={{ perspective: '1600px' }}
+        >
           {TEAM.map((member, i) => (
             <div
               key={member.name}
               ref={(el) => {
                 cardsRef.current[i] = el
               }}
-              className="absolute left-1/2 top-6 w-[300px] h-[430px] -ml-[150px]"
+              className="absolute left-1/2 top-6 w-[460px] h-[307px] -ml-[230px]"
               style={{ transformOrigin: 'bottom center' }}
             >
-              <PartnerCard />
+              <PartnerCard member={member} />
             </div>
           ))}
         </div>
 
-        {/* Подпись под колодой — переключается на наведённого партнёра */}
-        <div className="-mt-6 text-center hidden lg:block relative z-[6]">
-          <h3
-            ref={captionNameRef}
-            className="font-heading text-[25px] font-black leading-none tracking-[-0.03em] text-[var(--color-text)]"
-          >
-            {TEAM[CENTER_INDEX].name}
-          </h3>
-          <p ref={captionRoleRef} className="mt-2 text-xl text-[var(--color-muted)]">
-            {TEAM[CENTER_INDEX].role}
-          </p>
-        </div>
-
-        {/* Мобильная и планшетная раскладка — простая сетка без дуги */}
-        <div className="mt-16 grid grid-cols-2 sm:grid-cols-3 gap-4 lg:hidden">
+        {/* Мобильная и планшетная раскладка — простая сетка карточек-визиток */}
+        <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-6 lg:hidden">
           {TEAM.map((member) => (
-            <Card key={member.name} className="overflow-hidden">
-              <div
-                className="w-full aspect-[3/4] flex items-end justify-center pb-6"
-                style={{ background: 'linear-gradient(135deg,#ffffff,#f4f4f3)' }}
-              >
-                <SilhouetteIcon className="w-16 h-20" />
-              </div>
-              <div className="p-4">
-                <h3 className="font-heading text-sm font-extrabold leading-snug text-[var(--color-text)]">
-                  {member.name}
-                </h3>
-                <p className="mt-1 text-xs text-[var(--color-muted)]">{member.role}</p>
-              </div>
-            </Card>
+            <div
+              key={member.name}
+              className="relative w-full aspect-[3/2] overflow-hidden rounded-2xl bg-white shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)] ring-1 ring-black/[0.06]"
+            >
+              <Image
+                src={member.photo!}
+                alt={`${member.name} — ${member.role}`}
+                fill
+                sizes="(max-width: 640px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </div>
           ))}
         </div>
       </div>
