@@ -254,8 +254,8 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
       {...(!isStory && { id: 'partners' })}
       className={
         isStory
-          ? 'relative flex h-full w-full flex-col justify-center overflow-hidden'
-          : 'relative min-h-dvh flex flex-col justify-center overflow-hidden'
+          ? 'relative flex h-full w-full flex-col justify-center lg:justify-start overflow-hidden'
+          : 'relative min-h-dvh flex flex-col justify-center lg:justify-start overflow-hidden'
       }
       style={
         isStory
@@ -280,9 +280,9 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
         <span className="absolute left-1/2 bottom-[10%] w-2.5 h-2.5 rounded-full bg-[var(--color-lime)] shadow-[0_0_20px_var(--color-lime-glow)]" />
       </div>
 
-      {/* На lg контент поднят выше (компактные отступы + сдвиг вверх), чтобы внизу
-          оставалась полоса под выезжающую панель с регалиями и она не накрывала карточки. */}
-      <div className="relative z-[5] max-w-[1440px] w-full mx-auto px-8 md:px-16 py-24 md:py-28 lg:py-10 lg:-translate-y-12">
+      {/* На lg секция прижата к верху (justify-start), заголовок сразу под шапкой —
+          внизу остаётся полоса под выезжающую панель с регалиями. */}
+      <div className="relative z-[5] max-w-[1440px] w-full mx-auto px-8 md:px-16 py-24 md:py-28 lg:pt-16 lg:pb-10">
         <SectionHeading
           title="Партнёры"
           subtitle="Профессиональная защита в ключевых областях права"
