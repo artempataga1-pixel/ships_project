@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { ScrollTrigger } from '@/lib/gsap'
 import { HERO } from '@/constants/content/home'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { CompetenciesSection } from '@/components/sections/CompetenciesSection'
@@ -75,6 +76,19 @@ export function ScrollStory() {
     mq.addEventListener('change', apply)
     return () => mq.removeEventListener('change', apply)
   }, [])
+
+  // Переключение flow↔story меняет высоту документа на ~3 экрана. Триггеры
+  // нижних секций (пины Практик/Статей, reveal Кейсов/Контактов) создаются в
+  // ту же коммит-фазу, что и этот апгрейд, т.е. ещё при flow-разметке — их
+  // start'ы кешируются со сдвигом на высоту flow-секций (reveal Контактов
+  // улетает за пределы документа и не срабатывает никогда). На первичной
+  // загрузке позиции чинят refresh'ы SmoothScrollProvider (fonts/load/600мс),
+  // но при client-side возврате на главную (например «Все кейсы» со страницы
+  // кейса) тот эффект не перезапускается — пересчитываем сами, когда новая
+  // разметка уже в DOM.
+  useEffect(() => {
+    ScrollTrigger.refresh()
+  }, [isStory])
 
   return isStory ? <StoryScene /> : <FlowFallback />
 }

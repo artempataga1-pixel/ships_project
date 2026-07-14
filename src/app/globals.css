@@ -66,6 +66,11 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
+  /* Full-bleed элементы на w-screen (бегущая строка СМИ в Контактах): 100vw
+     включает вертикальный скроллбар, из-за чего внизу вылезал горизонтальный
+     скроллбар на его ширину. clip (не hidden) — не создаёт scroll-контейнер,
+     не мешает position: sticky/пину ScrollTrigger. */
+  overflow-x: clip;
 }
 
 /* Кнопка «BUTTON 3» (по мотивам CodePen Дерека Мораша) под лайм-тему.
