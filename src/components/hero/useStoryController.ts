@@ -403,10 +403,42 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     // ── Инициализация ───────────────────────────────────────────────────────
     // Флаг для навбара: стори жива → клики по story-пунктам перехватываются
     ;(window as StoryWindow).__storyActive = true
-    lenis?.stop()
-    activateVideo(0)
-    showOnly(0, true)
-    emitStep(0)
+
+    // Поставить стори на полку step без анимации (видео-слой + нужный кадр)
+    const restAt = (step: number) => {
+      st.step = step
+      const seg = Math.max(step - 1, 0)
+      activateVideo(seg)
+      const v = videos[seg]
+      if (v) {
+        v.pause()
+        try {
+          v.currentTime = step === 0 ? 0 : segDuration(seg) - 0.05
+        } catch {}
+      }
+      showOnly(step, true)
+      emitStep(step)
+    }
+
+    // Загрузка с якорем на секцию НИЖЕ стори (например возврат /#case-<slug>
+    // со страницы кейса): нельзя запирать страницу на нуле — иначе гард
+    // onLenisScroll дерётся с CaseAnchorScroll за позицию, колесо перехвачено
+    // стори (preventDefault) и страница выглядит мёртвой/разъехавшейся.
+    // Стартуем отпущенными на последней полке; вернётся к верху — гард сделает
+    // relock как обычно.
+    const hashId = window.location.hash.slice(1)
+    if (hashId && !(hashId in NAV_ID_TO_STEP) && hashId !== 'hero') {
+      st.released = true
+      restAt(LAST_STEP)
+      lenis?.start()
+    } else if (hashId && hashId in NAV_ID_TO_STEP) {
+      // Якорь на полку самой стори — запертый старт сразу на нужном шаге
+      lenis?.stop()
+      restAt(NAV_ID_TO_STEP[hashId])
+    } else {
+      lenis?.stop()
+      restAt(0)
+    }
 
     window.addEventListener('wheel', onWheel, { passive: false })
     window.addEventListener('keydown', onKey)
