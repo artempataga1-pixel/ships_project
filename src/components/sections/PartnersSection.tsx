@@ -342,9 +342,9 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
               panelsRef.current[i] = el
             }}
             aria-hidden
-            className={`invisible absolute bottom-0 w-[min(680px,46vw)] rounded-2xl border border-white/10 bg-[rgba(37,41,44,0.82)] p-7 text-white opacity-0 shadow-[0_44px_90px_-26px_rgba(12,18,8,0.65)] backdrop-blur-md ${
-              member.panelSide === 'left' ? 'left-6' : 'right-6'
-            }`}
+            className={`invisible absolute bottom-0 rounded-2xl border border-white/10 bg-[rgba(37,41,44,0.82)] p-7 text-white opacity-0 shadow-[0_44px_90px_-26px_rgba(12,18,8,0.65)] backdrop-blur-md ${
+              (member.achievements?.length ?? 0) > 4 ? 'w-[min(880px,58vw)]' : 'w-[min(680px,46vw)]'
+            } ${member.panelSide === 'left' ? 'left-6' : 'right-6'}`}
             style={{
               transformOrigin: member.panelSide === 'left' ? 'left center' : 'right center',
             }}
@@ -359,7 +359,15 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
               {member.role}
             </p>
             <h3 className="mt-1.5 text-xl font-semibold tracking-tight">{member.name}</h3>
-            <ul className="mt-4 space-y-2">
+            {/* Длинный список регалий — в две колонки, чтобы панель не росла в высоту
+                и не наезжала на карточки. */}
+            <ul
+              className={`mt-4 ${
+                (member.achievements?.length ?? 0) > 4
+                  ? 'grid grid-cols-2 gap-x-8 gap-y-2'
+                  : 'space-y-2'
+              }`}
+            >
               {member.achievements?.map((item) => (
                 <li key={item} className="flex gap-2.5 text-[13px] leading-snug text-white/80">
                   <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-lime)]" />
