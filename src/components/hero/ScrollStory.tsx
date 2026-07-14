@@ -17,40 +17,43 @@ const VIDEO_SRC = ['/video/story1.mp4', '/video/story2.mp4', '/video/story3.mp4'
 
 // ── Контент героя: заголовок / подзаголовок / CTA / счётчики / нижняя строка.
 // Общий и для story-оверлея, и для flow-hero (постер-режим на мобилке).
+// Адаптив ≥lg: все размеры пропорциональны ширине экрана относительно эталона
+// 2560×1440 (vw-коэффициент = эталонный px / 25.6). На 2560px значения совпадают
+// с эталоном пиксель-в-пиксель, ниже — масштабируются, выше — упираются в потолок.
 function HeroLayer() {
   return (
-    <div className="relative h-full min-h-[720px] w-full px-8 lg:px-14">
+    <div className="relative h-full min-h-[720px] w-full px-8 lg:px-[min(2.1875vw,3.5rem)]">
       {/* Левая колонка: заголовок, подзаголовок, CTA — крупный кегль (×2). */}
-      <div className="relative z-10 max-w-[70rem] pt-[clamp(80px,10vh,130px)]">
-        <h1 className="font-heading font-medium leading-[1.03] tracking-[-0.055em] text-[clamp(3.9rem,11.5vw,9rem)]">
+      <div className="relative z-10 max-w-[70rem] pt-[clamp(80px,10vh,130px)] lg:max-w-[min(43.75vw,70rem)] lg:pt-[min(5.0781vw,130px)]">
+        <h1 className="font-heading font-medium leading-[1.03] tracking-[-0.055em] text-[clamp(3.9rem,11.5vw,9rem)] lg:text-[min(5.625vw,9rem)]">
           <span className="block">{HERO.titleLine1}</span>
           <span className="block">{HERO.titleLine2}</span>
           <span className="block text-black/25">{HERO.titleMuted}</span>
         </h1>
 
-        <p className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[40rem] text-[clamp(1.5rem,2.3vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)]">
+        <p className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[40rem] text-[clamp(1.5rem,2.3vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)] lg:mt-[min(1.5625vw,2.5rem)] lg:max-w-[min(25vw,40rem)] lg:text-[clamp(1.125rem,1.40625vw,2.25rem)]">
           {HERO.subtitle}
         </p>
 
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/#contacts"
-          className="group mt-[clamp(2.75rem,5.5vh,4.5rem)] inline-flex items-center gap-8"
+          className="group mt-[clamp(2.75rem,5.5vh,4.5rem)] inline-flex items-center gap-8 lg:mt-[min(2.8125vw,4.5rem)] lg:gap-[min(1.25vw,2rem)]"
         >
           <span
             aria-hidden="true"
-            className="grid h-[104px] w-[104px] place-items-center rounded-full border border-[var(--color-black)] bg-[var(--color-lime)] text-[36px] text-[var(--color-black)] shadow-[0_0_42px_var(--color-lime-glow)] transition-transform duration-300 group-hover:scale-105"
+            className="grid h-[104px] w-[104px] place-items-center rounded-full border border-[var(--color-black)] bg-[var(--color-lime)] text-[36px] text-[var(--color-black)] shadow-[0_0_42px_var(--color-lime-glow)] transition-transform duration-300 group-hover:scale-105 lg:h-[clamp(48px,4.0625vw,104px)] lg:w-[clamp(48px,4.0625vw,104px)] lg:text-[clamp(17px,1.40625vw,36px)]"
           >
             →
           </span>
-          <span className="text-2xl font-semibold text-[var(--color-text)]">
+          <span className="text-2xl font-semibold text-[var(--color-text)] lg:text-[clamp(0.9375rem,0.9375vw,1.5rem)]">
             {HERO.ctaLabel}
           </span>
         </a>
       </div>
 
       {/* Нижняя строка: слоган */}
-      <div className="absolute inset-x-8 bottom-7 flex h-[70px] items-center border-t border-[var(--color-line)] lg:inset-x-14">
+      <div className="absolute inset-x-8 bottom-7 flex h-[70px] items-center border-t border-[var(--color-line)] lg:inset-x-[min(2.1875vw,3.5rem)] lg:bottom-[min(1.09375vw,1.75rem)] lg:h-[min(2.7344vw,70px)]">
         <p className="flex items-center gap-3.5 text-xs font-extrabold uppercase tracking-[0.46em] text-[#3c3c3c]">
           <i className="h-2.5 w-2.5 rounded-[2px] bg-[var(--color-lime)]" />
           {HERO.bottomLine}

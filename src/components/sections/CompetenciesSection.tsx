@@ -11,19 +11,21 @@ import { PRACTICES } from '@/constants/content/practice'
    у нас карточек меньше, поэтому один виток. Скорость облёта вдвое медленнее
    референса — там мельтешило гораздо быстрее.
 
-   Радиус орбиты считается от реальной ширины сцены (а не фиксированным пикселем) —
-   на широком экране карточки разлетаются шире, на границе брейкпоинта не режутся
-   краем контейнера. CARD_HALF_WIDTH — половина w-64 (256px). */
+   Радиус орбиты считается от реальных размеров сцены и вьюпорта (а не фиксированным
+   пикселем): по X — от ширины сцены, по Y — ещё и от высоты окна, чтобы на низких
+   экранах (ноуты, маки) карточки не резались краями. Размер карточки задан через
+   vw с потолком 250px (эталон 2560×1440), половина берётся из DOM на каждый resize. */
 
-const CARD_HALF_WIDTH = 128
 const RADIUS_MIN = 300
 const RADIUS_MAX = 620
 const ORBIT_DURATION = 42
 const CARD_TILT = 6
+// Просвет сверху/снизу: шапка сайта + угловые скобки карточки
+const VERTICAL_CLEAR = 120
 
-function computeRadius(stageWidth: number) {
-  const x = Math.min(RADIUS_MAX, Math.max(RADIUS_MIN, stageWidth / 2 - CARD_HALF_WIDTH - 24))
-  const y = Math.min(440, x * 0.82)
+function computeRadius(stageWidth: number, cardHalf: number, viewportHeight: number) {
+  const x = Math.min(RADIUS_MAX, Math.max(RADIUS_MIN, stageWidth / 2 - cardHalf - 24))
+  const y = Math.min(440, x * 0.82, viewportHeight / 2 - cardHalf - VERTICAL_CLEAR)
   return { x, y }
 }
 
@@ -53,7 +55,12 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
       if (!cards.length || !stageRef.current) return
 
       const updateRadius = () => {
-        radiusRef.current = computeRadius(stageRef.current!.clientWidth)
+        const cardHalf = (cardsRef.current[0]?.clientWidth ?? 250) / 2
+        radiusRef.current = computeRadius(
+          stageRef.current!.clientWidth,
+          cardHalf,
+          window.innerHeight,
+        )
       }
       updateRadius()
       window.addEventListener('resize', updateRadius)
@@ -161,11 +168,11 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
             {/* Фоновые эллиптические орбиты + точки-искры */}
             <div
               className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-                w-[94%] h-[560px] rounded-[50%] border border-[var(--color-lime)]/40 rotate-[-3deg]"
+                w-[94%] h-[min(38.89vh,560px)] rounded-[50%] border border-[var(--color-lime)]/40 rotate-[-3deg]"
             />
             <div
               className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-                w-[82%] h-[440px] rounded-[50%] border border-black/[0.08] rotate-[-2deg]"
+                w-[82%] h-[min(30.56vh,440px)] rounded-[50%] border border-black/[0.08] rotate-[-2deg]"
             />
             {[
               'left-[18%] top-[24%]',
@@ -186,7 +193,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                 ref={(el) => {
                   cardsRef.current[i] = el
                 }}
-                className="absolute left-1/2 top-1/2 w-[250px]"
+                className="absolute left-1/2 top-1/2 w-[min(9.7656vw,250px)]"
               >
                 <div
                   className="
@@ -198,7 +205,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                 >
                   {/* Угловая рамка-скобка (line-frame) — видна только по углам */}
                   <span
-                    className="pointer-events-none absolute -inset-[22px] rounded-[27px] border-[1.5px] border-black/[0.38] opacity-70"
+                    className="pointer-events-none absolute -inset-[min(0.8594vw,22px)] rounded-[27px] border-[1.5px] border-black/[0.38] opacity-70"
                     style={{
                       clipPath:
                         'polygon(0 0,28% 0,28% 7%,72% 7%,72% 0,100% 0,100% 28%,93% 28%,93% 72%,100% 72%,100% 100%,72% 100%,72% 93%,28% 93%,28% 100%,0 100%,0 72%,7% 72%,7% 28%,0 28%)',
@@ -206,13 +213,13 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                   />
                   {/* Лайм-полоса у правого края */}
                   <span
-                    className="pointer-events-none absolute right-[-2px] top-7 bottom-7 w-1 rounded-full bg-[var(--color-lime)]"
+                    className="pointer-events-none absolute right-[-2px] top-[min(1.09375vw,1.75rem)] bottom-[min(1.09375vw,1.75rem)] w-1 rounded-full bg-[var(--color-lime)]"
                     style={{ boxShadow: '0 0 24px var(--color-lime)' }}
                   />
-                  <strong className="font-heading text-[57px] font-black leading-none tracking-[-0.05em] text-[var(--color-text)]">
+                  <strong className="font-heading text-[min(2.2266vw,57px)] font-black leading-none tracking-[-0.05em] text-[var(--color-text)]">
                     {String(i + 1).padStart(2, '0')}
                   </strong>
-                  <p className="mt-6 px-4 text-center text-[17px] font-semibold leading-tight text-[var(--color-text)]">
+                  <p className="mt-[min(0.9375vw,1.5rem)] px-4 text-center text-[clamp(11px,0.6641vw,17px)] font-semibold leading-tight text-[var(--color-text)]">
                     {practice.title}
                   </p>
                 </div>
