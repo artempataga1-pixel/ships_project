@@ -35,7 +35,7 @@ function CustomSelect({
         type="button"
         id={id}
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between rounded-sm border border-[var(--color-lime-ink)]/35 bg-white px-4 py-3.5 text-left transition-colors duration-200 focus:border-[var(--color-lime-ink)] focus:outline-none"
+        className="flex w-full items-center justify-between rounded-sm border border-[var(--color-lime-ink)]/35 bg-white px-4 py-3.5 text-left transition-colors duration-200 focus:border-[var(--color-lime-ink)] focus:outline-none lg:py-[min(0.97vh,0.875rem)]"
       >
         <span className={value ? 'text-[var(--color-text)]' : 'text-[var(--color-muted)]'}>
           {value || placeholder}
@@ -94,7 +94,7 @@ const formatPhone = (v: string): string => {
 }
 
 const inputClass =
-  'rounded-sm border bg-white px-4 py-3.5 text-[var(--color-text)] font-medium placeholder:text-[var(--color-muted)] focus:outline-none transition-colors duration-200'
+  'rounded-sm border bg-white px-4 py-3.5 text-[var(--color-text)] font-medium placeholder:text-[var(--color-muted)] focus:outline-none transition-colors duration-200 lg:py-[min(0.97vh,0.875rem)]'
 const labelClass = 'text-xs font-extrabold uppercase tracking-[0.03em] text-[var(--color-text)]/75'
 
 export function ContactForm() {
@@ -164,7 +164,7 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6 lg:gap-[min(1.67vh,1.5rem)]">
       {/* Имя */}
       <div className="flex flex-col gap-2">
         <label htmlFor="name" className={labelClass}>
@@ -238,13 +238,13 @@ export function ContactForm() {
           name="message"
           rows={4}
           placeholder="Опишите вашу ситуацию..."
-          className={`${inputClass} resize-none border-[var(--color-lime-ink)]/35 focus:border-[var(--color-lime-ink)]`}
+          className={`${inputClass} resize-none border-[var(--color-lime-ink)]/35 focus:border-[var(--color-lime-ink)] lg:h-[clamp(4.5rem,8.75vh,126px)]`}
         />
       </div>
 
       <button
         type="submit"
-        className="btn-lime-fill mt-1 h-14 w-full rounded-sm text-sm font-extrabold uppercase tracking-[0.08em] sm:w-[280px]"
+        className="btn-lime-fill mt-1 h-14 w-full rounded-sm text-sm font-extrabold uppercase tracking-[0.08em] sm:w-[280px] lg:h-[clamp(2.75rem,3.89vh,3.5rem)]"
       >
         Отправить заявку
       </button>

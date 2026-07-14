@@ -97,7 +97,9 @@ function StoryScene() {
       {/* Прибитый экран: видео-слои + оверлеи поверх */}
       <div className="sticky top-0 h-[100dvh] overflow-hidden bg-[var(--color-bg)]">
         {/* Три видео-сегмента наложены друг на друга; видимостью рулит контроллер
-            (кадры на стыках совпадают → переключение слоёв незаметно). */}
+            (кадры на стыках совпадают → переключение слоёв незаметно).
+            scale-[1.14]: в кадры Veo запечён плавающий letterbox (до 60px из 1080
+            сверху/снизу) — зум выталкивает чёрные полосы за край при любом аспекте. */}
         {VIDEO_SRC.map((src, i) => (
           <video
             key={src}
@@ -110,7 +112,7 @@ function StoryScene() {
             playsInline
             preload="auto"
             onCanPlayThrough={i === 0 ? () => setLoaded(true) : undefined}
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="absolute inset-0 h-full w-full scale-[1.14] object-cover object-center"
             style={{ opacity: i === 0 ? 1 : 0 }}
           />
         ))}
@@ -180,9 +182,10 @@ function FlowFallback() {
         id="hero"
         className="relative h-[100dvh] min-h-[640px] overflow-hidden bg-[var(--color-bg)]"
       >
+        {/* scale-[1.14] — тот же зум, что у видео-слоёв: срезает letterbox постера */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 scale-[1.14] bg-cover bg-center"
           style={{ backgroundImage: 'url(/video/poster_start.jpg)' }}
         />
         {/* Лёгкий светлый скрим слева — чтобы чёрный текст читался поверх кадра */}

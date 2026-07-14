@@ -98,13 +98,20 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
             rotation: tilt,
           })
 
+          // quickSetter вместо gsap.set: onUpdate дёргается каждый кадр, а set
+          // плодил бы твины в контексте useGSAP — утечка и stack overflow при revert
+          const setX = gsap.quickSetter(card, 'x', 'px')
+          const setY = gsap.quickSetter(card, 'y', 'px')
+
           gsap.to(state, {
             angle: startAngle + 360,
             duration: ORBIT_DURATION,
             ease: 'none',
             repeat: -1,
             onUpdate: () => {
-              gsap.set(card, orbitPoint(state.angle, radiusRef.current))
+              const p = orbitPoint(state.angle, radiusRef.current)
+              setX(p.x)
+              setY(p.y)
             },
           })
         })
