@@ -38,6 +38,10 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
+          // Flow-секции полок (about/…) удаляются при апгрейде до story — их
+          // прощальное «не пересекает» приходит уже после story:step от
+          // контроллера и гасило бы только что зажжённую лампу
+          if (!entry.target.isConnected) continue
           const index = items.findIndex(
             (item) => item.href.endsWith(`#${entry.target.id}`),
           )

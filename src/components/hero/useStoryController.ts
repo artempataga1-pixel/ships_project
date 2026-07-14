@@ -404,8 +404,11 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     // Флаг для навбара: стори жива → клики по story-пунктам перехватываются
     ;(window as StoryWindow).__storyActive = true
 
-    // Поставить стори на полку step без анимации (видео-слой + нужный кадр)
-    const restAt = (step: number) => {
+    // Поставить стори на полку step без анимации (видео-слой + нужный кадр).
+    // silent — не слать story:step: при отпущенном старте (якорь ниже стори)
+    // страница стоит на другой секции, и событие с partners зажгло бы лампу
+    // навбара над «Партнёрами» — подсветку там должен давать observer секций.
+    const restAt = (step: number, silent = false) => {
       st.step = step
       const seg = Math.max(step - 1, 0)
       activateVideo(seg)
@@ -417,19 +420,19 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
         } catch {}
       }
       showOnly(step, true)
-      emitStep(step)
+      if (!silent) emitStep(step)
     }
 
-    // Загрузка с якорем на секцию НИЖЕ стори (например возврат /#case-<slug>
-    // со страницы кейса): нельзя запирать страницу на нуле — иначе гард
-    // onLenisScroll дерётся с CaseAnchorScroll за позицию, колесо перехвачено
+    // Загрузка с якорем на секцию НИЖЕ стори (навбар с внутренних страниц,
+    // возврат /#case-<slug>): нельзя запирать страницу на нуле — иначе гард
+    // onLenisScroll дерётся с HomeAnchorScroll за позицию, колесо перехвачено
     // стори (preventDefault) и страница выглядит мёртвой/разъехавшейся.
     // Стартуем отпущенными на последней полке; вернётся к верху — гард сделает
     // relock как обычно.
     const hashId = window.location.hash.slice(1)
     if (hashId && !(hashId in NAV_ID_TO_STEP) && hashId !== 'hero') {
       st.released = true
-      restAt(LAST_STEP)
+      restAt(LAST_STEP, true)
       lenis?.start()
     } else if (hashId && hashId in NAV_ID_TO_STEP) {
       // Якорь на полку самой стори — запертый старт сразу на нужном шаге

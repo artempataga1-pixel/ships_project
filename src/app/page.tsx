@@ -1,4 +1,5 @@
 import { ScrollStory } from '@/components/hero/ScrollStory'
+import { HomeAnchorScroll } from '@/components/sections/HomeAnchorScroll'
 import { PracticesSection } from '@/components/sections/PracticesSection'
 import { ArticlesSection } from '@/components/sections/ArticlesSection'
 import { CasesSection } from '@/components/sections/CasesSection'
@@ -11,6 +12,8 @@ import { ContactsSection } from '@/components/sections/ContactsSection'
 export default function Home() {
   return (
     <>
+      {/* Доводка скролла при загрузке с якорем ниже стори (навбар/возврат с кейса) */}
+      <HomeAnchorScroll />
       <ScrollStory />
 
       <PracticesSection />

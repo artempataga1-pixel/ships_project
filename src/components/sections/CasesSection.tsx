@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
-import { CaseAnchorScroll } from './CaseAnchorScroll'
 import type { CaseStudy } from '@/types/content'
 
 /* Референс — dizain6.jpg + 02_cases_archive (заголовочный экран). Механика
@@ -141,7 +140,6 @@ export function CasesSection() {
           'radial-gradient(circle at 72% 42%, rgba(201,255,31,.08), transparent 24%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
       }}
     >
-      <CaseAnchorScroll />
       {/* Прилипающий заголовок: стоит по центру экрана, пока мимо едут карточки */}
       <div
         className="
