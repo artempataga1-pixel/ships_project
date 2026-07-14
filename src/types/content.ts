@@ -53,6 +53,10 @@ export interface TeamMember {
   role: string
   /** Готовая карточка-визитка (фото + имя + роль впечатаны в изображение). */
   photo?: string
+  /** Регалии для выезжающей 3D-панели при наведении на карточку. */
+  achievements?: string[]
+  /** Из какого края экрана выезжает панель с регалиями. */
+  panelSide?: 'left' | 'right'
 }
 
 export interface Practice {

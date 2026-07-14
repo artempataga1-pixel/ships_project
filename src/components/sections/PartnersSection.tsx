@@ -70,6 +70,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
   const isStory = variant === 'story'
   const arcRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+  const panelsRef = useRef<(HTMLElement | null)[]>([])
 
   useGSAP(
     () => {
@@ -82,6 +83,39 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
         const idleTweens: gsap.core.Tween[] = []
         const listeners: Array<{ el: HTMLDivElement; enter: () => void; leave: () => void }> = []
         const positions = cards.map((_, i) => fanPosition(i, TEAM.length))
+        const panels = panelsRef.current
+
+        // Панели-регалии спрятаны за краем экрана, повернуты «в глубину» (3D).
+        const panelDir = (i: number) => (TEAM[i]?.panelSide === 'left' ? -1 : 1)
+        panels.forEach((panel, i) => {
+          if (panel) gsap.set(panel, { xPercent: panelDir(i) * 118, rotateY: panelDir(i) * -42, autoAlpha: 0 })
+        })
+        const showPanel = (i: number) => {
+          panels.forEach((panel, j) => {
+            if (!panel) return
+            gsap.to(panel, {
+              xPercent: j === i ? 0 : panelDir(j) * 118,
+              rotateY: j === i ? panelDir(j) * -7 : panelDir(j) * -42,
+              autoAlpha: j === i ? 1 : 0,
+              duration: j === i ? 0.85 : 0.4,
+              ease: j === i ? 'power4.out' : 'power2.in',
+              overwrite: 'auto',
+            })
+          })
+        }
+        const hidePanels = () => {
+          panels.forEach((panel, j) => {
+            if (!panel) return
+            gsap.to(panel, {
+              xPercent: panelDir(j) * 118,
+              rotateY: panelDir(j) * -42,
+              autoAlpha: 0,
+              duration: 0.5,
+              ease: 'power2.in',
+              overwrite: 'auto',
+            })
+          })
+        }
 
         const startWobble = (card: HTMLDivElement, i: number, rotate: number) => {
           idleTweens[i] = gsap.to(card, {
@@ -129,6 +163,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
         cards.forEach((card, i) => {
           const onEnter = () => {
             idleTweens.forEach((tween) => tween?.pause())
+            showPanel(i)
 
             cards.forEach((other, j) => {
               gsap.killTweensOf(other)
@@ -171,6 +206,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
             })
           }
           const onLeave = () => {
+            hidePanels()
             cards.forEach((other, j) => {
               gsap.killTweensOf(other)
               other.style.zIndex = String(positions[j].z)
@@ -244,7 +280,9 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
         <span className="absolute left-1/2 bottom-[10%] w-2.5 h-2.5 rounded-full bg-[var(--color-lime)] shadow-[0_0_20px_var(--color-lime-glow)]" />
       </div>
 
-      <div className="relative z-[5] max-w-[1440px] w-full mx-auto px-8 md:px-16 py-24 md:py-28">
+      {/* На lg контент поднят выше (py-14 вместо py-28), чтобы внизу оставалась
+          полоса под выезжающую панель с регалиями и она не накрывала карточки. */}
+      <div className="relative z-[5] max-w-[1440px] w-full mx-auto px-8 md:px-16 py-24 md:py-28 lg:py-14">
         <SectionHeading
           title="Партнёры"
           subtitle="Профессиональная защита в ключевых областях права"
@@ -254,7 +292,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
         {/* Плотная дуга-веер карточек — только десктоп */}
         <div
           ref={arcRef}
-          className="relative mt-20 h-[460px] hidden lg:block"
+          className="relative mt-20 lg:mt-12 h-[460px] hidden lg:block"
           style={{ perspective: '1600px' }}
         >
           {TEAM.map((member, i) => (
@@ -288,6 +326,49 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Выезжающие 3D-панели с регалиями (десктоп). Живут в нижней полосе секции
+          под карточками (z-[4] < z-[5] контента), поэтому карточки не перекрывают.
+          Сторона вылета — panelSide из TEAM: Максим и Анна справа, Арина слева. */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-6 z-[4] hidden lg:block"
+        style={{ perspective: '1500px' }}
+      >
+        {TEAM.map((member, i) => (
+          <aside
+            key={member.name}
+            ref={(el) => {
+              panelsRef.current[i] = el
+            }}
+            aria-hidden
+            className={`invisible absolute bottom-0 w-[min(680px,46vw)] rounded-2xl border border-white/10 bg-[rgba(37,41,44,0.82)] p-7 text-white opacity-0 shadow-[0_44px_90px_-26px_rgba(12,18,8,0.65)] backdrop-blur-md ${
+              member.panelSide === 'left' ? 'left-6' : 'right-6'
+            }`}
+            style={{
+              transformOrigin: member.panelSide === 'left' ? 'left center' : 'right center',
+            }}
+          >
+            <span
+              className={`pointer-events-none absolute top-[12%] h-[76%] w-[3px] bg-[var(--color-lime)] ${
+                member.panelSide === 'left' ? 'left-0' : 'right-0'
+              }`}
+              style={{ boxShadow: '0 0 26px var(--color-lime-glow)' }}
+            />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-lime)]">
+              {member.role}
+            </p>
+            <h3 className="mt-1.5 text-xl font-semibold tracking-tight">{member.name}</h3>
+            <ul className="mt-4 space-y-2">
+              {member.achievements?.map((item) => (
+                <li key={item} className="flex gap-2.5 text-[13px] leading-snug text-white/80">
+                  <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-lime)]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </aside>
+        ))}
       </div>
     </section>
   )
