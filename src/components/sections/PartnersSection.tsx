@@ -280,9 +280,9 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
         <span className="absolute left-1/2 bottom-[10%] w-2.5 h-2.5 rounded-full bg-[var(--color-lime)] shadow-[0_0_20px_var(--color-lime-glow)]" />
       </div>
 
-      {/* На lg контент поднят выше (py-14 вместо py-28), чтобы внизу оставалась
-          полоса под выезжающую панель с регалиями и она не накрывала карточки. */}
-      <div className="relative z-[5] max-w-[1440px] w-full mx-auto px-8 md:px-16 py-24 md:py-28 lg:py-14">
+      {/* На lg контент поднят выше (компактные отступы + сдвиг вверх), чтобы внизу
+          оставалась полоса под выезжающую панель с регалиями и она не накрывала карточки. */}
+      <div className="relative z-[5] max-w-[1440px] w-full mx-auto px-8 md:px-16 py-24 md:py-28 lg:py-10 lg:-translate-y-12">
         <SectionHeading
           title="Партнёры"
           subtitle="Профессиональная защита в ключевых областях права"
@@ -292,7 +292,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
         {/* Плотная дуга-веер карточек — только десктоп */}
         <div
           ref={arcRef}
-          className="relative mt-20 lg:mt-12 h-[460px] hidden lg:block"
+          className="relative mt-20 lg:mt-8 h-[460px] hidden lg:block"
           style={{ perspective: '1600px' }}
         >
           {TEAM.map((member, i) => (
@@ -342,11 +342,15 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
               panelsRef.current[i] = el
             }}
             aria-hidden
-            className={`invisible absolute bottom-0 rounded-2xl border border-white/10 bg-[rgba(37,41,44,0.82)] p-7 text-white opacity-0 shadow-[0_44px_90px_-26px_rgba(12,18,8,0.65)] backdrop-blur-md ${
-              (member.achievements?.length ?? 0) > 4 ? 'w-[min(880px,58vw)]' : 'w-[min(680px,46vw)]'
-            } ${member.panelSide === 'left' ? 'left-6' : 'right-6'}`}
+            className={`invisible absolute bottom-0 rounded-2xl border border-white/10 bg-[rgba(37,41,44,0.82)] text-white opacity-0 shadow-[0_44px_90px_-26px_rgba(12,18,8,0.65)] backdrop-blur-md ${
+              member.panelSide === 'left' ? 'left-6 right-1/2' : 'left-1/2 right-6'
+            }`}
             style={{
               transformOrigin: member.panelSide === 'left' ? 'left center' : 'right center',
+              // Типографика панели масштабируется от высоты вьюпорта: на 2K —
+              // крупная (×1.5), на низких экранах ужимается, чтобы панель
+              // оставалась в полосе под карточками и не пряталась за ними.
+              padding: 'clamp(24px, 3.2vh - 4px, 40px)',
             }}
           >
             <span
@@ -355,22 +359,37 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
               }`}
               style={{ boxShadow: '0 0 26px var(--color-lime-glow)' }}
             />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-lime)]">
+            <p
+              className="font-semibold uppercase tracking-[0.22em] text-[var(--color-lime)]"
+              style={{ fontSize: 'clamp(11px, 1.1vh + 1px, 16px)' }}
+            >
               {member.role}
             </p>
-            <h3 className="mt-1.5 text-xl font-semibold tracking-tight">{member.name}</h3>
+            <h3
+              className="mt-2 font-semibold tracking-tight"
+              style={{ fontSize: 'clamp(20px, 2.2vh - 1px, 30px)' }}
+            >
+              {member.name}
+            </h3>
             {/* Длинный список регалий — в две колонки, чтобы панель не росла в высоту
                 и не наезжала на карточки. */}
             <ul
-              className={`mt-4 ${
+              className={`mt-5 ${
                 (member.achievements?.length ?? 0) > 4
-                  ? 'grid grid-cols-2 gap-x-8 gap-y-2'
-                  : 'space-y-2'
+                  ? 'grid grid-cols-2 gap-x-10 gap-y-3'
+                  : 'space-y-3'
               }`}
             >
               {member.achievements?.map((item) => (
-                <li key={item} className="flex gap-2.5 text-[13px] leading-snug text-white/80">
-                  <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-lime)]" />
+                <li
+                  key={item}
+                  className="flex gap-3 leading-snug text-white/85"
+                  style={{ fontSize: 'clamp(13px, 1.1vh + 4px, 19px)' }}
+                >
+                  <span
+                    className="shrink-0 rounded-full bg-[var(--color-lime)]"
+                    style={{ width: '0.5em', height: '0.5em', marginTop: '0.42em' }}
+                  />
                   {item}
                 </li>
               ))}
