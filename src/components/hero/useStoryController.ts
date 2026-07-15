@@ -20,18 +20,22 @@ const SEG_DURATION = [8, 8, 10]
 const WHEEL_THRESHOLD = 8 // мин. |deltaY| чтобы счесть за «тик»
 const TOUCH_THRESHOLD = 40 // мин. смещение пальца, px
 const COOLDOWN_MS = 420 // пауза после шага — гасит инерцию тачпада
-const REVERSE_RATE = 1.4 // скорость реверса относительно реального времени
 const REACTIVATE_Y = 2 // порог scrollY для реактивации стори при возврате вверх
 
-// «Escape для нетерпеливых»: пока сегмент играет (8–10 с), ввод залочен. Копим
-// |дельту| скролла в любую сторону, и как только накопили SKIP_DELTA_THRESHOLD —
-// анимация мгновенно домётывается на целевую полку. Считаем именно СУММУ дельт,
-// а не количество событий: трекпад шлёт поток мелких deltaY (плюс инерционный
-// докат), и по количеству событий он набирал бы «тики» в разы быстрее мыши,
-// где один щелчок колеса = одно крупное deltaY. GESTURE_GAP_MS обнуляет
-// накопление, если между событиями была пауза — это уже новый жест, а не хвост
-// прежнего.
-const SKIP_DELTA_THRESHOLD = 640 // ~5-6 щелчков мыши подряд — заметно больше усилий, чем раньше, но не «никогда»
+// Темп проигрыша: любой сегмент нормируется по времени через playbackRate,
+// само видео не режется. Обычный тик — полный сегмент за NORMAL_SECONDS.
+// «Escape для нетерпеливых»: если во время проигрыша пользователь крутит ещё —
+// не обрываем анимацию прыжком в конец (выглядело рвано), а плавно ускоряем
+// проигрыш до темпа «весь сегмент за FAST_SECONDS» — остаток долетает быстро,
+// но кадры идут подряд, без телепорта.
+const NORMAL_SECONDS = 5 // полный сегмент в спокойном режиме
+const FAST_SECONDS = 1.5 // полный сегмент в ускоренном режиме (скип)
+// Порог ускорения — сумма |deltaY| во время проигрыша (та же чувствительность,
+// что была у старого скипа-обрыва). Считаем СУММУ дельт, а не число событий:
+// трекпад шлёт поток мелких deltaY, по количеству событий он «кликал» бы
+// в разы быстрее мыши. GESTURE_GAP_MS обнуляет накопление после паузы —
+// это уже новый жест, а не хвост прежнего.
+const SPEEDUP_DELTA_THRESHOLD = 640
 const GESTURE_GAP_MS = 260 // терпимее к естественному темпу кручения колеса (не только к free-spin)
 const DEFAULT_TICK_MAGNITUDE = 120 // вклад одного «тика» для клавиатуры/тач (нет своего deltaY)
 
@@ -82,8 +86,11 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       leftStory: false, // страница реально уехала вниз от стори (защита relock)
       cooldown: false,
       raf: 0,
-      // Форс-финиш текущей анимации (прыжок на её целевую полку) + накопитель скипа
+      // Форс-финиш текущей анимации (прыжок на её целевую полку) — только для
+      // аварийных случаев (блокировка автоплея, переход из меню)
       forceFinish: null as null | (() => void),
+      // Ускорение текущей анимации до темпа FAST_SECONDS + накопитель дельты
+      speedUp: null as null | (() => void),
       skipAccum: 0,
       lastTickAt: 0,
     }
@@ -153,7 +160,9 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     }
 
     // ── Переходы ────────────────────────────────────────────────────────────
-    // Вперёд: сегмент seg (= текущий шаг) играет 0 → конец нативным play()
+    // Вперёд: сегмент seg (= текущий шаг) играет 0 → конец нативным play().
+    // playbackRate нормирует темп: полный сегмент = NORMAL_SECONDS, при скипе
+    // (накопили SPEEDUP_DELTA_THRESHOLD) — плавно ускоряемся до FAST_SECONDS.
     const playForward = (seg: number) => {
       const v = videos[seg]
       if (!v) return
@@ -165,10 +174,11 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       try {
         v.currentTime = 0
       } catch {}
-      // Завершение сегмента: showOnly полки seg+1. jump=true — форс-домотка кадра
-      // в конец (при прыжке по SKIP_DELTA_THRESHOLD / блокировке автоплея),
-      // иначе видео уже там. Reveal ждёт реального кадра — иначе при jump текст
-      // новой полки покажется раньше, чем видео доедет до нужного места.
+      v.playbackRate = segDuration(seg) / NORMAL_SECONDS
+      // Завершение сегмента: showOnly полки seg+1. jump=true — форс-домотка
+      // кадра в конец (блокировка автоплея / переход из меню), иначе видео уже
+      // там. Reveal ждёт реального кадра — иначе при jump текст новой полки
+      // покажется раньше, чем видео доедет до нужного места.
       const finish = (jump: boolean) => {
         v.removeEventListener('ended', onEnd)
         v.pause()
@@ -179,6 +189,7 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
           armCooldown()
           st.busy = false
           st.forceFinish = null
+          st.speedUp = null
         }
         if (jump) {
           afterSeek(v, segDuration(seg) - 0.05, reveal)
@@ -188,6 +199,9 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       }
       const onEnd = () => finish(false)
       st.forceFinish = () => finish(true)
+      st.speedUp = () => {
+        v.playbackRate = segDuration(seg) / FAST_SECONDS
+      }
       v.addEventListener('ended', onEnd)
       v.play().catch(() => {
         // Если браузер заблокировал автоплей — просто прыгаем в конец сегмента
@@ -195,7 +209,8 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       })
     }
 
-    // Назад: сегмент fromStep-1 гоним от конца к 0 через rAF
+    // Назад: сегмент fromStep-1 гоним от конца к 0 через rAF в том же темпе,
+    // что и вперёд: полный сегмент = NORMAL_SECONDS, при скипе — FAST_SECONDS.
     const playReverse = (fromStep: number) => {
       const seg = fromStep - 1
       const v = videos[seg]
@@ -210,8 +225,8 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
         v.currentTime = dur - 0.05
       } catch {}
       // Завершение реверса: кадр 0, полка seg. Вызывается из rAF при t<=0 либо
-      // форс-финишем по SKIP_DELTA_THRESHOLD. Reveal — только после реального
-      // seek к 0 (при форс-финише currentTime может быть далеко от 0).
+      // форс-финишем (переход из меню). Reveal — только после реального seek
+      // к 0 (при форс-финише currentTime может быть далеко от 0).
       const finish = () => {
         cancelAnimationFrame(st.raf)
         afterSeek(v, 0, () => {
@@ -221,14 +236,19 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
           armCooldown()
           st.busy = false
           st.forceFinish = null
+          st.speedUp = null
         })
       }
       st.forceFinish = finish
+      let rate = dur / NORMAL_SECONDS
+      st.speedUp = () => {
+        rate = dur / FAST_SECONDS
+      }
       let last = performance.now()
       const frame = (now: number) => {
         const dt = (now - last) / 1000
         last = now
-        const t = v.currentTime - dt * REVERSE_RATE
+        const t = v.currentTime - dt * rate
         if (t <= 0) {
           finish()
           return
@@ -271,27 +291,28 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       emitStep(LAST_STEP)
     }
 
-    // Тик во время проигрыша: копим сумму |deltaY|, при достижении порога — форс-финиш.
+    // Тик во время проигрыша: копим сумму |deltaY|, при достижении порога —
+    // ускоряем проигрыш до темпа FAST_SECONDS (вместо прежнего резкого обрыва).
     const countSkipTick = (magnitude: number) => {
-      if (!st.forceFinish) return
+      if (!st.speedUp) return
       const now = performance.now()
       if (now - st.lastTickAt > GESTURE_GAP_MS) {
         st.skipAccum = 0 // пауза между событиями — это новый жест, старое не считаем
       }
       st.lastTickAt = now
       st.skipAccum += magnitude
-      if (st.skipAccum >= SKIP_DELTA_THRESHOLD) {
-        const finish = st.forceFinish
+      if (st.skipAccum >= SPEEDUP_DELTA_THRESHOLD) {
+        const speedUp = st.speedUp
         st.skipAccum = 0
-        st.forceFinish = null // защита от повторного форс-финиша, пока ждём afterSeek
-        finish()
+        st.speedUp = null // ускорение однократное — повторные тики уже ничего не меняют
+        speedUp()
       }
     }
 
     // ── Диспетчер «тика» ────────────────────────────────────────────────────
     const trigger = (dir: number, magnitude = DEFAULT_TICK_MAGNITUDE) => {
       if (st.busy) {
-        countSkipTick(magnitude) // залочено проигрышем — но набор SKIP_DELTA_THRESHOLD домотает анимацию
+        countSkipTick(magnitude) // залочено проигрышем — но набор SPEEDUP_DELTA_THRESHOLD ускорит анимацию
         return
       }
       if (st.cooldown) return
@@ -357,6 +378,7 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       cancelAnimationFrame(st.raf)
       st.busy = false
       st.forceFinish = null
+      st.speedUp = null
       st.skipAccum = 0
       if (st.released) {
         st.released = false
@@ -393,6 +415,7 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       cancelAnimationFrame(st.raf)
       st.busy = false
       st.forceFinish = null
+      st.speedUp = null
       st.skipAccum = 0
       st.step = LAST_STEP
       showOnly(LAST_STEP, true)
