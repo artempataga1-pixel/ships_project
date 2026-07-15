@@ -22,6 +22,11 @@ const ORBIT_DURATION = 42
 const CARD_TILT = 6
 // Просвет сверху/снизу: шапка сайта + угловые скобки карточки
 const VERTICAL_CLEAR = 120
+// Реакция на движение мыши
+const PARALLAX_SHIFT = 26 // сдвиг всей орбиты за курсором, px
+const HOVER_SCALE = 1.1 // рост карточки под курсором
+const HOVER_TILT_MAX = 10 // макс. 3D-наклон карточки за курсором, °
+const ORBIT_HOVER_TIMESCALE = 0.12 // орбита почти замирает, пока читают карточку
 
 function computeRadius(stageWidth: number, cardHalf: number, viewportHeight: number) {
   const x = Math.min(RADIUS_MAX, Math.max(RADIUS_MIN, stageWidth / 2 - cardHalf - 24))
@@ -86,6 +91,9 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
           })
         }
 
+        // Орбитальные твины копим — hover карточки плавно тормозит весь облёт
+        const orbitTweens: gsap.core.Tween[] = []
+
         cards.forEach((card, i) => {
           const startAngle = (360 / PRACTICES.length) * i - 90
           const state = { angle: startAngle }
@@ -103,18 +111,96 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
           const setX = gsap.quickSetter(card, 'x', 'px')
           const setY = gsap.quickSetter(card, 'y', 'px')
 
-          gsap.to(state, {
-            angle: startAngle + 360,
-            duration: ORBIT_DURATION,
-            ease: 'none',
-            repeat: -1,
-            onUpdate: () => {
-              const p = orbitPoint(state.angle, radiusRef.current)
-              setX(p.x)
-              setY(p.y)
-            },
+          orbitTweens.push(
+            gsap.to(state, {
+              angle: startAngle + 360,
+              duration: ORBIT_DURATION,
+              ease: 'none',
+              repeat: -1,
+              onUpdate: () => {
+                const p = orbitPoint(state.angle, radiusRef.current)
+                setX(p.x)
+                setY(p.y)
+              },
+            }),
+          )
+        })
+
+        // ── Реакция на движение мыши ──────────────────────────────────────
+        const stage = stageRef.current!
+        const listeners: { el: HTMLElement; type: string; fn: (e: MouseEvent) => void }[] = []
+        const on = (el: HTMLElement, type: string, fn: (e: MouseEvent) => void) => {
+          el.addEventListener(type, fn as EventListener)
+          listeners.push({ el, type, fn })
+        }
+
+        // Параллакс: вся орбита мягко тянется за курсором по сцене
+        const parX = gsap.quickTo(orbitRef.current, 'x', { duration: 0.9, ease: 'power3.out' })
+        const parY = gsap.quickTo(orbitRef.current, 'y', { duration: 0.9, ease: 'power3.out' })
+        on(stage, 'mousemove', (e) => {
+          const r = stage.getBoundingClientRect()
+          const nx = ((e.clientX - r.left) / r.width - 0.5) * 2 // -1..1
+          const ny = ((e.clientY - r.top) / r.height - 0.5) * 2
+          parX(nx * PARALLAX_SHIFT)
+          parY(ny * PARALLAX_SHIFT * 0.6)
+        })
+        on(stage, 'mouseleave', () => {
+          parX(0)
+          parY(0)
+        })
+
+        // Hover карточки: орбита почти замирает (карточку можно прочитать),
+        // сама карточка вырастает и наклоняется в 3D за курсором. Внешний div
+        // двигает орбита (x/y), поэтому scale/tilt — на внутреннем, без драки
+        // за transform. hoverCount — на случай мгновенного перескока между
+        // соседними карточками (leave одной приходит после enter другой).
+        let hoverCount = 0
+        const orbitSpeed = (timeScale: number, duration: number) => {
+          orbitTweens.forEach((tween) => gsap.to(tween, { timeScale, duration, overwrite: true }))
+        }
+        cards.forEach((card) => {
+          const inner = card.firstElementChild as HTMLElement | null
+          if (!inner) return
+          gsap.set(inner, { transformPerspective: 900 })
+          const tiltX = gsap.quickTo(inner, 'rotationX', { duration: 0.5, ease: 'power2.out' })
+          const tiltY = gsap.quickTo(inner, 'rotationY', { duration: 0.5, ease: 'power2.out' })
+
+          on(card, 'mouseenter', () => {
+            hoverCount++
+            orbitSpeed(ORBIT_HOVER_TIMESCALE, 0.6)
+            card.style.zIndex = '30'
+            gsap.to(inner, {
+              scale: HOVER_SCALE,
+              duration: 0.9,
+              ease: 'elastic.out(0.5, 0.35)',
+              overwrite: 'auto',
+            })
+          })
+          on(card, 'mousemove', (e) => {
+            const r = inner.getBoundingClientRect()
+            const nx = ((e.clientX - r.left) / r.width - 0.5) * 2
+            const ny = ((e.clientY - r.top) / r.height - 0.5) * 2
+            tiltX(-ny * HOVER_TILT_MAX)
+            tiltY(nx * HOVER_TILT_MAX)
+          })
+          on(card, 'mouseleave', () => {
+            hoverCount = Math.max(0, hoverCount - 1)
+            if (hoverCount === 0) orbitSpeed(1, 0.9)
+            card.style.zIndex = ''
+            tiltX(0)
+            tiltY(0)
+            gsap.to(inner, {
+              scale: 1,
+              duration: 0.9,
+              ease: 'elastic.out(0.5, 0.35)',
+              overwrite: 'auto',
+            })
           })
         })
+
+        return () => {
+          listeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn as EventListener))
+        }
       })
 
       mm.add('(prefers-reduced-motion: reduce)', () => {
@@ -162,7 +248,9 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
         {/* Сцена: заголовок неподвижен в центре (десктоп — внутри орбиты, мобильный — обычным блоком).
             В story сцена ниже — вся орбита должна уместиться в 100dvh оверлея. */}
         <div ref={stageRef} className={`relative ${isStory ? 'lg:h-[760px]' : 'lg:h-[920px]'}`}>
-          <div className="flex items-center justify-center lg:absolute lg:inset-0 lg:z-10">
+          {/* pointer-events-none: контейнер растянут на всю сцену и иначе
+              экранировал бы карточки орбиты от событий мыши (hover/tilt) */}
+          <div className="flex items-center justify-center lg:pointer-events-none lg:absolute lg:inset-0 lg:z-10">
             <SectionHeading
               title="Наши компетенции"
               subtitle="Профессионалы с многолетним опытом в ключевых отраслях права"
