@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { PRACTICE_OPTIONS } from '@/constants/content/contacts'
+import { CONTACT_INFO, PRACTICE_OPTIONS } from '@/constants/content/contacts'
 
 function CustomSelect({
   value,
@@ -102,6 +102,9 @@ export function ContactForm() {
   const [practice, setPractice] = useState('')
   const [phoneError, setPhoneError] = useState('')
   const [nameError, setNameError] = useState('')
+  const [consent, setConsent] = useState(false)
+  const [consentError, setConsentError] = useState('')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'error'>('idle')
   const [submitted, setSubmitted] = useState(false)
   const thankRef = useRef<HTMLDivElement>(null)
 
@@ -116,10 +119,13 @@ export function ContactForm() {
     if (phoneError) setPhoneError('')
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (status === 'sending') return
     const form = e.currentTarget
     const nameVal = (form.elements.namedItem('name') as HTMLInputElement).value.trim()
+    const messageVal = (form.elements.namedItem('message') as HTMLTextAreaElement).value.trim()
+    const honeypotVal = (form.elements.namedItem('website') as HTMLInputElement).value
     const digits = phone.replace(/\D/g, '')
 
     let hasError = false
@@ -135,8 +141,33 @@ export function ContactForm() {
     } else {
       setPhoneError('')
     }
+    if (!consent) {
+      setConsentError('Необходимо согласие на обработку персональных данных')
+      hasError = true
+    } else {
+      setConsentError('')
+    }
     if (hasError) return
-    setSubmitted(true)
+
+    setStatus('sending')
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: nameVal,
+          phone: digits,
+          practice,
+          message: messageVal,
+          website: honeypotVal,
+        }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      setStatus('idle')
+      setSubmitted(true)
+    } catch {
+      setStatus('error')
+    }
   }
 
   if (submitted) {
@@ -165,6 +196,11 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6 lg:gap-[min(1.67vh,1.5rem)]">
+      {/* Ловушка для спам-ботов: люди поле не видят и не заполняют */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+      </div>
+
       {/* Имя */}
       <div className="flex flex-col gap-2">
         <label htmlFor="name" className={labelClass}>
@@ -237,17 +273,49 @@ export function ContactForm() {
           id="message"
           name="message"
           rows={4}
+          maxLength={2000}
           placeholder="Опишите вашу ситуацию..."
           className={`${inputClass} resize-none border-[var(--color-lime-ink)]/35 focus:border-[var(--color-lime-ink)] lg:h-[clamp(4.5rem,8.75vh,126px)]`}
         />
       </div>
 
+      {/* Согласие на обработку персональных данных (152-ФЗ) */}
+      <div className="flex flex-col gap-2">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            name="consent"
+            checked={consent}
+            onChange={(e) => {
+              setConsent(e.target.checked)
+              if (e.target.checked) setConsentError('')
+            }}
+            className="mt-0.5 size-4 shrink-0 cursor-pointer accent-[var(--color-lime-ink)]"
+          />
+          <span className="text-xs text-[var(--color-muted)]">
+            Согласен(на) на обработку персональных данных *
+          </span>
+        </label>
+        {consentError && (
+          <p role="alert" className="text-xs text-red-500">
+            {consentError}
+          </p>
+        )}
+      </div>
+
       <button
         type="submit"
-        className="btn-lime-fill mt-1 h-14 w-full rounded-sm text-sm font-extrabold uppercase tracking-[0.08em] sm:w-[280px] lg:h-[clamp(2.75rem,3.89vh,3.5rem)]"
+        disabled={status === 'sending'}
+        className="btn-lime-fill mt-1 h-14 w-full rounded-sm text-sm font-extrabold uppercase tracking-[0.08em] disabled:cursor-not-allowed disabled:opacity-60 sm:w-[280px] lg:h-[clamp(2.75rem,3.89vh,3.5rem)]"
       >
-        Отправить заявку
+        {status === 'sending' ? 'Отправка…' : 'Отправить заявку'}
       </button>
+
+      {status === 'error' && (
+        <p role="alert" className="text-sm text-red-500">
+          Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам: {CONTACT_INFO.phone}
+        </p>
+      )}
     </form>
   )
 }
