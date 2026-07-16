@@ -6,7 +6,7 @@ import { HERO } from '@/constants/content/home'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { CompetenciesSection } from '@/components/sections/CompetenciesSection'
 import { PartnersSection } from '@/components/sections/PartnersSection'
-import { useStoryController } from './useStoryController'
+import { handleStoryAwareAnchorClick, useStoryController } from './useStoryController'
 
 // Story-режим только на десктопе без reduced-motion — scroll-jacking с
 // перехватом ввода на телефоне капризен, там секции идут обычным потоком
@@ -39,6 +39,7 @@ function HeroLayer() {
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/#contacts"
+          onClick={(e) => handleStoryAwareAnchorClick(e, 'contacts')}
           className="group mt-[clamp(2.75rem,5.5vh,4.5rem)] inline-flex items-center gap-8 lg:mt-[min(2.8125vw,4.5rem)] lg:gap-[min(1.25vw,2rem)]"
         >
           <span

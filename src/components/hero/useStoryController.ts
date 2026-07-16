@@ -59,6 +59,20 @@ export function isStoryActive(): boolean {
   return typeof window !== 'undefined' && !!(window as StoryWindow).__storyActive
 }
 
+// Клик по «сырому» <a href="/#id"> вне навбара (CTA «Связаться»/«Обсудить
+// задачу»): пока стори жива, голый клик перехватывает сам Lenis (anchors:true
+// в SmoothScrollProvider) и дёргает scrollTo мимо контроллера — guard
+// onLenisScroll в useStoryController откатывает скролл к 0 и стопит Lenis
+// (isStopped), а start() после этого никто не вызывает (его дают только
+// exitTo/relock/onGoto) — Lenis остаётся мёртвым, ломая весь дальнейший
+// скролл, включая логотип и пункты меню. Здесь — тот же мягкий выход через
+// STORY_EXIT_EVENT, что уже использует LimelightNav для пунктов ниже стори.
+export function handleStoryAwareAnchorClick(e: React.MouseEvent, id: string) {
+  if (!isStoryActive()) return
+  e.preventDefault()
+  window.dispatchEvent(new CustomEvent(STORY_EXIT_EVENT, { detail: { id } }))
+}
+
 export interface StoryRefs {
   wrapperRef: React.RefObject<HTMLElement | null>
   videoRefs: React.MutableRefObject<(HTMLVideoElement | null)[]>
