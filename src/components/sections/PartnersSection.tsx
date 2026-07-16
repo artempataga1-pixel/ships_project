@@ -1,12 +1,15 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { TEAM } from '@/constants/content/team'
 import type { TeamMember } from '@/types/content'
+
+// useLayoutEffect на сервере даёт warning — на SSR подменяем на useEffect
+const useClientLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
 /* Блок «Партнёры» — колода из 3 готовых карточек-визиток (фото + имя + роль
    впечатаны в PNG, public/images/team). Карточки раскрываются тесным веером
@@ -68,9 +71,11 @@ interface PartnersSectionProps {
 
 export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
   const isStory = variant === 'story'
+  const sectionRef = useRef<HTMLElement>(null)
   const arcRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
   const panelsRef = useRef<(HTMLElement | null)[]>([])
+  const panelSpaceRef = useRef<HTMLDivElement>(null)
 
   useGSAP(
     () => {
@@ -249,8 +254,49 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
     { scope: arcRef, dependencies: [] },
   )
 
+  // Панель регалий может свободно наезжать на карточки (z-index держит карточки
+  // читаемыми поверх) — поэтому в качестве доступного места берём почти всю
+  // высоту секции, а не только узкую полоску под карточками. Это подстраховка
+  // только на случай экстремально низких окон: обычно даже самый длинный
+  // список регалий (Анна, 8 пунктов) помещается без какого-либо сжатия.
+  useClientLayoutEffect(() => {
+    const panels = panelsRef.current.filter((p): p is HTMLElement => p !== null)
+    const section = sectionRef.current
+    if (!panels.length || !section || !isStory) return
+
+    const MIN_FIT = 0.72
+    const lastFactors: number[] = panels.map(() => -1)
+
+    const measure = () => {
+      const available = Math.max(0, section.getBoundingClientRect().height - 24)
+
+      panels.forEach((p, i) => {
+        const needed = p.scrollHeight
+        const factor = needed > available ? Math.max(MIN_FIT, available / needed) : 1
+        // gsap.set трогаем только при реальном изменении — иначе на каждый
+        // ResizeObserver-тик мы бы переустанавливали scale ПОВЕРХ активного
+        // showPanel/hidePanels твина того же элемента (xPercent/rotateY/autoAlpha),
+        // рискуя сбить его прямо во время наведения.
+        if (factor !== lastFactors[i]) {
+          lastFactors[i] = factor
+          gsap.set(p, { scale: factor })
+        }
+        p.style.maxHeight = `${Math.ceil(available / factor)}px`
+      })
+    }
+
+    measure()
+
+    const ro = new ResizeObserver(measure)
+    panels.forEach((p) => ro.observe(p))
+    ro.observe(section)
+
+    return () => ro.disconnect()
+  }, [isStory])
+
   return (
     <section
+      ref={sectionRef}
       {...(!isStory && { id: 'partners' })}
       className={
         isStory
@@ -328,74 +374,103 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
         </div>
       </div>
 
-      {/* Выезжающие 3D-панели с регалиями (десктоп). Живут в нижней полосе секции
-          под карточками (z-[4] < z-[5] контента), поэтому карточки не перекрывают.
-          Сторона вылета — panelSide из TEAM: Максим и Анна справа, Арина слева. */}
+      {/* Выезжающие 3D-панели с регалиями (десктоп). Абсолютно позиционированы
+          от всей секции (не только полоски под карточками) — панель может
+          свободно наезжать на карточки. Контент-враппер с карточками — свой
+          stacking context (position:relative + z-[5]), поэтому сравнивается с
+          этим блоком как единое целое независимо от z-index карточек внутри
+          (там до 100 при наведении) — z-[6] здесь гарантирует, что открытая
+          панель всегда поверх ВСЕХ карточек, и текст регалий никогда не
+          перекрывается их непрозрачными фото. max-w-[1440px] mx-auto — та же
+          система координат, что у контент-враппера с карточками, чтобы центры
+          совпадали. Сторона вылета — panelSide из TEAM: Максим и Анна справа,
+          Арина слева. */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-6 z-[4] hidden lg:block"
+        ref={panelSpaceRef}
+        className="pointer-events-none absolute inset-x-0 bottom-6 z-[6] mx-auto hidden w-full max-w-[1440px] px-8 lg:block md:px-16"
         style={{ perspective: '1500px' }}
       >
-        {TEAM.map((member, i) => (
-          <aside
-            key={member.name}
-            ref={(el) => {
-              panelsRef.current[i] = el
-            }}
-            aria-hidden
-            className={`invisible absolute bottom-0 rounded-2xl border border-white/10 bg-[rgba(37,41,44,0.82)] text-white opacity-0 shadow-[0_44px_90px_-26px_rgba(12,18,8,0.65)] backdrop-blur-md ${
-              member.panelSide === 'left' ? 'left-6 right-1/2' : 'left-1/2 right-6'
-            }`}
-            style={{
-              transformOrigin: member.panelSide === 'left' ? 'left center' : 'right center',
-              // Типографика панели масштабируется от высоты вьюпорта: на 2K —
-              // крупная (×1.5), на низких экранах ужимается, чтобы панель
-              // оставалась в полосе под карточками и не пряталась за ними.
-              padding: 'clamp(24px, 3.2vh - 4px, 40px)',
-            }}
-          >
-            <span
-              className={`pointer-events-none absolute top-[12%] h-[76%] w-[3px] bg-[var(--color-lime)] ${
-                member.panelSide === 'left' ? 'left-0' : 'right-0'
+        {TEAM.map((member, i) => {
+          // Центральная карточка (Шумская) стоит ровно на линии 50%, по которой
+          // обычно режется left-1/2/right-1/2 — из-за этого её собственная панель
+          // упиралась прямо в её же фото. Соседние карточки от этой линии смещены
+          // (FAN x: ±300), поэтому их не задевает. Отодвигаем внутренний край
+          // панели центральной карточки за пределы её увеличенной на hover копии
+          // (scale 1.12 → 460×1.12/2 ≈ 258px от центра) с запасом.
+          const isCenter = fanPosition(i, TEAM.length).x === 0
+          const CENTER_CLEARANCE = 'calc(50% + 290px)'
+          return (
+            <aside
+              key={member.name}
+              ref={(el) => {
+                panelsRef.current[i] = el
+              }}
+              aria-hidden
+              className={`invisible absolute bottom-0 max-h-full overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[rgba(37,41,44,0.82)] text-white opacity-0 shadow-[0_44px_90px_-26px_rgba(12,18,8,0.65)] backdrop-blur-md ${
+                member.panelSide === 'left'
+                  ? isCenter
+                    ? 'right-1/2'
+                    : 'left-6 right-1/2'
+                  : isCenter
+                    ? 'left-1/2'
+                    : 'left-1/2 right-6'
               }`}
-              style={{ boxShadow: '0 0 26px var(--color-lime-glow)' }}
-            />
-            <p
-              className="font-semibold uppercase tracking-[0.22em] text-[var(--color-lime)]"
-              style={{ fontSize: 'clamp(11px, 1.1vh + 1px, 16px)' }}
+              style={{
+                // bottom — совпадает с CSS bottom-0 панели: scale (см. измерительный
+                // эффект выше) ужимает её к этой же точке, а не «от центра».
+                transformOrigin: member.panelSide === 'left' ? 'left bottom' : 'right bottom',
+                // Типографика панели масштабируется от высоты вьюпорта: на 2K —
+                // крупная (×1.5), на низких экранах ужимается, чтобы панель
+                // оставалась в полосе под карточками и не пряталась за ними.
+                padding: 'clamp(24px, 3.2vh - 4px, 40px)',
+                ...(isCenter && member.panelSide === 'right' ? { left: CENTER_CLEARANCE } : {}),
+                ...(isCenter && member.panelSide === 'left' ? { right: CENTER_CLEARANCE } : {}),
+              }}
             >
-              {member.role}
-            </p>
-            <h3
-              className="mt-2 font-semibold tracking-tight"
-              style={{ fontSize: 'clamp(20px, 2.2vh - 1px, 30px)' }}
-            >
-              {member.name}
-            </h3>
-            {/* Длинный список регалий — в две колонки, чтобы панель не росла в высоту
-                и не наезжала на карточки. */}
-            <ul
-              className={`mt-5 ${
-                (member.achievements?.length ?? 0) > 4
-                  ? 'grid grid-cols-2 gap-x-10 gap-y-3'
-                  : 'space-y-3'
-              }`}
-            >
-              {member.achievements?.map((item) => (
-                <li
-                  key={item}
-                  className="flex gap-3 leading-snug text-white/85"
-                  style={{ fontSize: 'clamp(13px, 1.1vh + 4px, 19px)' }}
-                >
-                  <span
-                    className="shrink-0 rounded-full bg-[var(--color-lime)]"
-                    style={{ width: '0.5em', height: '0.5em', marginTop: '0.42em' }}
-                  />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </aside>
-        ))}
+              <span
+                className={`pointer-events-none absolute top-[12%] h-[76%] w-[3px] bg-[var(--color-lime)] ${
+                  member.panelSide === 'left' ? 'left-0' : 'right-0'
+                }`}
+                style={{ boxShadow: '0 0 26px var(--color-lime-glow)' }}
+              />
+              <p
+                className="font-semibold uppercase tracking-[0.22em] text-[var(--color-lime)]"
+                style={{ fontSize: 'clamp(11px, 1.1vh + 1px, 16px)' }}
+              >
+                {member.role}
+              </p>
+              <h3
+                className="mt-2 font-semibold tracking-tight"
+                style={{ fontSize: 'clamp(20px, 2.2vh - 1px, 30px)' }}
+              >
+                {member.name}
+              </h3>
+              {/* Длинный список регалий — в две колонки, чтобы панель росла вширь,
+                  а не только в высоту. */}
+              <ul
+                className={`mt-5 ${
+                  (member.achievements?.length ?? 0) > 4
+                    ? 'grid grid-cols-2 gap-x-10 gap-y-3'
+                    : 'space-y-3'
+                }`}
+              >
+                {member.achievements?.map((item) => (
+                  <li
+                    key={item}
+                    className="flex gap-3 leading-snug text-white/85"
+                    style={{ fontSize: 'clamp(13px, 1.1vh + 4px, 19px)' }}
+                  >
+                    <span
+                      className="shrink-0 rounded-full bg-[var(--color-lime)]"
+                      style={{ width: '0.5em', height: '0.5em', marginTop: '0.42em' }}
+                    />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </aside>
+          )
+        })}
       </div>
     </section>
   )
