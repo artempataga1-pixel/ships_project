@@ -15,6 +15,21 @@ function formatMoscowTime(): string {
   }).format(new Date())
 }
 
+/* Номер заявки из московской даты: #ДДММ-ЧЧММ (например #1607-2143).
+   Счётчика в serverless нет, поэтому номер — из момента поступления. */
+function leadNumber(): string {
+  const parts = new Intl.DateTimeFormat('ru-RU', {
+    timeZone: 'Europe/Moscow',
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date())
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '00'
+  return `#${get('day')}${get('month')}-${get('hour')}${get('minute')}`
+}
+
 /* Rate-limit по IP: best-effort — Map живёт в памяти warm-инстанса serverless-функции,
    при холодном старте или параллельном инстансе счётчик чистый. От двойных кликов
    и примитивных ботов защищает, от целевого спама — нет (тогда Turnstile/Redis). */
@@ -105,7 +120,7 @@ export async function POST(request: NextRequest) {
 
   const normalizedPhone = '+7' + phone.slice(1)
   const text = [
-    '🔔 <b>Новая заявка с сайта</b>',
+    `🔔 <b>Новая заявка ${leadNumber()}</b>`,
     '',
     `<b>Имя:</b> ${escapeHtml(name)}`,
     `<b>Телефон:</b> ${normalizedPhone}`,
