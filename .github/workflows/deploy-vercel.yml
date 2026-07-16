@@ -1,0 +1,29 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  VERCEL_ORG_ID: team_FPY8YW2qOsUQe2Ef0iAIXVME
+  VERCEL_PROJECT_ID: prj_2ZLb4tqXrzaPaQbQG4AdIfNK8q81
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Пока секрет VERCEL_TOKEN не добавлен в Settings → Secrets → Actions,
+      # деплой мягко пропускается, а не падает с ошибкой
+      - name: Секрет не задан — пропуск
+        if: env.VERCEL_TOKEN == ''
+        run: echo "Секрет VERCEL_TOKEN не задан в репозитории — деплой пропущен."
+
+      - name: Checkout
+        if: env.VERCEL_TOKEN != ''
+        uses: actions/checkout@v4
+
+      - name: Деплой на Vercel (production)
+        if: env.VERCEL_TOKEN != ''
+        run: npx vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
