@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
 import { ScrollTopOnLoad } from '@/components/ui/ScrollTopOnLoad'
+import { CaseBackground } from '@/components/ui/CaseBackground'
 
 interface CasePageProps {
   params: Promise<{ slug: string }>
@@ -63,20 +64,7 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
       }}
     >
       <ScrollTopOnLoad />
-      {/* --- Фоновое видео кейса: бесшовный пинг-понг (16с — вперёд + реверс,
-             склеено ffmpeg, оттого loop без рывка). Тихое, автоплей. --- */}
-      <video
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        poster="/video/poster_start.jpg"
-      >
-        <source src="/video/case-bg-loop.mp4" type="video/mp4" />
-      </video>
+      <CaseBackground />
       {/* --- Фоновый декор: эллиптические орбиты + лайм-точки + контурная скобка --- */}
       <div
         aria-hidden
