@@ -98,9 +98,23 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Копирайт */}
-        <div className="mt-10 pt-6 border-t border-[var(--color-line)] flex items-center justify-between text-xs text-[var(--color-muted)]">
+        {/* Копирайт + правовая информация */}
+        <div className="mt-10 flex flex-col gap-4 border-t border-[var(--color-line)] pt-6 text-xs text-[var(--color-muted)] sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} Шумская и Партнёры. Все права защищены.</span>
+          <nav aria-label="Правовая информация" className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <Link
+              href="/privacy-policy"
+              className="hover:text-[var(--color-lime-ink)] transition-colors duration-200"
+            >
+              Политика обработки персональных данных
+            </Link>
+            <Link
+              href="/terms"
+              className="hover:text-[var(--color-lime-ink)] transition-colors duration-200"
+            >
+              Пользовательское соглашение
+            </Link>
+          </nav>
           <span>Юридическая компания</span>
         </div>
       </div>
