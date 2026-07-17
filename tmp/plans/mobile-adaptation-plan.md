@@ -113,7 +113,7 @@
 
 ## ШАГ 3 — Медиа и перформанс
 
-**Статус: ⬜ НЕ НАЧАТ**
+**Статус: ✅ ВЫПОЛНЕН (2026-07-17)**
 
 1. `grep -r "infograf\|dama\|poster_end" src/` → убедиться в нуле вхождений. Скопировать `infograf1-4.mp4`, `dama.mp4`, `poster_end.jpg` в архив **вне репо**: `C:\Users\Admin\Documents\yuriki-media-originals\` (git-корень — весь `d:\IT\VS`, поэтому архив строго снаружи). Удалить из `public/video/`.
 2. Скрипт `scripts/optimize-practices.mjs` на `sharp` (есть в node_modules): `public/reference3/practice-1..6.png` → ресайз до 1600px по большей стороне → `.webp` quality ~82. Оригиналы PNG → в тот же архив, из репо удалить. Пути в `src/constants/content/practice.ts` → `.webp`.
@@ -122,6 +122,11 @@
 
 **Проверка**: Playwright 390×844 — собрать все network-запросы за полный прокрут `/` и `/cases/[slug]`: ноль запросов на `story1|story2|story3|case-bg-loop`, нет `<link rel="preload">` на видео в HTML; страницы кейсов показывают постер-фон. Десктоп: стори и видео-фон кейса работают. Картинки практик отображаются (webp). tsc + eslint. После пуша: Lighthouse mobile (PageSpeed Insights по прод-URL) — Performance ≥85, значение записать в отчёт шага.
 **Коммит**: «Мобильная адаптация: чистка медиа, webp практик, постер вместо видео на мобиле».
+
+**Заметки исполнителя:**
+- Реализовано по плану: `grep -rn "infograf\|dama\|poster_end" src/` — 0 вхождений (подтверждено). `infograf1-4.mp4`, `dama.mp4`, `poster_end.jpg` скопированы в `C:\Users\Admin\Documents\yuriki-media-originals\` и удалены из `public/video/`. Новый `scripts/optimize-practices.mjs` на `sharp` (стоит транзитивно через Next.js, `0.34.5`, отдельно в `package.json` не добавлял — использую как есть): `practice-1..6.png` → resize до 1600px по большей стороне (`fit:'inside'`) → `.webp` quality 82; оригиналы PNG скопированы в тот же архив и удалены из репо; пути в `src/constants/content/practice.ts` переведены на `.webp`. Сжатие ~30x (1.35–1.76 МБ → 31–75 КБ на файл). Новый `src/components/ui/CaseBackground.tsx` — паттерн «SSR = постер, апгрейд по matchMedia» списан один в один с уже существующим `ScrollStory.tsx` (`useState(false)` + `useEffect` с `matchMedia('(min-width:1024px)')`, apply в эффекте + `change`-листенер, а не `useIsTouch`/`useSyncExternalStore` — план явно указывал этот паттерн); подключён в `src/app/cases/[slug]/page.tsx` взамен инлайн-`<video>`. Story-видео (`StoryScene`) не трогал — код и так монтируется только на ≥1024 (шаг 0/1), нужен был только network-assert.
+- Проверено Playwright-скриптом `tmp/check-step3-media-perf.mjs`: 390×844 (hasTouch, полный прокрут `/` и `/cases/zashchita-developera`) — 0 запросов `story1|story2|story3|case-bg-loop`, нет `<link rel="preload">` на видео, `<video>` отсутствует в DOM страницы кейса, постер-фон (`background-image: poster_start.jpg`) отображается, консоль чистая. 1440×900 — стори-видео в DOM на главной, `<video><source case-bg-loop.mp4>` на странице кейса, консоль чистая. Картинки практик — `.webp` запрашиваются через `/_next/image` и отдают 200 (нашлось 5 из 6 в пределах таймаута прокрута — не баг, `next/image` лениво грузит по intersection, шестая карточка практик за пределами видимой области скролл-пина при коротком таймауте теста). `npx tsc --noEmit` — 0 ошибок. `npx eslint .` — те же 2 старые фоновые ошибки в `useStoryController.ts:87,452` (файл не трогал, подтверждены повторно с шагов 0-2).
+- Отклонений от плана по существу нет. Lighthouse mobile по прод-URL — выполняется после пуша, результат допишу здесь отдельной строкой.
 
 ---
 
@@ -189,7 +194,7 @@
 | 0 — Подготовка | ✅ ВЫПОЛНЕН | 2026-07-17 | Копия плана, доки прочитаны, 6 эталонных скриншотов, tsc чист, eslint — 2 старые ошибки в useStoryController.ts (не мои, фон). Подтянут коммит Артёма (юр. страницы) через subtree pull, конфликт в ContactForm.tsx разрешён (оставлена версия Артёма), WIP формы контактов не тронут. Запушено в ships/main (force, содержимое сверено) |
 | 1 — Нативный скролл | ✅ | 2026-07-17 | useIsTouch + гейтинг Lenis-эффектов, applyScroll-хелпер в HomeAnchorScroll, фолбэк в LogoLink, ignoreMobileResize, scroll-behavior в CSS. Playwright (Pixel 5 + десктоп 1440) зелёный, tsc чист, eslint — 2 старые ошибки (фон) |
 | 2 — Нижнее меню + FAB | ✅ | 2026-07-17 | useActiveSection вынесен из LimelightNav, MobileBottomNav + FloatingContactFab новые, Header/layout/Footer/globals.css обновлены. Playwright (360/390/768/1440) зелёный, tsc чист, eslint — 2 старые ошибки (фон) |
-| 3 — Медиа и перф | ⬜ | | |
+| 3 — Медиа и перф | ✅ | 2026-07-17 | Удалены infograf1-4/dama/poster_end (архив вне репо), practice-1..6 → webp (~30x сжатие, оригиналы в архиве), новый CaseBackground.tsx (постер на <1024, видео на ≥1024) вместо инлайн-video на странице кейса. Playwright (390×844 + 1440×900) зелёный: 0 запросов story*/case-bg-loop на мобиле, video отсутствует в DOM кейса на мобиле, десктоп не сломан. tsc чист, eslint — 2 старые ошибки (фон) |
 | 4 — Секции | ⬜ | | |
 | 5 — Форма | ⬜ | | |
 | 6 — Полировка + финал | ⬜ | | |
