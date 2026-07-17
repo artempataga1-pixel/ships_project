@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ScrollTrigger } from '@/lib/gsap'
+import { useGSAP } from '@gsap/react'
+import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { HERO } from '@/constants/content/home'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { CompetenciesSection } from '@/components/sections/CompetenciesSection'
@@ -27,12 +28,15 @@ function HeroLayer() {
       {/* Левая колонка: заголовок, подзаголовок, CTA — крупный кегль (×2). */}
       <div className="relative z-10 max-w-[70rem] pt-[clamp(80px,10vh,130px)] lg:max-w-[min(43.75vw,70rem)] lg:pt-[min(5.0781vw,130px)]">
         <h1 className="font-heading font-medium leading-[1.03] tracking-[-0.055em] text-[clamp(3.9rem,11.5vw,9rem)] lg:text-[min(5.625vw,9rem)]">
-          <span className="block">{HERO.titleLine1}</span>
-          <span className="block">{HERO.titleLine2}</span>
-          <span className="block text-black/25">{HERO.titleMuted}</span>
+          <span data-hero-fade className="block">{HERO.titleLine1}</span>
+          <span data-hero-fade className="block">{HERO.titleLine2}</span>
+          <span data-hero-fade className="block text-black/25">{HERO.titleMuted}</span>
         </h1>
 
-        <p className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[40rem] text-[clamp(1.5rem,2.3vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)] lg:mt-[min(1.5625vw,2.5rem)] lg:max-w-[min(25vw,40rem)] lg:text-[clamp(1.125rem,1.40625vw,2.25rem)]">
+        <p
+          data-hero-fade
+          className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[40rem] text-[clamp(1.5rem,2.3vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)] lg:mt-[min(1.5625vw,2.5rem)] lg:max-w-[min(25vw,40rem)] lg:text-[clamp(1.125rem,1.40625vw,2.25rem)]"
+        >
           {HERO.subtitle}
         </p>
 
@@ -40,6 +44,7 @@ function HeroLayer() {
         <a
           href="/#contacts"
           onClick={(e) => handleStoryAwareAnchorClick(e, 'contacts')}
+          data-hero-fade
           className="group mt-[clamp(2.75rem,5.5vh,4.5rem)] inline-flex items-center gap-8 lg:mt-[min(2.8125vw,4.5rem)] lg:gap-[min(1.25vw,2rem)]"
         >
           <span
@@ -190,10 +195,36 @@ function StoryScene() {
 // FLOW: мобилка / reduced-motion — обычный поток, видео = постер-hero.
 // ══════════════════════════════════════════════════════════════════════════
 function FlowFallback() {
+  const heroRef = useRef<HTMLElement>(null)
+
+  // Стаггер-появление заголовка/подзаголовка/CTA (data-hero-fade в HeroLayer).
+  // Только когда motion разрешён — на reduce элементы остаются в исходном
+  // (видимом) состоянии, gsap.set внутри ветки вообще не выполняется.
+  useGSAP(
+    () => {
+      const items = gsap.utils.toArray<HTMLElement>('[data-hero-fade]', heroRef.current)
+      if (!items.length) return
+
+      const mm = gsap.matchMedia()
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        gsap.set(items, { autoAlpha: 0, y: 24 })
+        gsap.to(items, {
+          autoAlpha: 1,
+          y: 0,
+          stagger: 0.08,
+          duration: 0.7,
+          ease: 'power3.out',
+        })
+      })
+    },
+    { scope: heroRef },
+  )
+
   return (
     <>
       {/* Постер-hero: статичный первый кадр видео + контент героя поверх */}
       <section
+        ref={heroRef}
         id="hero"
         className="relative h-[100dvh] min-h-[640px] overflow-hidden bg-[var(--color-bg)]"
       >
