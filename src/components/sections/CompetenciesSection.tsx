@@ -241,7 +241,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
       />
 
       <div
-        className={`relative max-w-[1440px] w-full mx-auto px-16 ${
+        className={`relative max-w-[1440px] w-full mx-auto px-6 md:px-12 lg:px-16 ${
           isStory ? 'py-10' : 'py-32'
         }`}
       >

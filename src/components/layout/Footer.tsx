@@ -8,7 +8,7 @@ export function Footer() {
   return (
     <footer className="border-t border-[var(--color-line)] bg-[var(--color-surface-soft)] pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <div className="max-w-[1440px] mx-auto px-8 py-12">
-        <div className="grid grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-12">
           {/* Лого + описание + соцсети */}
           <div className="flex flex-col gap-4">
             <Link href="/" aria-label="На главную">

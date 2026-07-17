@@ -22,9 +22,9 @@ import type { MediaItem } from '@/types/content'
 // чтобы её край выглядывал из-под текущей, а не пряталась ровно под ней
 const PEEK_STEPS = [
   '',
-  'md:translate-x-3 md:translate-y-3',
-  'md:translate-x-6 md:translate-y-6',
-  'md:translate-x-9 md:translate-y-9',
+  'lg:translate-x-3 lg:translate-y-3',
+  'lg:translate-x-6 lg:translate-y-6',
+  'lg:translate-x-9 lg:translate-y-9',
 ]
 
 function ArticleCard({ item, index, total }: { item: MediaItem; index: number; total: number }) {
@@ -35,7 +35,7 @@ function ArticleCard({ item, index, total }: { item: MediaItem; index: number; t
     <article
       className="
         relative flex flex-col justify-center
-        min-h-[82dvh] md:min-h-0 md:h-full w-full
+        min-h-0 lg:h-full w-full
         rounded-2xl md:rounded-[28px]
         border border-[var(--color-line)]
         bg-[var(--color-surface)]
@@ -120,7 +120,7 @@ export function ArticlesSection() {
 
       const mm = gsap.matchMedia()
 
-      mm.add('(prefers-reduced-motion: no-preference) and (min-width: 768px)', () => {
+      mm.add('(prefers-reduced-motion: no-preference) and (min-width: 1024px)', () => {
         // Первая карточка стартует за нижним краем экрана. Пока она едет наверх,
         // её бокс физически ниже экрана и не закрывает карточки под собой —
         // поэтому остальные прячем (autoAlpha 0) и открываем только когда она доедет
@@ -166,6 +166,24 @@ export function ArticlesSection() {
           tl.kill()
         }
       })
+
+      // Мобильный/планшетный вариант: карточки идут обычным вертикальным
+      // списком (без пина) — каждая появляется лёгким reveal при входе в вьюпорт
+      mm.add('(prefers-reduced-motion: no-preference) and (max-width: 1023px)', () => {
+        cards.forEach((card) => {
+          gsap.from(card, {
+            autoAlpha: 0,
+            y: 40,
+            duration: 0.7,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              once: true,
+            },
+          })
+        })
+      })
     },
     { scope: sectionRef },
   )
@@ -174,19 +192,19 @@ export function ArticlesSection() {
     <section id="articles" ref={sectionRef} className="relative bg-[var(--color-bg)]">
       {/* На мобильных — обычный заголовок сверху. На десктопе он скрыт: вместо
           него внутри пина работает вариант, оседающий в нижней полосе (см. ниже) */}
-      <div className="md:hidden max-w-[1440px] w-full mx-auto px-8 pt-24">
+      <div className="lg:hidden max-w-[1440px] w-full mx-auto px-8 pt-24">
         <SectionHeading title="Статьи" subtitle="Публикации и комментарии экспертов компании" />
       </div>
 
       <div
         ref={pinRef}
-        className="relative mt-12 md:mt-0 flex flex-col gap-6 md:gap-0 md:h-dvh md:overflow-hidden"
+        className="relative mt-12 lg:mt-0 flex flex-col gap-6 lg:gap-0 lg:h-dvh lg:overflow-hidden"
       >
         {/* Фоновый декор экрана — светлый градиент + эллиптические орбиты и лайм-точки,
             видны в полях вокруг стопки (как в референс-коде .card-orbit/.dot) */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 hidden md:block"
+          className="pointer-events-none absolute inset-0 z-0 hidden lg:block"
           style={{
             background:
               'radial-gradient(circle at 72% 42%, var(--color-lime-soft), transparent 24%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
@@ -215,7 +233,7 @@ export function ArticlesSection() {
             ref={(el) => {
               cardsRef.current[i] = el
             }}
-            className={`relative md:absolute md:inset-x-[18%] md:inset-y-[20%] ${PEEK_STEPS[Math.min(i, PEEK_STEPS.length - 1)]}`}
+            className={`relative lg:absolute lg:inset-x-[18%] lg:inset-y-[20%] ${PEEK_STEPS[Math.min(i, PEEK_STEPS.length - 1)]}`}
             style={{ zIndex: MEDIA.length - i }}
           >
             <ArticleCard item={item} index={i} total={MEDIA.length} />
@@ -228,7 +246,7 @@ export function ArticlesSection() {
         <div
           ref={headingRef}
           className="
-            hidden md:flex absolute inset-x-0 top-[8%] z-30
+            hidden lg:flex absolute inset-x-0 top-[8%] z-30
             flex-col items-center gap-3 text-center
           "
         >
@@ -241,7 +259,7 @@ export function ArticlesSection() {
         </div>
 
         {/* Полоска прогресса пина — заполняется по мере смены карточек (только десктоп) */}
-        <div className="hidden md:block absolute bottom-0 inset-x-0 h-[3px] bg-[var(--color-line)] z-20">
+        <div className="hidden lg:block absolute bottom-0 inset-x-0 h-[3px] bg-[var(--color-line)] z-20">
           <div
             ref={progressRef}
             className="h-full w-full origin-left bg-gradient-to-r from-[var(--color-lime-ink)] to-[var(--color-lime)]"

@@ -32,12 +32,12 @@ interface CardVariant {
 /* ratio каждой карточки совпадает с пропорцией её фото (practice-1..6),
    чтобы object-cover не резал кадр — форма рамки повторяет форму снимка */
 const CARD_VARIANTS: CardVariant[] = [
-  { align: 'self-center', width: 'w-[24vw] min-w-[280px]', ratio: 'aspect-[2/3]', muted: false },   // practice-1 · 1024×1536
-  { align: 'self-start mt-[10dvh]', width: 'w-[34vw] min-w-[360px]', ratio: 'aspect-[3/2]', muted: false }, // practice-2 · 1536×1024
-  { align: 'self-end mb-[14dvh]', width: 'w-[18vw] min-w-[240px]', ratio: 'aspect-[10/13]', muted: true },  // practice-3 · 1100×1430
-  { align: 'self-start mt-[8dvh]', width: 'w-[27vw] min-w-[320px]', ratio: 'aspect-[4/3]', muted: false },  // practice-4 · 1448×1086
-  { align: 'self-center', width: 'w-[17vw] min-w-[230px]', ratio: 'aspect-[9/16]', muted: true },   // practice-5 · 941×1672
-  { align: 'self-end mb-[12dvh]', width: 'w-[30vw] min-w-[360px]', ratio: 'aspect-[4/3]', muted: false },   // practice-6 · 1448×1086
+  { align: 'lg:self-center', width: 'w-full lg:w-[24vw] lg:min-w-[280px]', ratio: 'aspect-[2/3]', muted: false },   // practice-1 · 1024×1536
+  { align: 'lg:self-start lg:mt-[10dvh]', width: 'w-full lg:w-[34vw] lg:min-w-[360px]', ratio: 'aspect-[3/2]', muted: false }, // practice-2 · 1536×1024
+  { align: 'lg:self-end lg:mb-[14dvh]', width: 'w-full lg:w-[18vw] lg:min-w-[240px]', ratio: 'aspect-[10/13]', muted: true },  // practice-3 · 1100×1430
+  { align: 'lg:self-start lg:mt-[8dvh]', width: 'w-full lg:w-[27vw] lg:min-w-[320px]', ratio: 'aspect-[4/3]', muted: false },  // practice-4 · 1448×1086
+  { align: 'lg:self-center', width: 'w-full lg:w-[17vw] lg:min-w-[230px]', ratio: 'aspect-[9/16]', muted: true },   // practice-5 · 941×1672
+  { align: 'lg:self-end lg:mb-[12dvh]', width: 'w-full lg:w-[30vw] lg:min-w-[360px]', ratio: 'aspect-[4/3]', muted: false },   // practice-6 · 1448×1086
 ]
 
 /* Контурный логотип-скобка (декор фона заголовочного экрана, ~16% opacity) —
@@ -69,7 +69,7 @@ function LogoOutline({ className }: { className?: string }) {
 
 function PracticeCard({ item, variant }: { item: PracticeArea; variant: CardVariant }) {
   return (
-    <figure className={`shrink-0 ml-[5vw] ${variant.align} ${variant.width}`}>
+    <figure className={`shrink-0 lg:ml-[5vw] ${variant.align} ${variant.width}`}>
       {/* Ярлык над фото — как «QATAR, 2024» в референсе */}
       <figcaption className="mb-3 text-xs tracking-[0.25em] uppercase text-[var(--color-muted)]">
         {item.num} / {item.label}
@@ -87,7 +87,7 @@ function PracticeCard({ item, variant }: { item: PracticeArea; variant: CardVari
             src={item.image}
             alt={item.title}
             fill
-            sizes="(max-width: 768px) 80vw, 36vw"
+            sizes="(max-width: 1023px) 92vw, 36vw"
             className="scale-[1.12] object-cover"
           />
         </div>
@@ -111,7 +111,7 @@ function PracticeCard({ item, variant }: { item: PracticeArea; variant: CardVari
 
 function QuoteBlock({ text }: { text: string }) {
   return (
-    <div className="shrink-0 self-center ml-[7vw] w-[26vw] min-w-[300px]">
+    <div className="shrink-0 w-full lg:self-center lg:ml-[7vw] lg:w-[26vw] lg:min-w-[300px]">
       <p className="font-heading italic font-semibold text-[var(--color-lime-ink)] text-[clamp(1.25rem,1.8vw,1.75rem)] leading-snug">
         {text}
       </p>
@@ -132,7 +132,7 @@ export function PracticesSection() {
 
       const mm = gsap.matchMedia()
 
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
+      mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
         const dist = () => track.scrollWidth - window.innerWidth
 
         // Вертикальный скролл конвертируется в горизонтальный сдвиг трека;
@@ -172,7 +172,7 @@ export function PracticesSection() {
       })
 
       // Reduced motion: без пина — обычная горизонтальная прокрутка коллажа
-      mm.add('(prefers-reduced-motion: reduce)', () => {
+      mm.add('(min-width: 1024px) and (prefers-reduced-motion: reduce)', () => {
         pinWrap.classList.add('overflow-x-auto')
         return () => pinWrap.classList.remove('overflow-x-auto')
       })
@@ -183,7 +183,7 @@ export function PracticesSection() {
   return (
     <section id="practices" ref={sectionRef} className="relative bg-[var(--color-bg)]">
       {/* Экран-заголовок: уезжает вверх обычным скроллом, как интро в референсе */}
-      <div className="relative flex h-dvh flex-col items-center justify-center overflow-hidden px-6 text-center">
+      <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-6 text-center lg:h-dvh">
         {/* Светлый градиент секции + мягкий лайм-glow за заголовком */}
         <div
           aria-hidden
@@ -264,10 +264,13 @@ export function PracticesSection() {
       </div>
 
       {/* Пин-экран: коллаж карточек, едущий горизонтально */}
-      <div ref={pinRef} className="relative h-dvh overflow-hidden">
-        <div ref={trackRef} className="flex h-full w-max items-stretch py-[6dvh]">
+      <div ref={pinRef} className="relative lg:h-dvh lg:overflow-hidden">
+        <div
+          ref={trackRef}
+          className="flex flex-col gap-14 px-6 py-16 lg:h-full lg:w-max lg:flex-row lg:items-stretch lg:gap-0 lg:px-0 lg:py-[6dvh]"
+        >
           {/* Отступ старта: первая карточка входит из-за правого края не впритык */}
-          <div className="w-[6vw] shrink-0" aria-hidden="true" />
+          <div className="hidden w-[6vw] shrink-0 lg:block" aria-hidden="true" />
 
           {PRACTICE_AREAS.map((item, i) => (
             <Fragment key={item.num}>
@@ -279,7 +282,7 @@ export function PracticesSection() {
           ))}
 
           {/* Хвост: последняя карточка останавливается не у самого края */}
-          <div className="w-[10vw] shrink-0" aria-hidden="true" />
+          <div className="hidden w-[10vw] shrink-0 lg:block" aria-hidden="true" />
         </div>
       </div>
     </section>

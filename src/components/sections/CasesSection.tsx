@@ -143,7 +143,7 @@ export function CasesSection() {
       {/* Прилипающий заголовок: стоит по центру экрана, пока мимо едут карточки */}
       <div
         className="
-          sticky top-0 z-0 h-dvh overflow-hidden
+          sticky top-0 z-0 h-svh overflow-hidden lg:h-dvh
           flex flex-col items-center justify-center gap-6
           text-center px-6
         "
@@ -210,7 +210,7 @@ export function CasesSection() {
         <div className="h-[85dvh]" aria-hidden="true" />
 
         {CASE_STUDIES.map((item, i) => (
-          <div key={item.slug} className={i === 0 ? 'flex flex-col' : 'mt-[45dvh] flex flex-col'}>
+          <div key={item.slug} className={i === 0 ? 'flex flex-col' : 'mt-[30dvh] lg:mt-[45dvh] flex flex-col'}>
             <FloatingCaseCard item={item} align={ALIGN_CYCLE[i % 3]} />
           </div>
         ))}
