@@ -1,8 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { FloatingContactFab } from "@/components/layout/FloatingContactFab";
 import { LogoIntro } from "@/components/ui/LogoIntro";
 import "./globals.css";
 
@@ -15,6 +17,14 @@ const manrope = Manrope({
   variable: "--font-manrope-var",
   display: "swap",
 });
+
+// viewportFit: 'cover' обязателен — без него env(safe-area-inset-bottom) на
+// iPhone равен 0, и нижнее меню/FAB встают вплотную к home indicator
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "Шумская и Партнёры — Юридическая компания",
@@ -46,6 +56,8 @@ export default function RootLayout({
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <MobileBottomNav />
+          <FloatingContactFab />
         </SmoothScrollProvider>
       </body>
     </html>

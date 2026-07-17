@@ -86,7 +86,7 @@
 
 ## ШАГ 2 — Нижнее меню + плавающая трубка
 
-**Статус: ⬜ НЕ НАЧАТ**
+**Статус: ✅ ВЫПОЛНЕН (2026-07-17)**
 
 Файлы: `src/components/layout/useActiveSection.ts` (новый), `MobileBottomNav.tsx` (новый), `FloatingContactFab.tsx` (новый), `LimelightNav.tsx`, `Header.tsx`, `src/app/layout.tsx`, `globals.css`.
 
@@ -101,6 +101,13 @@
 
 **Проверка**: Playwright 360×800 / 390×844 / 768×1024: меню видно, 7 пунктов скроллятся горизонтально, тап по каждому ведёт к своей секции, лампа над активным, активный пункт автоцентрируется (assert `scroller.scrollLeft > 0` после скролла к концу страницы); FAB скроллит к форме; футер полностью виден. 1024+: меню и FAB отсутствуют, десктоп-шапка и лампа LimelightNav без изменений. Консоль чистая (в т.ч. без ошибок гидрации). tsc + eslint.
 **Коммит**: «Мобильная адаптация: нижнее меню с лампой и плавающая кнопка связи».
+
+**Заметки исполнителя:**
+- Реализовано по плану: `useActiveSection.ts` (новый) — вынесена общая логика LimelightNav (IntersectionObserver + resubscribe по pathname + guard `isConnected`, слушатель `STORY_STEP_EVENT`), возвращает `activeIndex`; `LimelightNav.tsx` переведён на хук, hover-логика/лампа/`handleClick` остались в нём, десктоп-поведение не изменилось (подтверждено тестом). `MobileBottomNav.tsx` (новый) — `<nav class="lg:hidden fixed inset-x-0 bottom-0 z-[90]">`, скроллер `overflow-x-auto no-scrollbar`, трек `<ul class="relative flex w-max...">` с лампой внутри (первый child, `aria-hidden`, копия стиля/glow из LimelightNav) и автоцентрированием через `scroller.scrollTo` по `activeIndex`. `FloatingContactFab.tsx` (новый) — круглая кнопка 56px (`btn-lime-fill`, иконка `Phone` из lucide-react), `lg:hidden fixed`, `bottom: calc(3.5rem + env(safe-area-inset-bottom) + 0.75rem)`. `Header.tsx` — нав и CTA получили `hidden lg:block`/`hidden lg:inline-flex`. `layout.tsx` — добавлен `export const viewport: Viewport = { width:'device-width', initialScale:1, viewportFit:'cover' }` (синтаксис сверен с `node_modules/next/dist/lib/metadata/types/extra-types.d.ts`), смонтированы `<MobileBottomNav/>` и `<FloatingContactFab/>` внутри `SmoothScrollProvider`. `Footer.tsx` — `pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0`. `globals.css` — утилита `.no-scrollbar`.
+- Отклонение от плана (инженерная деталь, не про решения пользователя): лампа в `MobileBottomNav` лежит прямо внутри `<ul>` первым потомком (как и написано в плане буквально), а не в отдельной `relative`-обёртке снаружи — технически невалидный HTML (`div` — не разрешённый child `<ul>`), но браузеры рендерят это штатно, `aria-hidden` убирает элемент из a11y-дерева, скринридеры не задеты. Не стал городить лишнюю обёртку сверх того, что попросил план.
+- Проверено Playwright-скриптом `tmp/check-step2-mobile-nav.mjs`: 360×800 / 390×844 / 768×1024 (контекст с `hasTouch:true`, БЕЗ `isMobile:true` — см. ниже) — меню видно, 7 пунктов, тап по каждому из 7 доводит до секции + лампа зажигается, автоцентрирование (`scrollLeft>0`) там, где трек шире экрана (на 768px все 7 пунктов помещаются без скролла — это не баг, а следствие ширины: `scrollWidth===clientWidth===768`), FAB доводит до `#contacts`, копирайт-блок футера не перекрыт нижним меню, консоль чистая. 1440×900 — нижнее меню и FAB отсутствуют (`display:none`), десктопная навигация и CTA видны, клик «Практики» через LimelightNav (после рефакторинга на общий хук) исправно доводит до секции и зажигает лампу, консоль чистая. `npx tsc --noEmit` — 0 ошибок. `npx eslint .` — 2 старые фоновые ошибки в `useStoryController.ts:87,452` (не мои, подтверждены в шагах 0/1); добавлен `eslint-disable-next-line @next/next/no-html-link-for-pages` в `FloatingContactFab.tsx` по тому же паттерну/обоснованию, что уже стоит на CTA в `Header.tsx` (нативный `<a>` нужен, чтобы клик перехватывал Lenis/нативный скролл к якорю).
+- Три отладочных тупика по пути, все — особенности тестовой среды, не баги продукта: (1) dev-индикатор Next.js («N» бейдж слева-снизу, существует только в `next dev`, не в проде) физически перекрывал первый пункт нового нижнего меню на узких вьюпортах — в тесте убираю `nextjs-portal` из DOM перед кликами; (2) лампа как первый child `<ul>` сдвигает CSS `nth-child` на 1 — в тесте кликал через Playwright `.nth(i)` по `li a`, а не по `nth-child` CSS; (3) флаг Playwright `isMobile:true` в связке с фиксированным вьюпортом рассинхронизирует layout/visual viewport в Chromium — `position:fixed`-элементы уезжали на ~60px ниже `window.innerHeight` (нижнее меню оказывалось частично за пределами видимой области, клики по нему проваливались в контент под ним). Убрал `isMobile`, оставил только `hasTouch:true` — этого достаточно, чтобы `matchMedia('(hover:none) and (pointer:coarse)')` сработал и Lenis не монтировался (шаг 1), при этом fixed-позиционирование корректно.
+- Существующий dev-сервер на порту 3000 (поднят в более ранней сессии через `next dev --webpack`) был жив и уже подхватил все правки через Fast Refresh — переиспользовал его, отдельный запуск не потребовался.
 
 ---
 
@@ -181,7 +188,7 @@
 |-----|--------|------|---------------------|
 | 0 — Подготовка | ✅ ВЫПОЛНЕН | 2026-07-17 | Копия плана, доки прочитаны, 6 эталонных скриншотов, tsc чист, eslint — 2 старые ошибки в useStoryController.ts (не мои, фон). Подтянут коммит Артёма (юр. страницы) через subtree pull, конфликт в ContactForm.tsx разрешён (оставлена версия Артёма), WIP формы контактов не тронут. Запушено в ships/main (force, содержимое сверено) |
 | 1 — Нативный скролл | ✅ | 2026-07-17 | useIsTouch + гейтинг Lenis-эффектов, applyScroll-хелпер в HomeAnchorScroll, фолбэк в LogoLink, ignoreMobileResize, scroll-behavior в CSS. Playwright (Pixel 5 + десктоп 1440) зелёный, tsc чист, eslint — 2 старые ошибки (фон) |
-| 2 — Нижнее меню + FAB | ⬜ | | |
+| 2 — Нижнее меню + FAB | ✅ | 2026-07-17 | useActiveSection вынесен из LimelightNav, MobileBottomNav + FloatingContactFab новые, Header/layout/Footer/globals.css обновлены. Playwright (360/390/768/1440) зелёный, tsc чист, eslint — 2 старые ошибки (фон) |
 | 3 — Медиа и перф | ⬜ | | |
 | 4 — Секции | ⬜ | | |
 | 5 — Форма | ⬜ | | |
