@@ -1,0 +1,847 @@
+/* ==========================================================================
+   Блок «Контакты» — стили изолированы префиксом .pb-contact
+   Эталон: contact-section-package/css/contact-section.css (референс 1537×1023).
+   Отличия от эталона: путь к фону из public/, шрифт сайта (--font-body),
+   добавлен чекбокс согласия на обработку ПДн (.pb-contact__consent).
+   ========================================================================== */
+
+.pb-contact,
+.pb-contact *,
+.pb-contact *::before,
+.pb-contact *::after {
+  box-sizing: border-box;
+}
+
+.pb-contact {
+  --pb-accent: #a9dc18;
+  --pb-accent-bright: #c4f331;
+  --pb-ink: #111311;
+  --pb-muted: #747774;
+  --pb-glass: rgba(255, 255, 255, 0.32);
+  --pb-glass-border: rgba(255, 255, 255, 0.78);
+  --pb-shadow: 0 1.2cqw 3.2cqw rgba(64, 67, 57, 0.08);
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  color: var(--pb-ink);
+  background: #f4f3f1;
+  font-family: var(--font-body, Manrope), Manrope, Inter, Arial, Helvetica, sans-serif;
+  font-style: normal;
+}
+
+.pb-contact__stage {
+  position: relative;
+  container-type: inline-size;
+  width: min(100%, 1537px);
+  aspect-ratio: 1537 / 1023;
+  margin-inline: auto;
+  overflow: hidden;
+  background-color: #f4f3f1;
+  background-image: url("/contact-assets/contact-background.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size: 100% 100%;
+}
+
+.pb-contact__icon-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pb-contact svg {
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pb-contact a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pb-contact__intro {
+  position: absolute;
+  z-index: 3;
+  top: 15.15%;
+  left: 51.5%;
+  width: 34%;
+  margin: 0;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.pb-contact__eyebrow {
+  margin: 0 0 0.85cqw;
+  color: #94bd21;
+  font-size: 0.84cqw;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.12em;
+}
+
+.pb-contact__title {
+  margin: 0;
+  font-size: 2.4cqw;
+  font-weight: 430;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+
+.pb-contact__lead {
+  margin: 1.05cqw 0 0;
+  color: #737673;
+  font-size: 1.02cqw;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+/* Центральная форма точно накладывается на стеклянную панель фонового фото. */
+.pb-contact__form {
+  position: absolute;
+  z-index: 4;
+  top: 38.18%;
+  left: 51.5%;
+  display: flex;
+  width: 19.25%;
+  margin: 0;
+  flex-direction: column;
+  gap: 0.62cqw;
+  transform: translateX(-50%);
+}
+
+.pb-contact__field {
+  position: relative;
+  height: 3cqw;
+}
+
+.pb-contact__field > svg {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 0.95cqw;
+  width: 1.2cqw;
+  height: 1.2cqw;
+  color: #96bf19;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.pb-contact__field input,
+.pb-contact__field textarea {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 0.46cqw;
+  outline: 0;
+  color: #292b29;
+  background: rgba(255, 255, 255, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 0.18cqw 0.65cqw rgba(83, 86, 78, 0.035);
+  font: inherit;
+  font-size: 0.78cqw;
+  line-height: 1.35;
+  backdrop-filter: blur(10px) saturate(110%);
+  -webkit-backdrop-filter: blur(10px) saturate(110%);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.pb-contact__field input {
+  padding: 0 0.85cqw 0 3.05cqw;
+}
+
+.pb-contact__field textarea {
+  padding: 0.78cqw 0.85cqw 0.55cqw 3.05cqw;
+  resize: none;
+}
+
+.pb-contact__field input::placeholder,
+.pb-contact__field textarea::placeholder {
+  color: #696d69;
+  opacity: 0.9;
+}
+
+.pb-contact__field input:hover,
+.pb-contact__field textarea:hover {
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.pb-contact__field input:focus,
+.pb-contact__field textarea:focus {
+  border-color: rgba(172, 221, 35, 0.82);
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow: 0 0 0 0.14cqw rgba(177, 225, 44, 0.16);
+}
+
+.pb-contact__field input[aria-invalid="true"],
+.pb-contact__field textarea[aria-invalid="true"] {
+  border-color: rgba(196, 66, 66, 0.72);
+}
+
+.pb-contact__field--message {
+  height: 6.4cqw;
+}
+
+.pb-contact__field--message > svg {
+  top: 1.3cqw;
+}
+
+.pb-contact__submit {
+  position: relative;
+  display: grid;
+  width: 89.4%;
+  height: 2.75cqw;
+  margin: 0.45cqw auto 0;
+  padding: 0 1.1cqw;
+  border: 0;
+  border-radius: 0.42cqw;
+  color: #1d260e;
+  background: linear-gradient(100deg, #a5df0e 0%, #c3ef31 100%);
+  box-shadow:
+    0 0.55cqw 1.3cqw rgba(169, 219, 29, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  font: inherit;
+  font-size: 0.74cqw;
+  font-weight: 680;
+  line-height: 1;
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
+}
+
+.pb-contact__submit span {
+  padding-left: 1.1cqw;
+}
+
+.pb-contact__submit svg {
+  width: 1.2cqw;
+  height: 1.2cqw;
+  stroke-width: 1.7;
+}
+
+.pb-contact__submit:hover {
+  filter: saturate(108%) brightness(1.02);
+  box-shadow:
+    0 0.7cqw 1.55cqw rgba(169, 219, 29, 0.27),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.pb-contact__submit:active {
+  transform: translateY(0);
+}
+
+.pb-contact__submit:focus-visible {
+  outline: 0.15cqw solid rgba(37, 43, 25, 0.62);
+  outline-offset: 0.15cqw;
+}
+
+.pb-contact__submit:disabled {
+  cursor: wait;
+  filter: grayscale(0.3);
+  opacity: 0.72;
+}
+
+/* Согласие на обработку ПДн (152-ФЗ). */
+.pb-contact__consent {
+  display: flex;
+  width: 86%;
+  margin: 0.45cqw auto 0;
+  align-items: flex-start;
+  gap: 0.55cqw;
+  color: #6e716e;
+  font-size: 0.7cqw;
+  line-height: 1.42;
+  cursor: pointer;
+}
+
+.pb-contact__consent input {
+  width: 0.85cqw;
+  height: 0.85cqw;
+  margin: 0.04cqw 0 0;
+  flex-shrink: 0;
+  accent-color: #a9dc18;
+  cursor: pointer;
+}
+
+.pb-contact__consent input[aria-invalid="true"] {
+  outline: 1px solid rgba(196, 66, 66, 0.72);
+  outline-offset: 1px;
+}
+
+.pb-contact__consent a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.pb-contact__consent a:hover,
+.pb-contact__consent a:focus-visible {
+  color: #769b0c;
+}
+
+.pb-contact__status {
+  min-height: 0.85cqw;
+  margin: -0.2cqw 0 0;
+  color: #596f12;
+  font-size: 0.66cqw;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.pb-contact__status[data-state="error"] {
+  color: #9c3535;
+}
+
+.pb-contact__honey {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.pb-contact__details {
+  position: absolute;
+  z-index: 4;
+  top: 58.1%;
+  left: 2.7%;
+  display: flex;
+  width: 17%;
+  margin: 0;
+  flex-direction: column;
+  gap: 1.75cqw;
+  font-style: normal;
+}
+
+.pb-contact__detail {
+  display: grid;
+  grid-template-columns: 2.45cqw 1fr;
+  align-items: start;
+  column-gap: 1.05cqw;
+}
+
+.pb-contact__detail-icon,
+.pb-contact__benefit-icon {
+  display: grid;
+  border: 1px solid rgba(255, 255, 255, 0.64);
+  color: #96bf19;
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+  place-items: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.pb-contact__detail-icon {
+  width: 2.45cqw;
+  height: 2.45cqw;
+  border-radius: 0.52cqw;
+}
+
+.pb-contact__detail-icon svg {
+  width: 1.25cqw;
+  height: 1.25cqw;
+}
+
+.pb-contact__detail > span:last-child {
+  display: flex;
+  padding-top: 0.18cqw;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.pb-contact__detail a:not(.pb-contact__map-link),
+.pb-contact__detail strong {
+  font-size: 0.76cqw;
+  font-weight: 620;
+  line-height: 1.42;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.pb-contact__detail small {
+  margin-top: 0.3cqw;
+  color: #777a77;
+  font-size: 0.68cqw;
+  font-weight: 400;
+  line-height: 1.45;
+  white-space: normal;
+}
+
+.pb-contact__detail a:hover,
+.pb-contact__detail a:focus-visible {
+  color: #769b0c;
+}
+
+.pb-contact__map-link {
+  margin-top: 0.42cqw;
+  color: #8db71a !important;
+  font-size: 0.68cqw;
+  font-weight: 520;
+  line-height: 1.35;
+}
+
+.pb-contact__benefits {
+  position: absolute;
+  z-index: 4;
+  top: 58.2%;
+  right: 2.5%;
+  display: flex;
+  width: 15%;
+  padding-left: 1.25cqw;
+  flex-direction: column;
+  gap: 1.38cqw;
+}
+
+.pb-contact__benefits::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background: rgba(143, 146, 139, 0.22);
+  content: "";
+}
+
+.pb-contact__benefit {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.35cqw 1fr;
+  align-items: start;
+  column-gap: 0.82cqw;
+}
+
+.pb-contact__benefit::before {
+  position: absolute;
+  top: 1.08cqw;
+  left: -1.35cqw;
+  width: 0.22cqw;
+  height: 0.22cqw;
+  border-radius: 50%;
+  background: #9dcc1b;
+  box-shadow: 0 0 0.45cqw rgba(172, 218, 35, 0.4);
+  content: "";
+}
+
+.pb-contact__benefit-icon {
+  width: 2.35cqw;
+  height: 2.35cqw;
+  border-radius: 0.5cqw;
+}
+
+.pb-contact__benefit-icon svg {
+  width: 1.2cqw;
+  height: 1.2cqw;
+}
+
+.pb-contact__benefit > span:last-child {
+  display: flex;
+  padding-top: 0.14cqw;
+  flex-direction: column;
+}
+
+.pb-contact__benefit strong {
+  font-size: 0.72cqw;
+  font-weight: 640;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.pb-contact__benefit small {
+  margin-top: 0.28cqw;
+  color: #747774;
+  font-size: 0.64cqw;
+  font-weight: 400;
+  line-height: 1.48;
+  white-space: normal;
+}
+
+.pb-contact__trust {
+  position: absolute;
+  z-index: 4;
+  top: 86.15%;
+  left: 51.5%;
+  width: 46.7%;
+  height: 12.5%;
+  padding: 1.1cqw 2.2cqw 1.25cqw;
+  border: 1px solid rgba(169, 171, 164, 0.23);
+  border-radius: 1.05cqw;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.27), rgba(255, 255, 255, 0.15));
+  box-shadow:
+    0 0.14cqw 0.5cqw rgba(75, 79, 68, 0.025),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -0.11cqw 0 rgba(187, 234, 56, 0.9),
+    0 0.3cqw 0.8cqw rgba(190, 232, 74, 0.12);
+  transform: translateX(-50%);
+  backdrop-filter: blur(13px) saturate(108%);
+  -webkit-backdrop-filter: blur(13px) saturate(108%);
+}
+
+.pb-contact__trust h3 {
+  margin: 0;
+  font-size: 0.74cqw;
+  font-weight: 540;
+  line-height: 1;
+  text-align: center;
+}
+
+.pb-contact__trust-logos {
+  display: flex;
+  min-height: 4cqw;
+  margin-top: 0.6cqw;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 1.8cqw;
+}
+
+.pb-contact__trust-logo {
+  display: block;
+  height: 3cqw;
+  max-width: 7.8cqw;
+  flex: 1 1 0;
+  background-color: var(--pb-accent);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.pb-contact__sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Ноутбуки и планшеты: сохраняем исходную композицию до 901 px. */
+@media (max-width: 1100px) and (min-width: 901px) {
+  .pb-contact__detail a:not(.pb-contact__map-link),
+  .pb-contact__detail strong,
+  .pb-contact__benefit strong {
+    font-weight: 650;
+  }
+}
+
+/* Мобильная версия: фото показывается целиком сверху, контент становится читаемым. */
+@media (max-width: 900px) {
+  .pb-contact {
+    --pb-shadow: 0 18px 50px rgba(64, 67, 57, 0.08);
+  }
+
+  .pb-contact__stage {
+    display: flex;
+    width: 100%;
+    min-height: 0;
+    aspect-ratio: auto;
+    padding: calc(66.56vw + 20px) clamp(16px, 5vw, 32px) 32px;
+    overflow: visible;
+    flex-direction: column;
+    background-position: 50% 0;
+    background-size: 100% auto;
+  }
+
+  .pb-contact__intro,
+  .pb-contact__form,
+  .pb-contact__details,
+  .pb-contact__benefits,
+  .pb-contact__trust {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    width: min(100%, 560px);
+    height: auto;
+    margin-inline: auto;
+    transform: none;
+  }
+
+  .pb-contact__intro {
+    order: 1;
+  }
+
+  .pb-contact__eyebrow {
+    margin-bottom: 10px;
+    font-size: 11px;
+  }
+
+  .pb-contact__title {
+    font-size: clamp(30px, 8vw, 44px);
+    line-height: 1.06;
+  }
+
+  .pb-contact__lead {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .pb-contact__form {
+    order: 2;
+    gap: 10px;
+    margin-top: 24px;
+    padding: clamp(18px, 5vw, 30px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.38);
+    box-shadow: var(--pb-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(16px) saturate(110%);
+    -webkit-backdrop-filter: blur(16px) saturate(110%);
+  }
+
+  .pb-contact__field,
+  .pb-contact__field--message {
+    height: 52px;
+  }
+
+  .pb-contact__field--message {
+    height: 112px;
+  }
+
+  .pb-contact__field > svg {
+    left: 16px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .pb-contact__field--message > svg {
+    top: 19px;
+  }
+
+  .pb-contact__field input,
+  .pb-contact__field textarea {
+    border-radius: 9px;
+    font-size: 14px;
+  }
+
+  .pb-contact__field input {
+    padding: 0 16px 0 50px;
+  }
+
+  .pb-contact__field textarea {
+    padding: 17px 16px 12px 50px;
+  }
+
+  .pb-contact__submit {
+    width: 100%;
+    height: 52px;
+    margin-top: 6px;
+    padding: 0 18px;
+    border-radius: 9px;
+    font-size: 12px;
+  }
+
+  .pb-contact__submit span {
+    padding-left: 26px;
+  }
+
+  .pb-contact__submit svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .pb-contact__privacy {
+    width: 100%;
+    margin-top: 7px;
+    gap: 10px;
+    font-size: 11px;
+  }
+
+  .pb-contact__privacy svg {
+    width: 18px;
+    min-width: 18px;
+    height: 18px;
+  }
+
+  .pb-contact__consent {
+    width: 100%;
+    margin-top: 8px;
+    gap: 10px;
+    font-size: 11px;
+  }
+
+  .pb-contact__consent input {
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+  }
+
+  .pb-contact__status {
+    min-height: 14px;
+    margin-top: 0;
+    font-size: 11px;
+  }
+
+  .pb-contact__details {
+    order: 3;
+    display: grid;
+    margin-top: 22px;
+    padding: clamp(20px, 5vw, 28px);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    border-radius: 22px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 16px;
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .pb-contact__detail {
+    grid-template-columns: 42px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+
+  .pb-contact__detail-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+  }
+
+  .pb-contact__detail-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .pb-contact__detail > span:last-child {
+    padding-top: 2px;
+  }
+
+  .pb-contact__detail a:not(.pb-contact__map-link),
+  .pb-contact__detail strong {
+    font-size: 12px;
+    white-space: normal;
+  }
+
+  .pb-contact__detail small,
+  .pb-contact__map-link {
+    margin-top: 4px;
+    font-size: 11px;
+    white-space: normal;
+  }
+
+  .pb-contact__benefits {
+    order: 4;
+    display: grid;
+    margin-top: 18px;
+    padding: clamp(20px, 5vw, 28px);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    border-radius: 22px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 16px;
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .pb-contact__benefits::before,
+  .pb-contact__benefit::before {
+    display: none;
+  }
+
+  .pb-contact__benefit {
+    grid-template-columns: 42px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+
+  .pb-contact__benefit-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+  }
+
+  .pb-contact__benefit-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .pb-contact__benefit strong {
+    font-size: 12px;
+    white-space: normal;
+  }
+
+  .pb-contact__benefit small {
+    margin-top: 4px;
+    font-size: 11px;
+    white-space: normal;
+  }
+
+  .pb-contact__benefit small br {
+    display: none;
+  }
+
+  .pb-contact__trust {
+    order: 5;
+    min-height: 118px;
+    margin-top: 18px;
+    padding: 18px 20px 20px;
+    border-radius: 22px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      inset 0 -2px 0 rgba(187, 234, 56, 0.9),
+      0 7px 18px rgba(190, 232, 74, 0.11);
+  }
+
+  .pb-contact__trust h3 {
+    font-size: 12px;
+  }
+
+  .pb-contact__trust-logos {
+    display: grid;
+    min-height: 55px;
+    margin-top: 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 18px;
+  }
+
+  .pb-contact__trust-logo {
+    width: 100%;
+    max-width: 105px;
+    height: 36px;
+    margin: auto;
+    flex: initial;
+  }
+}
+
+@media (max-width: 560px) {
+  .pb-contact__details,
+  .pb-contact__benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .pb-contact__title br,
+  .pb-contact__lead br {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pb-contact *,
+  .pb-contact *::before,
+  .pb-contact *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
