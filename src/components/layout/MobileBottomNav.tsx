@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NAV_ITEMS } from '@/constants/nav'
 import { useActiveSection } from '@/components/layout/useActiveSection'
+import { useFormFocus } from '@/lib/useFormFocus'
 
 // Те же величины, что в LimelightNav — лампа той же формы/свечения
 const LINK_PADDING_X = 32
@@ -14,6 +15,9 @@ const LAMP_MIN_WIDTH = 44
 // обычным браузерным переходом/якорем, перехватывать нечем.
 export function MobileBottomNav() {
   const activeIndex = useActiveSection(NAV_ITEMS)
+  // Во время ввода в поле формы iOS-клавиатура двигает fixed-элементы —
+  // прячем меню, чтобы оно не наезжало на поля/кнопку отправки
+  const isFormFocused = useFormFocus()
   const [lamp, setLamp] = useState<{ x: number; width: number } | null>(null)
   // Первый замер рисуем без transition — иначе лампа «переезжает» из нуля при загрузке
   const [isReady, setIsReady] = useState(false)
@@ -53,7 +57,10 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Основная навигация"
-      className="lg:hidden fixed inset-x-0 bottom-0 z-[90] bg-[var(--color-bg)]/92 backdrop-blur-md border-t border-[var(--color-line)]"
+      aria-hidden={isFormFocused}
+      className={`lg:hidden fixed inset-x-0 bottom-0 z-[90] bg-[var(--color-bg)]/92 backdrop-blur-md border-t border-[var(--color-line)] transition-transform duration-200 ${
+        isFormFocused ? 'translate-y-full pointer-events-none' : 'translate-y-0'
+      }`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div ref={scrollerRef} className="overflow-x-auto no-scrollbar">
