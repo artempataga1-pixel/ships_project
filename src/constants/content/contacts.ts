@@ -1,9 +1,25 @@
-import type { ContactInfo, MediaMention } from '@/types/content'
+import type { CompanyLegalInfo, ContactInfo, MediaMention } from '@/types/content'
 
 export const CONTACT_INFO: ContactInfo = {
-  phone: '+7 (495) 123-45-67',
-  email: 'info@shumskaya.ru',
-  address: 'г. Москва, ул. Ильинка, 4, оф. 301',
+  phone: '+7 (913) 901-76-41',
+  email: 'as@shumskaya.pro',
+  address: '630099, г. Новосибирск, ул. Депутатская, д. 2, офис 5Б',
+}
+
+/* Регистрационные и банковские реквизиты — используются на страницах
+   /privacy-policy и /terms (раздел «Реквизиты Оператора»), не в публичном
+   виджете «Контакты». */
+export const COMPANY_LEGAL_INFO: CompanyLegalInfo = {
+  fullName: 'Индивидуальный предприниматель Шумская Анна Сергеевна',
+  legalForm: 'Индивидуальный предприниматель (ИП)',
+  inn: '544511441883',
+  ogrnip: '321547600107577',
+  bankAccount: '40802810120000117170',
+  bankName: 'ООО «Банк Точка»',
+  bik: '044525104',
+  correspondentAccount: '30101810745374525104',
+  postalAddress: 'а/я 334, 630099, г. Новосибирск',
+  actualAddress: '630099, г. Новосибирск, ул. Депутатская, д. 2, офис 5Б',
 }
 
 export const PRACTICE_OPTIONS = [

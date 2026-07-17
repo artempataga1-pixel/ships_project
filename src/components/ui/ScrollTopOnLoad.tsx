@@ -8,17 +8,26 @@ import { useLenis } from 'lenis/react'
    внутреннее значение с прошлой (длинной) страницы и уводит на произвольную
    позицию. Форсим 0 через Lenis API (force — Lenis на смене страницы
    остановлен), и повторяем после его перезапуска (~350мс), чтобы он не увёл
-   обратно. */
+   обратно. Если в URL есть якорь (например /privacy-policy#consent — ссылка
+   из чекбокса формы), скроллим к нему, а не к 0. */
 export function ScrollTopOnLoad() {
   const lenis = useLenis()
 
   useEffect(() => {
-    const toTop = () => {
-      lenis?.scrollTo(0, { immediate: true, force: true })
-      window.scrollTo(0, 0)
+    const hash = window.location.hash
+    const target = hash ? document.getElementById(hash.slice(1)) : null
+
+    const toPosition = () => {
+      if (target) {
+        lenis?.scrollTo(target, { immediate: true, force: true })
+        target.scrollIntoView({ behavior: 'instant', block: 'start' })
+      } else {
+        lenis?.scrollTo(0, { immediate: true, force: true })
+        window.scrollTo(0, 0)
+      }
     }
-    toTop()
-    const t = window.setTimeout(toTop, 400)
+    toPosition()
+    const t = window.setTimeout(toPosition, 400)
     return () => window.clearTimeout(t)
   }, [lenis])
 

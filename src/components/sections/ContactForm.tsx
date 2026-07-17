@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { CONTACT_INFO, PRACTICE_OPTIONS } from '@/constants/content/contacts'
 
 function CustomSelect({
@@ -293,7 +294,16 @@ export function ContactForm() {
             className="mt-0.5 size-4 shrink-0 cursor-pointer accent-[var(--color-lime-ink)]"
           />
           <span className="text-xs text-[var(--color-muted)]">
-            Согласен(на) на обработку персональных данных *
+            Согласен(на) на{' '}
+            <Link
+              href="/privacy-policy#consent"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-[var(--color-lime-ink)] transition-colors duration-200"
+            >
+              обработку персональных данных
+            </Link>{' '}
+            *
           </span>
         </label>
         {consentError && (

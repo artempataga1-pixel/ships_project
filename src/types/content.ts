@@ -108,6 +108,22 @@ export interface ContactInfo {
   address: string
 }
 
+/* Регистрационные и банковские реквизиты для юридических документов
+   (политика обработки ПДн, пользовательское соглашение) — не для публичного
+   виджета «Контакты», а для раздела «Реквизиты» на юридических страницах. */
+export interface CompanyLegalInfo {
+  fullName: string
+  legalForm: string
+  inn: string
+  ogrnip: string
+  bankAccount: string
+  bankName: string
+  bik: string
+  correspondentAccount: string
+  postalAddress: string
+  actualAddress: string
+}
+
 /* СМИ/рейтинг в бегущей строке блока «Контакты». logo не задан —
    значит для бренда нет чистого файла логотипа, рендерим текстом. */
 export interface MediaMention {
@@ -115,4 +131,24 @@ export interface MediaMention {
   logo?: string
   logoWidth?: number
   logoHeight?: number
+}
+
+/* Раздел юридического документа (политика/соглашение). id — якорь для
+   прямых ссылок (например #consent из чекбокса формы). highlight — рендер
+   в акцентной ghost-panel вместо обычного раздела: используется для
+   самостоятельного раздела «Согласие на обработку персональных данных»,
+   который по 152-ФЗ (с 1 сентября 2025) должен быть самодостаточным. */
+export interface LegalSection {
+  id?: string
+  heading: string
+  body?: string[]
+  list?: string[]
+  highlight?: boolean
+}
+
+export interface LegalDocument {
+  title: string
+  updatedAt: string
+  intro?: string
+  sections: LegalSection[]
 }
