@@ -1,157 +1,308 @@
-import { Phone, Mail, MapPin, Clock } from 'lucide-react'
-import type { ComponentType } from 'react'
-import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
-import { Marquee } from '@/components/ui/Marquee'
-import { CONTACT_INFO, MEDIA_MENTIONS } from '@/constants/content/contacts'
-import { ContactForm } from './ContactForm'
+'use client'
 
-/* Бегущая строка СМИ — full-bleed на всю ширину экрана (вырывается за max-w
-   контейнера через left-1/2 -translate-x-1/2 w-screen). Механика Marquee
-   сохранена (CSS-анимация, дублирование x2). Рендерим единым uppercase-текстом:
-   логотипы-файлы вшиты старым холодным цветом #AAD2FF (голубой прошлой тёмной
-   темы) и на светлой лайм-теме смотрелись бы чужеродно — на dizain9 это ровный
-   текстовый ряд, первый пункт — лайм-акцентом. */
-const mediaItems = MEDIA_MENTIONS.map((mention) => (
-  <span
-    key={mention.name}
-    className="font-heading text-sm md:text-base font-extrabold uppercase tracking-[0.02em] whitespace-nowrap text-[var(--color-lime-ink)]"
-  >
-    {mention.name}
-  </span>
-))
+import { useRef, useState } from 'react'
+import type { FormEvent } from 'react'
+import {
+  ArrowRight,
+  Clock,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Phone,
+  ShieldCheck,
+  Target,
+  Trophy,
+  UserRound,
+} from 'lucide-react'
 
+import { MEDIA_MENTIONS } from '@/constants/content/contacts'
+import './contacts-section.css'
+import { contactsContent } from './contacts-content'
+
+/* Логотипы изданий для «Нам доверяют» — берём только реальные файлы
+   из MEDIA_MENTIONS (Право.ru идёт текстом, без файла — сюда не подходит).
+   Континент Сибирь и Российская газета исключены по просьбе — оставшиеся
+   логотипы крупнее и заметнее в один ряд. Рендерим как mask-image в
+   акцентном цвете — так все логотипы выглядят единым лаймовым силуэтом. */
+const EXCLUDED_TRUST_LOGOS = new Set(['Континент Сибирь', 'Российская газета'])
+const trustLogos = MEDIA_MENTIONS.filter(
+  (m): m is typeof m & { logo: string } => Boolean(m.logo) && !EXCLUDED_TRUST_LOGOS.has(m.name),
+)
+
+const detailIcons = {
+  phone: Phone,
+  email: Mail,
+  address: MapPin,
+} satisfies Record<string, typeof Phone>
+
+const benefitIcons = {
+  privacy: ShieldCheck,
+  speed: Clock,
+  approach: Target,
+  result: Trophy,
+} satisfies Record<string, typeof ShieldCheck>
+
+/* Маска телефона: цифры нормализуются в +7, остальное отбрасывается —
+   та же логика, что была в прежнем виджете контактов. */
+const formatPhone = (v: string): string => {
+  const d = v.replace(/\D/g, '').slice(0, 11)
+  if (!d) return '+7'
+  const n = d.startsWith('7') ? d : '7' + d
+  let r = '+7'
+  if (n.length > 1) r += ' (' + n.slice(1, 4)
+  if (n.length > 4) r += ') ' + n.slice(4, 7)
+  if (n.length > 7) r += '-' + n.slice(7, 9)
+  if (n.length > 9) r += '-' + n.slice(9, 11)
+  return r
+}
+
+type FieldErrors = {
+  name?: boolean
+  phone?: boolean
+  message?: boolean
+  consent?: boolean
+}
+
+/* Секция «Контакты» — блок из contact-section-package, перенесённый в React.
+   Фон (люди, интерьер, стеклянная панель, подиум) — public/contact-assets/
+   contact-background.png, заголовки/форма/иконки/панели — кодом. Заявка уходит
+   в тот же /api/contact (Telegram-уведомления), что и раньше. */
 export function ContactsSection() {
+  const formRef = useRef<HTMLFormElement>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const phoneRef = useRef<HTMLInputElement>(null)
+  const messageRef = useRef<HTMLTextAreaElement>(null)
+  const consentRef = useRef<HTMLInputElement>(null)
+
+  const [phone, setPhone] = useState('+7')
+  const [consent, setConsent] = useState(false)
+  const [errors, setErrors] = useState<FieldErrors>({})
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
+  const [statusMessage, setStatusMessage] = useState('')
+
+  function clearFieldError(field: keyof FieldErrors) {
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: false } : prev))
+    if (statusMessage) setStatusMessage('')
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (status === 'sending') return
+
+    const form = event.currentTarget
+    const data = new FormData(form)
+    const name = String(data.get('name') ?? '').trim()
+    const message = String(data.get('message') ?? '').trim()
+    const website = String(data.get('website') ?? '')
+    const digits = phone.replace(/\D/g, '')
+
+    const nextErrors: FieldErrors = {
+      name: !name,
+      phone: digits.length !== 11,
+      message: !message,
+      consent: !consent,
+    }
+    setErrors(nextErrors)
+
+    if (Object.values(nextErrors).some(Boolean)) {
+      setStatus('error')
+      setStatusMessage(contactsContent.invalidText)
+      if (nextErrors.name) nameRef.current?.focus()
+      else if (nextErrors.phone) phoneRef.current?.focus()
+      else if (nextErrors.message) messageRef.current?.focus()
+      else if (nextErrors.consent) consentRef.current?.focus()
+      return
+    }
+
+    setStatus('sending')
+    setStatusMessage('')
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone: digits, message, website }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+
+      form.reset()
+      setPhone('+7')
+      setConsent(false)
+      setErrors({})
+      setStatus('success')
+      setStatusMessage(contactsContent.successText)
+    } catch {
+      setStatus('error')
+      setStatusMessage(`${contactsContent.errorText} ${contactsContent.details[0].title}`)
+    }
+  }
+
   return (
-    <section
-      id="contacts"
-      className="relative flex min-h-dvh items-center overflow-hidden bg-[var(--color-bg)] py-24 md:py-28 lg:py-[min(7.78vh,7rem)]"
-    >
-      {/* Мягкий лайм-glow + светлый вертикальный градиент секции */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(circle at 72% 38%, var(--color-lime-soft), transparent 24%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
-          opacity: 0.6,
-        }}
-      />
-
-      <div className="relative mx-auto w-full max-w-[1440px] px-6 md:px-12 lg:px-16">
-        {/* Заголовок по центру с короткой лайм-чертой */}
-        <RevealOnScroll className="text-center">
-          <h2 className="font-heading text-[clamp(2.75rem,7vw,4.5rem)] font-extrabold uppercase leading-[1] tracking-[-0.055em] text-[var(--color-text)] lg:text-[min(5vh,4.5rem)]">
-            Контакты
+    <section className="pb-contact" id="contacts" aria-labelledby="pb-contact-title">
+      <div className="pb-contact__stage">
+        <header className="pb-contact__intro">
+          <p className="pb-contact__eyebrow">{contactsContent.eyebrow}</p>
+          <h2 className="pb-contact__title" id="pb-contact-title">
+            {contactsContent.titleLine1}
+            <br />
+            {contactsContent.titleLine2}
           </h2>
-          <span
-            aria-hidden
-            className="mx-auto mt-5 block h-[2px] w-12 lg:mt-[min(1.39vh,1.25rem)]"
-            style={{
-              background: 'var(--color-lime)',
-              boxShadow: '0 0 14px var(--color-lime-glow)',
-            }}
-          />
-          <p className="mt-5 text-lg font-medium text-[var(--color-text)] md:text-xl lg:mt-[min(1.39vh,1.25rem)] lg:text-[clamp(0.875rem,1.39vh,1.25rem)]">
-            Свяжитесь с нами — и ответим в течение рабочего дня
+          <p className="pb-contact__lead">
+            {contactsContent.subtitleLine1}
+            <br />
+            {contactsContent.subtitleLine2}
           </p>
-        </RevealOnScroll>
+        </header>
 
-        {/* Строка СМИ — на всю ширину экрана, механика Marquee сохранена */}
-        <div className="relative left-1/2 mt-14 w-screen -translate-x-1/2 border-y border-[var(--color-line)] py-4 lg:mt-[min(3.89vh,3.5rem)] lg:py-[min(1.11vh,1rem)]">
-          <Marquee
-            items={mediaItems}
-            duration={34}
-            separator={<span className="text-[var(--color-lime-ink)]">·</span>}
-            srLabel={`СМИ и рейтинги о нас: ${MEDIA_MENTIONS.map((m) => m.name).join(', ')}`}
-          />
-        </div>
+        <form ref={formRef} className="pb-contact__form" onSubmit={handleSubmit} noValidate>
+          <div className="pb-contact__field">
+            <UserRound aria-hidden="true" />
+            <label className="pb-contact__sr-only" htmlFor="pb-name">
+              Ваше имя
+            </label>
+            <input
+              ref={nameRef}
+              id="pb-name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              placeholder="Ваше имя"
+              required
+              aria-invalid={errors.name ? 'true' : undefined}
+              onChange={() => clearFieldError('name')}
+            />
+          </div>
 
-        <div className="mt-14 grid grid-cols-1 items-stretch gap-8 lg:mt-[min(3.89vh,3.5rem)] lg:grid-cols-[1fr_1.18fr] lg:gap-10">
-          {/* Левая карточка — контактная информация */}
-          <RevealOnScroll delay={0}>
-            <div
-              className="relative flex h-full flex-col justify-center gap-9 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-surface)] p-8 sm:p-12 lg:gap-[min(2.5vh,2.25rem)] lg:p-[min(3.33vh,3rem)]"
-              style={{
-                borderRight: '4px solid var(--color-lime)',
-                boxShadow:
-                  '0 28px 80px rgba(0,0,0,.06), 0 0 34px rgba(201,255,31,.10)',
+          <div className="pb-contact__field">
+            <Phone aria-hidden="true" />
+            <label className="pb-contact__sr-only" htmlFor="pb-phone">
+              Телефон
+            </label>
+            <input
+              ref={phoneRef}
+              id="pb-phone"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="Телефон"
+              required
+              value={phone}
+              aria-invalid={errors.phone ? 'true' : undefined}
+              onChange={(e) => {
+                setPhone(formatPhone(e.target.value))
+                clearFieldError('phone')
               }}
-            >
-              <ContactInfoRow
-                icon={Phone}
-                label="Телефон"
-                value={CONTACT_INFO.phone}
-                href={`tel:+${CONTACT_INFO.phone.replace(/\D/g, '')}`}
-              />
-              <ContactInfoRow
-                icon={Mail}
-                label="E-mail"
-                value={CONTACT_INFO.email}
-                href={`mailto:${CONTACT_INFO.email}`}
-              />
-              <ContactInfoRow icon={MapPin} label="Адрес" value={CONTACT_INFO.address} />
-              <ContactInfoRow icon={Clock} label="Режим работы" value="Пн–Пт: 9:00 – 18:00" />
+            />
+          </div>
 
-              {/* Нижняя лайм-полоса карточки */}
+          <div className="pb-contact__field pb-contact__field--message">
+            <MessageSquare aria-hidden="true" />
+            <label className="pb-contact__sr-only" htmlFor="pb-message">
+              Опишите вашу задачу
+            </label>
+            <textarea
+              ref={messageRef}
+              id="pb-message"
+              name="message"
+              rows={4}
+              maxLength={2000}
+              placeholder="Опишите вашу задачу"
+              required
+              aria-invalid={errors.message ? 'true' : undefined}
+              onChange={() => clearFieldError('message')}
+            />
+          </div>
+
+          {/* Антиспам-поле: посетитель его не видит. */}
+          <label className="pb-contact__honey" aria-hidden="true">
+            Не заполняйте это поле
+            <input name="website" type="text" tabIndex={-1} autoComplete="off" />
+          </label>
+
+          <button className="pb-contact__submit" type="submit" disabled={status === 'sending'}>
+            <span>{status === 'sending' ? 'ОТПРАВКА…' : contactsContent.submitLabel}</span>
+            <ArrowRight aria-hidden="true" />
+          </button>
+
+          <label className="pb-contact__consent">
+            <input
+              ref={consentRef}
+              type="checkbox"
+              name="consent"
+              checked={consent}
+              aria-invalid={errors.consent ? 'true' : undefined}
+              onChange={(e) => {
+                setConsent(e.target.checked)
+                clearFieldError('consent')
+              }}
+            />
+            <span>
+              {contactsContent.consentLabel}{' '}
+              <a href="/privacy-policy#consent" target="_blank" rel="noopener noreferrer">
+                (политика обработки ПДн)
+              </a>
+            </span>
+          </label>
+
+          <p className="pb-contact__status" role="status" aria-live="polite" data-state={status === 'error' ? 'error' : undefined}>
+            {statusMessage}
+          </p>
+        </form>
+
+        <address className="pb-contact__details" aria-label="Контактная информация">
+          {contactsContent.details.map((item) => {
+            const Icon = detailIcons[item.type]
+            const inner = (
+              <>
+                <span className="pb-contact__detail-icon">
+                  <Icon aria-hidden="true" />
+                </span>
+                <span>
+                  {item.href ? <a href={item.href}>{item.title}</a> : <strong>{item.title}</strong>}
+                  {item.text && <small>{item.text}</small>}
+                </span>
+              </>
+            )
+            return (
+              <div className="pb-contact__detail" key={item.type}>
+                {inner}
+              </div>
+            )
+          })}
+        </address>
+
+        <aside className="pb-contact__benefits" aria-label="Преимущества">
+          {contactsContent.benefits.map((item) => {
+            const Icon = benefitIcons[item.type]
+            return (
+              <div className="pb-contact__benefit" key={item.type}>
+                <span className="pb-contact__benefit-icon">
+                  <Icon aria-hidden="true" />
+                </span>
+                <span>
+                  <strong>{item.title}</strong>
+                  <small>{item.text}</small>
+                </span>
+              </div>
+            )
+          })}
+        </aside>
+
+        <section className="pb-contact__trust" aria-labelledby="pb-trust-title">
+          <h3 id="pb-trust-title">Нам доверяют</h3>
+          <div className="pb-contact__trust-logos" aria-label="СМИ и рейтинги, писавшие о компании">
+            {trustLogos.map((item) => (
               <span
-                aria-hidden
-                className="absolute inset-x-0 bottom-0 h-[3px] rounded-b-[var(--radius-md)]"
-                style={{ background: 'var(--color-lime)' }}
+                key={item.name}
+                className="pb-contact__trust-logo"
+                style={{ WebkitMaskImage: `url(${item.logo})`, maskImage: `url(${item.logo})` }}
+                role="img"
+                aria-label={item.name}
               />
-            </div>
-          </RevealOnScroll>
-
-          {/* Правая карточка — форма */}
-          <RevealOnScroll delay={0.15}>
-            <div
-              className="h-full rounded-[var(--radius-md)] border border-[var(--color-line)] p-6 sm:p-10 lg:p-[min(2.78vh,2.5rem)]"
-              style={{
-                background: 'linear-gradient(180deg,#ffffff,#fbfbfa)',
-                boxShadow: '0 24px 70px rgba(0,0,0,.05)',
-              }}
-            >
-              <ContactForm />
-            </div>
-          </RevealOnScroll>
-        </div>
+            ))}
+          </div>
+        </section>
       </div>
     </section>
-  )
-}
-
-interface ContactInfoRowProps {
-  icon: ComponentType<{ className?: string; strokeWidth?: number }>
-  label: string
-  value: string
-  href?: string
-}
-
-function ContactInfoRow({ icon: Icon, label, value, href }: ContactInfoRowProps) {
-  return (
-    <div className="grid grid-cols-[48px_1fr] items-center gap-5 lg:grid-cols-[clamp(2.25rem,3.33vh,3rem)_1fr]">
-      <span
-        className="flex h-12 w-12 items-center justify-center rounded-full text-[var(--color-lime-ink)] lg:h-[clamp(2.25rem,3.33vh,3rem)] lg:w-[clamp(2.25rem,3.33vh,3rem)]"
-        style={{ background: 'rgba(201,255,31,.18)' }}
-      >
-        <Icon className="h-[22px] w-[22px]" strokeWidth={2} />
-      </span>
-      <div>
-        <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.06em] text-[var(--color-lime-ink)]">
-          {label}
-        </p>
-        {href ? (
-          <a
-            href={href}
-            className="block text-xl font-extrabold leading-tight text-[var(--color-text)] transition-colors duration-200 hover:text-[var(--color-lime-ink)] md:text-2xl lg:text-[clamp(1rem,1.67vh,1.5rem)]"
-          >
-            {value}
-          </a>
-        ) : (
-          <p className="text-xl font-extrabold leading-tight text-[var(--color-text)] md:text-2xl lg:text-[clamp(1rem,1.67vh,1.5rem)]">
-            {value}
-          </p>
-        )}
-      </div>
-    </div>
   )
 }
