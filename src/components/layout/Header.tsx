@@ -15,8 +15,9 @@ export function Header() {
         <LogoLink />
 
         {/* Навигация — плоская, без фона-пилюли; relative нужен как offsetParent
-            для лампы (LimelightNav измеряет offsetLeft относительно него) */}
-        <nav aria-label="Основная навигация" className="relative">
+            для лампы (LimelightNav измеряет offsetLeft относительно него).
+            До 1024px — нижнее меню MobileBottomNav, эта прячется */}
+        <nav aria-label="Основная навигация" className="relative hidden lg:block">
           <LimelightNav items={NAV_ITEMS} />
         </nav>
 
@@ -24,12 +25,13 @@ export function Header() {
             с внутренних страниц «/#contacts» уводит на главную к секции.
             onClick — мягкий выход из стори (см. handleStoryAwareAnchorClick),
             иначе голый клик мимо контроллера намертво стопит Lenis.
-            Эффект .btn-lime-fill: залита лаймом → при наведении белеет + лайм-glow. */}
+            Эффект .btn-lime-fill: залита лаймом → при наведении белеет + лайм-glow.
+            До 1024px — плавающая кнопка FloatingContactFab, эта прячется */}
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- намеренно нативный <a>: на главной клик перехватывает Lenis (плавный скролл к #contacts), Link здесь не нужен */}
         <a
           href="/#contacts"
           onClick={(e) => handleStoryAwareAnchorClick(e, 'contacts')}
-          className="btn-lime-fill btn-outline-thin shrink-0 inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
+          className="btn-lime-fill btn-outline-thin shrink-0 hidden lg:inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
         >
           Связаться
         </a>

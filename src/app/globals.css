@@ -124,6 +124,15 @@ body {
   will-change: transform, filter;
 }
 
+/* Скроллер нижнего меню (MobileBottomNav) — горизонтальный скролл пунктов
+   без видимого скроллбара */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Page transitions — View Transitions API */
 ::view-transition-old(root) {
   animation: vt-fade-out 0.25s ease-in forwards;
