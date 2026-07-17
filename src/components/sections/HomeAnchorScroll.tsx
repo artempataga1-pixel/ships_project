@@ -52,8 +52,23 @@ export function HomeAnchorScroll() {
 
   useEffect(() => {
     const hash = window.location.hash
-    if (!isBelowStoryHash(hash) || !lenis) return
+    if (!isBelowStoryHash(hash)) return
     const id = hash.slice(1)
+
+    // С Lenis — как раньше (его RAF-цикл иначе тут же перебивает нативный
+    // скролл). Без Lenis (тач, см. useIsTouch/SmoothScrollProvider) — обычный
+    // window.scrollTo; target уже включает offset и scroll-margin-top.
+    const applyScroll = (target: number) => {
+      if (lenis) {
+        // Lenis кеширует высоту документа: сразу после навигации limit ещё от
+        // прежней страницы, и scrollTo клампит цель до него. Пересчитываем
+        // размеры перед каждой попыткой.
+        lenis.resize()
+        lenis.scrollTo(target, { immediate: true, force: true })
+      } else {
+        window.scrollTo({ top: target, behavior: 'instant' })
+      }
+    }
 
     let i = 0
     let lastTarget: number | null = null
@@ -69,10 +84,6 @@ export function HomeAnchorScroll() {
     const go = () => {
       const el = document.getElementById(id)
       if (el) {
-        // Lenis кеширует высоту документа: сразу после навигации limit ещё от
-        // прежней страницы, и scrollTo клампит цель до него. Пересчитываем
-        // размеры перед каждой попыткой.
-        lenis.resize()
         // Карточку кейса — примерно в центр экрана (offset поднимает её
         // вверх); секции — ровно к их верху
         const offset = id.startsWith('case-') ? -window.innerHeight * 0.28 : 0
@@ -83,7 +94,7 @@ export function HomeAnchorScroll() {
           el.getBoundingClientRect().top + window.scrollY - scrollMargin + offset
         const max = document.documentElement.scrollHeight - window.innerHeight
         const target = Math.max(0, Math.min(desired, max))
-        lenis.scrollTo(el, { immediate: true, force: true, offset })
+        applyScroll(target)
         // Оверлей отпускаем, когда (а) скролл реально доехал до цели, (б) цель
         // два замера подряд не менялась (раскладка устаканилась) и (в) story-
         // апгрейд уже точно позади (i >= 2 ≈ 260мс)

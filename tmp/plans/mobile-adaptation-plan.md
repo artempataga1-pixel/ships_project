@@ -62,7 +62,7 @@
 
 ## ШАГ 1 — Нативный скролл на таче (отключение Lenis)
 
-**Статус: ⬜ НЕ НАЧАТ**
+**Статус: ✅ ВЫПОЛНЕН (2026-07-17)**
 
 Фундамент для нижнего меню. Файлы: `src/lib/useIsTouch.ts` (новый), `src/components/layout/SmoothScrollProvider.tsx`, `src/lib/gsap.ts`, `src/app/globals.css`, `src/components/sections/HomeAnchorScroll.tsx`, `src/components/layout/LogoLink.tsx`.
 
@@ -75,6 +75,12 @@
 
 **Проверка**: Playwright `devices['Pixel 5']` (эмулирует hover:none/pointer:coarse): свайп-скролл работает, тап по якорю доводит к секции, консоль чистая, нет lenis-классов на `<html>`. Десктоп 1440: Lenis жив, видео-стори работает, «← Все кейсы» со страницы кейса доводит к карточке. `npx tsc --noEmit` + eslint.
 **Коммит**: «Мобильная адаптация: нативный скролл на тач-устройствах вместо Lenis».
+
+**Заметки исполнителя:**
+- Реализовано по плану: `useIsTouch.ts` (новый, `useSyncExternalStore` на `matchMedia('(hover: none) and (pointer: coarse)')`, `getServerSnapshot → false`); `SmoothScrollProvider.tsx` — при `isTouch` рендерит `<>{children}</>`, все Lenis-эффекты гейтит по `!isTouch`, `ScrollTrigger.refresh()`-эффект оставлен безусловным; `gsap.ts` — добавлен `ScrollTrigger.config({ ignoreMobileResize: true })`; `globals.css` — `scroll-behavior: smooth` под `(hover:none) and (pointer:coarse)`, `auto` добавлен в существующий блок `prefers-reduced-motion: reduce`; `HomeAnchorScroll.tsx` — вынесен хелпер `applyScroll(target)` (с Lenis — `resize()+scrollTo(target,...)`, без — `window.scrollTo({top,behavior:'instant'})`), убран ранний выход по `!lenis`, эффект теперь запускается и без Lenis; `LogoLink.tsx` — фолбэк `window.scrollTo({top:0, behavior:'smooth'})`, когда `lenis` нет.
+- Проверено Playwright-скриптом `tmp/check-step1-native-scroll.mjs`: Pixel 5 (`devices['Pixel 5']`) — matchMedia распознаёт тач, лишних lenis-классов/wrapper в DOM нет, скролл колесом (эмуляция свайпа) двигает `scrollY`, `/#contacts` доводит до секции, консоль чистая; десктоп 1440 — `.lenis` класс на месте, контроллер стори активен (`__storyActive`), скролл колесом продвигает шаг стори (лампа загорается), «← Все кейсы» со страницы кейса доводит к карточке, консоль чистая. Все проверки зелёные. `npx tsc --noEmit` — 0 ошибок. `npx eslint .` — те же 2 старые ошибки в `useStoryController.ts:87,452` из шага 0 (файл не трогал, фон подтверждён повторно).
+- Отклонение от плана (процессное, не по коду): при первом прогоне тестов на порту 3000 висел **чужой процесс** — production-сервер (`next start`, судя по `.next/BUILD_ID`/`prerender-manifest.json`), не dev. Он отдавал старую сборку без моих правок и глушил консольными ошибками не по теме («Invalid or unexpected token» и React-warning про state update до маунта). Я его остановил (`Stop-Process`) и поднял `next dev --webpack` явно (см. «Технические константы проекта» — известный баг Turbopack на Windows) — после этого тесты прошли чисто. Если это был чужой процесс пользователя — сообщить, что порт 3000 сейчас держит dev-сервер, а не прежний.
+- Первая версия Playwright-теста на «лампа загорается при скролле» была нестабильной (фиксированная пауза 300мс×5 — контроллер стори крутит видео-сегмент ~5с перед emitStep, синтетический wheel не всегда укладывался в паузу) — переписал на поллинг до 6с вместо фиксированного ожидания. Логику `useStoryController.ts` не трогал (вне шага 1).
 
 ---
 
@@ -174,7 +180,7 @@
 | Шаг | Статус | Дата | Заметки исполнителя |
 |-----|--------|------|---------------------|
 | 0 — Подготовка | ✅ ВЫПОЛНЕН | 2026-07-17 | Копия плана, доки прочитаны, 6 эталонных скриншотов, tsc чист, eslint — 2 старые ошибки в useStoryController.ts (не мои, фон). Подтянут коммит Артёма (юр. страницы) через subtree pull, конфликт в ContactForm.tsx разрешён (оставлена версия Артёма), WIP формы контактов не тронут. Запушено в ships/main (force, содержимое сверено) |
-| 1 — Нативный скролл | ⬜ | | |
+| 1 — Нативный скролл | ✅ | 2026-07-17 | useIsTouch + гейтинг Lenis-эффектов, applyScroll-хелпер в HomeAnchorScroll, фолбэк в LogoLink, ignoreMobileResize, scroll-behavior в CSS. Playwright (Pixel 5 + десктоп 1440) зелёный, tsc чист, eslint — 2 старые ошибки (фон) |
 | 2 — Нижнее меню + FAB | ⬜ | | |
 | 3 — Медиа и перф | ⬜ | | |
 | 4 — Секции | ⬜ | | |

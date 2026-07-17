@@ -23,7 +23,11 @@ export function LogoLink() {
     }
     if (pathname === '/') {
       e.preventDefault()
-      lenis?.scrollTo(0)
+      if (lenis) {
+        lenis.scrollTo(0)
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
     }
   }
 
