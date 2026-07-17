@@ -632,7 +632,8 @@
   .pb-contact__field input,
   .pb-contact__field textarea {
     border-radius: 9px;
-    font-size: 14px;
+    /* 16px минимум — иначе iOS Safari даёт автозум при фокусе на поле. */
+    font-size: 16px;
   }
 
   .pb-contact__field input {
