@@ -68,7 +68,7 @@
 .pb-contact__intro {
   position: absolute;
   z-index: 3;
-  top: 20.7%;
+  top: 17.8%;
   left: 49%;
   width: 29%;
   margin: 0;
@@ -105,7 +105,7 @@
 .pb-contact__form {
   position: absolute;
   z-index: 4;
-  top: 43.7%;
+  top: 40.8%;
   left: 49%;
   display: flex;
   width: 19.25%;
@@ -133,7 +133,8 @@
 }
 
 .pb-contact__field input,
-.pb-contact__field textarea {
+.pb-contact__field textarea,
+.pb-contact__field select {
   display: block;
   width: 100%;
   height: 100%;
@@ -163,6 +164,22 @@
   resize: none;
 }
 
+.pb-contact__field select {
+  padding: 0 2.2cqw 0 3.05cqw;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.38);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2396bf19' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85cqw center;
+  background-size: 1.05cqw;
+}
+
+.pb-contact__field select[data-empty='true'] {
+  color: #696d69;
+}
+
 .pb-contact__field input::placeholder,
 .pb-contact__field textarea::placeholder {
   color: #696d69;
@@ -174,10 +191,20 @@
   background: rgba(255, 255, 255, 0.48);
 }
 
+.pb-contact__field select:hover {
+  background-color: rgba(255, 255, 255, 0.48);
+}
+
 .pb-contact__field input:focus,
 .pb-contact__field textarea:focus {
   border-color: rgba(172, 221, 35, 0.82);
   background: rgba(255, 255, 255, 0.56);
+  box-shadow: 0 0 0 0.14cqw rgba(177, 225, 44, 0.16);
+}
+
+.pb-contact__field select:focus {
+  border-color: rgba(172, 221, 35, 0.82);
+  background-color: rgba(255, 255, 255, 0.56);
   box-shadow: 0 0 0 0.14cqw rgba(177, 225, 44, 0.16);
 }
 
@@ -316,7 +343,7 @@
 .pb-contact__details {
   position: absolute;
   z-index: 4;
-  top: 92.4%;
+  top: 90%;
   left: 2.7%;
   display: flex;
   width: 17%;
@@ -554,7 +581,8 @@
   }
 
   .pb-contact__field input,
-  .pb-contact__field textarea {
+  .pb-contact__field textarea,
+  .pb-contact__field select {
     border-radius: 9px;
     /* 16px минимум — иначе iOS Safari даёт автозум при фокусе на поле. */
     font-size: 16px;
@@ -566,6 +594,12 @@
 
   .pb-contact__field textarea {
     padding: 17px 16px 12px 50px;
+  }
+
+  .pb-contact__field select {
+    padding: 0 42px 0 50px;
+    background-position: right 16px center;
+    background-size: 18px;
   }
 
   .pb-contact__submit {
