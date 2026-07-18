@@ -102,8 +102,13 @@ export default async function PracticePage({ params }: PracticePageProps) {
       <div className="relative z-10 mx-auto max-w-[1120px] px-6 pb-28 pt-36 md:pt-44">
         {/* Возврат ровно к карточке этой практики в горизонтальном коллаже.
             Эффект .btn-lime-fill: залита лаймом → при наведении белеет + лайм-glow. */}
+        {/* scroll={false} — свой скролл к карточке делает HomeAnchorScroll на
+            главной (с повторными попытками, пока раскладка не устаканится);
+            встроенный hash-scroll Next.js делает это одним ранним прыжком и
+            гонится с ним, из-за чего страница иногда оставалась в самом верху. */}
         <Link
           href={`/#practice-${item.slug}`}
+          scroll={false}
           className="btn-lime-fill inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
         >
           ← Все практики

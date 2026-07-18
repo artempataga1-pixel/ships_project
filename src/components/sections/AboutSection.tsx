@@ -43,7 +43,7 @@ export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
       className={
         isStory
           ? 'relative flex h-full w-full items-center overflow-hidden'
-          : 'relative flex min-h-svh scroll-mt-16 items-center overflow-hidden bg-[var(--color-bg)] py-24 lg:min-h-dvh'
+          : 'relative flex min-h-svh scroll-mt-16 items-start overflow-hidden bg-[var(--color-bg)] py-24 lg:min-h-dvh lg:items-center'
       }
     >
       {/* Фон-декор. В потоке — светлый градиент секции + лайм-glow. В story

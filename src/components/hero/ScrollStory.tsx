@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { useGSAP } from '@gsap/react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { HERO } from '@/constants/content/home'
@@ -27,7 +28,7 @@ function HeroLayer() {
     <div className="relative h-full min-h-[720px] w-full px-8 lg:px-[min(2.1875vw,3.5rem)]">
       {/* Левая колонка: заголовок, подзаголовок, CTA — крупный кегль (×2). */}
       <div className="relative z-10 max-w-[70rem] pt-[clamp(80px,10vh,130px)] lg:max-w-[min(43.75vw,70rem)] lg:pt-[min(5.0781vw,130px)]">
-        <h1 className="font-heading font-medium leading-[1.03] tracking-[-0.055em] text-[clamp(2.4rem,10vw,9rem)] lg:text-[min(5.625vw,9rem)]">
+        <h1 className="font-heading font-medium leading-[1.03] tracking-[-0.055em] text-[clamp(2rem,8vw,9rem)] lg:text-[min(5.625vw,9rem)]">
           <span data-hero-fade className="block">{HERO.titleLine1}</span>
           <span data-hero-fade className="block">{HERO.titleLine2}</span>
           <span data-hero-fade className="block text-black/25">{HERO.titleMuted}</span>
@@ -35,7 +36,7 @@ function HeroLayer() {
 
         <p
           data-hero-fade
-          className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[40rem] text-[clamp(1.05rem,4vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)] lg:mt-[min(1.5625vw,2.5rem)] lg:max-w-[min(25vw,40rem)] lg:text-[clamp(1.125rem,1.40625vw,2.25rem)]"
+          className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[40rem] text-[clamp(1rem,3.2vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)] lg:mt-[min(1.5625vw,2.5rem)] lg:max-w-[min(25vw,40rem)] lg:text-[clamp(1.125rem,1.40625vw,2.25rem)]"
         >
           {HERO.subtitle}
         </p>
@@ -45,7 +46,7 @@ function HeroLayer() {
           href="/#contacts"
           onClick={(e) => handleStoryAwareAnchorClick(e, 'contacts')}
           data-hero-fade
-          className="group mt-[clamp(2.75rem,5.5vh,4.5rem)] inline-flex items-center gap-5 lg:mt-[min(2.8125vw,4.5rem)] lg:gap-[min(1.25vw,2rem)]"
+          className="group mt-[clamp(3.5rem,10vh,4.5rem)] inline-flex items-center gap-5 lg:mt-[min(2.8125vw,4.5rem)] lg:gap-[min(1.25vw,2rem)]"
         >
           <span
             aria-hidden="true"
@@ -242,12 +243,21 @@ function FlowFallback() {
         id="hero"
         className="relative h-[100svh] min-h-[640px] overflow-hidden bg-[var(--color-bg)] lg:h-[100dvh]"
       >
-        {/* scale-[1.14] — тот же зум, что у видео-слоёв: срезает letterbox постера */}
-        <div
-          aria-hidden
-          className="absolute inset-0 scale-[1.14] bg-cover bg-center"
-          style={{ backgroundImage: 'url(/video/poster_start.jpg)' }}
-        />
+        {/* scale-[1.14] — тот же зум, что у видео-слоёв: срезает letterbox постера.
+            next/image вместо CSS background-image — на iOS Safari фоновая картинка
+            во время скролла иногда «протягивается»/смазывается (WebKit перерисовывает
+            background-image не так эффективно, как compositor-слой img/transform),
+            plus priority даёт LCP-приоритет вместо невидимого для оптимизации фона. */}
+        <div aria-hidden className="absolute inset-0 scale-[1.14]">
+          <Image
+            src="/video/poster_start.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
         {/* Лёгкий светлый скрим слева — чтобы чёрный текст читался поверх кадра */}
         <div
           aria-hidden

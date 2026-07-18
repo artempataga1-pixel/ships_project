@@ -101,7 +101,7 @@ function MobilePartnerCard({ member }: { member: TeamMember }) {
         {/* Лицевая сторона — готовая фото-визитка (как раньше) */}
         <div
           className="absolute inset-0 overflow-hidden rounded-2xl bg-white shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)] ring-1 ring-black/[0.06]"
-          style={{ backfaceVisibility: 'hidden' }}
+          style={{ backfaceVisibility: 'hidden', pointerEvents: flipped ? 'none' : 'auto' }}
         >
           <Image
             src={member.photo!}
@@ -129,10 +129,18 @@ function MobilePartnerCard({ member }: { member: TeamMember }) {
           </span>
         </div>
 
-        {/* Обратная сторона — графитовая панель с регалиями */}
+        {/* Обратная сторона — графитовая панель с регалиями. pointer-events:none, пока
+            не перевёрнута: на iOS Safari backface-visibility:hidden не всегда
+            вырезает элемент из хит-тестинга — с overflow-y-auto здесь браузер иногда
+            перехватывает вертикальный тач-скролл страницы даже на невидимой стороне
+            (overscroll-contain «глотает» скролл), и палец «упирается» в карточку. */}
         <div
           className="absolute inset-0 overflow-y-auto overscroll-contain rounded-2xl bg-[#25292c] p-4 ring-1 ring-white/10 shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)]"
-          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+          style={{
+            backfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+            pointerEvents: flipped ? 'auto' : 'none',
+          }}
         >
           <span
             className="pointer-events-none absolute left-0 top-[8%] h-[84%] w-[3px] bg-[var(--color-lime)]"
@@ -395,7 +403,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
       className={
         isStory
           ? 'relative flex h-full w-full flex-col justify-center lg:justify-start overflow-hidden'
-          : 'relative min-h-svh scroll-mt-16 flex flex-col justify-center overflow-hidden lg:min-h-dvh lg:justify-start'
+          : 'relative min-h-svh scroll-mt-16 flex flex-col justify-start overflow-hidden lg:min-h-dvh'
       }
       style={
         isStory
