@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
   ArrowRight,
+  Briefcase,
   Mail,
   MapPin,
   MessageSquare,
@@ -11,7 +12,7 @@ import {
   UserRound,
 } from 'lucide-react'
 
-import { MEDIA_MENTIONS } from '@/constants/content/contacts'
+import { MEDIA_MENTIONS, PRACTICE_OPTIONS } from '@/constants/content/contacts'
 import './contacts-section.css'
 import { contactsContent } from './contacts-content'
 
@@ -64,6 +65,7 @@ export function ContactsSection() {
   const consentRef = useRef<HTMLInputElement>(null)
 
   const [phone, setPhone] = useState('+7')
+  const [practice, setPractice] = useState('')
   const [consent, setConsent] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
@@ -109,12 +111,13 @@ export function ContactsSection() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone: digits, message, website }),
+        body: JSON.stringify({ name, phone: digits, practice, message, website }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
       form.reset()
       setPhone('+7')
+      setPractice('')
       setConsent(false)
       setErrors({})
       setStatus('success')
@@ -182,6 +185,27 @@ export function ContactsSection() {
                 clearFieldError('phone')
               }}
             />
+          </div>
+
+          <div className="pb-contact__field pb-contact__field--select">
+            <Briefcase aria-hidden="true" />
+            <label className="pb-contact__sr-only" htmlFor="pb-practice">
+              Направление
+            </label>
+            <select
+              id="pb-practice"
+              name="practice"
+              value={practice}
+              onChange={(e) => setPractice(e.target.value)}
+              data-empty={practice === '' ? 'true' : undefined}
+            >
+              <option value="">Направление обращения</option>
+              {PRACTICE_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="pb-contact__field pb-contact__field--message">

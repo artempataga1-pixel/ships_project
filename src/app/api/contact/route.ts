@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
 
   const name = typeof body.name === 'string' ? body.name.trim() : ''
   const phone = typeof body.phone === 'string' ? body.phone.replace(/\D/g, '') : ''
+  const email = typeof body.email === 'string' ? body.email.trim() : ''
   const practice = typeof body.practice === 'string' ? body.practice.trim() : ''
   const message = typeof body.message === 'string' ? body.message.trim() : ''
   const honeypot = typeof body.website === 'string' ? body.website.trim() : ''
@@ -102,6 +103,7 @@ export async function POST(request: NextRequest) {
     phone.length === 11 &&
     (phone[0] === '7' || phone[0] === '8') &&
     message.length <= 2000 &&
+    email.length <= 200 &&
     (practice === '' || PRACTICE_OPTIONS.includes(practice))
   if (!valid) {
     return NextResponse.json({ ok: false, error: 'validation' }, { status: 400 })
@@ -116,7 +118,7 @@ export async function POST(request: NextRequest) {
 
   /* Резервная копия заявки в логах (Vercel → Logs) — пишем ДО отправки,
      чтобы данные не потерялись, даже если Telegram недоступен. */
-  console.log('[contact] заявка:', JSON.stringify({ name, phone, practice, message, ts: new Date().toISOString() }))
+  console.log('[contact] заявка:', JSON.stringify({ name, phone, email, practice, message, ts: new Date().toISOString() }))
 
   const normalizedPhone = '+7' + phone.slice(1)
   const text = [
@@ -124,6 +126,7 @@ export async function POST(request: NextRequest) {
     '',
     `<b>Имя:</b> ${escapeHtml(name)}`,
     `<b>Телефон:</b> ${normalizedPhone}`,
+    `<b>E-mail:</b> ${email ? escapeHtml(email) : '—'}`,
     `<b>Направление:</b> ${practice ? escapeHtml(practice) : 'не указано'}`,
     `<b>Сообщение:</b> ${message ? escapeHtml(message) : '—'}`,
     '',
