@@ -2,6 +2,7 @@
 
 import { Fragment, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import {
@@ -69,43 +70,67 @@ function LogoOutline({ className }: { className?: string }) {
 
 function PracticeCard({ item, variant }: { item: PracticeArea; variant: CardVariant }) {
   return (
-    <figure className={`shrink-0 lg:ml-[5vw] ${variant.align} ${variant.width}`}>
-      {/* Ярлык над фото — как «QATAR, 2024» в референсе */}
-      <figcaption className="mb-3 text-xs tracking-[0.25em] uppercase text-[var(--color-muted)]">
-        {item.num} / {item.label}
-      </figcaption>
+    <Link
+      id={`practice-${item.slug}`}
+      href={`/practices/${item.slug}`}
+      aria-label={`Практика «${item.title}» — узнать подробнее`}
+      className={`group block scroll-mt-[30dvh] shrink-0 lg:ml-[5vw] ${variant.align} ${variant.width}`}
+    >
+      <figure>
+        {/* Ярлык над фото — как «QATAR, 2024» в референсе */}
+        <figcaption className="mb-3 text-xs tracking-[0.25em] uppercase text-[var(--color-muted)]">
+          {item.num} / {item.label}
+        </figcaption>
 
-      <div
-        className={`relative overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] ${variant.ratio} ${variant.muted ? 'opacity-80' : ''}`}
-        style={{ boxShadow: 'var(--shadow-card)' }}
-      >
-        {/* Фото направления. Пропорция рамки = пропорция фото, поэтому кадр
-            садится целиком; лёгкий зум (scale-112) даёт запас, чтобы
-            горизонтальный параллакс не оголял края при сдвиге */}
-        <div data-parallax className="absolute inset-0">
-          <Image
-            src={item.image}
-            alt={item.title}
-            fill
-            sizes="(max-width: 1023px) 92vw, 36vw"
-            className="scale-[1.12] object-cover"
+        {/* Внешняя рамка — держит hover-scale отдельно от внутреннего
+            data-parallax-слоя, который GSAP уже двигает инлайн-стилем
+            (xPercent): два независимых transform-слоя не конфликтуют. */}
+        <div
+          className={`relative overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] transition-transform duration-500 ease-out group-hover:scale-[1.02] ${variant.ratio} ${variant.muted ? 'opacity-80' : ''}`}
+          style={{ boxShadow: 'var(--shadow-card)' }}
+        >
+          {/* Фото направления. Пропорция рамки = пропорция фото, поэтому кадр
+              садится целиком; лёгкий зум (scale-112) даёт запас, чтобы
+              горизонтальный параллакс не оголял края при сдвиге */}
+          <div data-parallax className="absolute inset-0">
+            <Image
+              src={item.image}
+              alt={item.title}
+              fill
+              sizes="(max-width: 1023px) 92vw, 36vw"
+              className="scale-[1.12] object-cover"
+            />
+          </div>
+
+          {/* Затемнение снизу — контраст для лайм-текста «Узнать подробнее» */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/45 to-transparent"
           />
+
+          {/* Лайм-полоса у правого края — общая схема карточки редизайна */}
+          <span
+            className="pointer-events-none absolute right-0 top-0 h-full w-[3px] bg-[var(--color-lime)]"
+            style={{ boxShadow: '0 0 22px var(--color-lime-glow)' }}
+          />
+
+          {/* Ссылка на страницу практики — правый нижний угол фото */}
+          <span className="absolute bottom-3 right-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-lime)]">
+            Узнать подробнее
+            <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
+              →
+            </span>
+          </span>
         </div>
 
-        {/* Лайм-полоса у правого края — общая схема карточки редизайна */}
-        <span
-          className="pointer-events-none absolute right-0 top-0 h-full w-[3px] bg-[var(--color-lime)]"
-          style={{ boxShadow: '0 0 22px var(--color-lime-glow)' }}
-        />
-      </div>
-
-      <h3 className="mt-5 font-heading text-xl md:text-2xl font-extrabold leading-snug text-[var(--color-text)]">
-        {item.title}
-      </h3>
-      <p className="mt-2 text-sm text-[var(--color-muted)]">
-        {item.desc}
-      </p>
-    </figure>
+        <h3 className="mt-5 font-heading text-xl md:text-2xl font-extrabold leading-snug text-[var(--color-text)]">
+          {item.title}
+        </h3>
+        <p className="mt-2 text-sm text-[var(--color-muted)]">
+          {item.desc}
+        </p>
+      </figure>
+    </Link>
   )
 }
 
@@ -141,6 +166,7 @@ export function PracticesSection() {
           x: () => -dist(),
           ease: 'none',
           scrollTrigger: {
+            id: 'practices-collage',
             trigger: pinWrap,
             start: 'top top',
             end: () => `+=${dist()}`,
@@ -243,9 +269,6 @@ export function PracticesSection() {
 
         {/* Контент заголовочного экрана */}
         <div className="relative z-[4]">
-          <span className="text-sm md:text-base tracking-[0.3em] uppercase text-[var(--color-muted)]">
-            ( {String(PRACTICE_AREAS.length).padStart(2, '0')} направлений )
-          </span>
           <h2
             className="
               mt-8 font-heading font-black uppercase
@@ -267,13 +290,14 @@ export function PracticesSection() {
       <div ref={pinRef} className="relative lg:h-dvh lg:overflow-hidden">
         <div
           ref={trackRef}
+          id="practices-track"
           className="flex flex-col gap-14 px-6 py-16 lg:h-full lg:w-max lg:flex-row lg:items-stretch lg:gap-0 lg:px-0 lg:py-[6dvh]"
         >
           {/* Отступ старта: первая карточка входит из-за правого края не впритык */}
           <div className="hidden w-[6vw] shrink-0 lg:block" aria-hidden="true" />
 
           {PRACTICE_AREAS.map((item, i) => (
-            <Fragment key={item.num}>
+            <Fragment key={item.slug}>
               {/* Цитаты — перед 3-й и 5-й карточками, как реплики в референсе */}
               {i === 2 && <QuoteBlock text={PRACTICE_QUOTES[0]} />}
               {i === 4 && <QuoteBlock text={PRACTICE_QUOTES[1]} />}

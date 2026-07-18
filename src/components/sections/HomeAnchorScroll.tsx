@@ -3,13 +3,16 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { useLenis } from 'lenis/react'
 import { NAV_ID_TO_STEP } from '@/components/hero/useStoryController'
+import { gsap, ScrollTrigger } from '@/lib/gsap'
 
 // useLayoutEffect на сервере даёт warning — на SSR подменяем на useEffect
 const useClientLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
 /* Довозит скролл до цели при загрузке главной с якорем НИЖЕ стори:
    /#practices, /#articles, /#cases, /#contacts (навбар/«Связаться» с внутренних
-   страниц) и /#case-<slug> (возврат со страницы кейса).
+   страниц), /#case-<slug> (возврат со страницы кейса) и /#practice-<slug>
+   (возврат со страницы практики — с точным попаданием на карточку внутри
+   горизонтального pin-scroll коллажа, см. resolvePracticeTarget ниже).
 
    Якоря полок стори (about/competencies/partners) и hero сюда не входят — их
    обрабатывает контроллер стори (запертый старт на нужном шаге).
@@ -81,19 +84,57 @@ export function HomeAnchorScroll() {
       fadeTimer = window.setTimeout(() => setCover(false), 400)
     }
 
+    const max = () => document.documentElement.scrollHeight - window.innerHeight
+
+    // Карточка практики (id="practice-<slug>") едет не в обычном вертикальном
+    // потоке, а горизонтально внутри GSAP pin-scroll коллажа (PracticesSection):
+    // scrollTrigger 'practices-collage' линейно маппит вертикальный скролл
+    // документа на x-сдвиг трека #practices-track (1px скролла = 1px x).
+    // Зная это, можно вычислить нужный scrollY без прогресса/labels:
+    //   1) снять «статичную» (без текущего x) позицию карточки в треке,
+    //   2) подобрать scrollY так, чтобы после соответствующего x карточка
+    //      встала по центру viewport.
+    // Пока motion разрешён и пин десктопный — это точнее, чем scrollIntoView,
+    // который в pinned-секции не работает (документ не двигается синхронно
+    // с видимой позицией карточки). Если пин ещё не создан (отключён
+    // reduced-motion/мобильной шириной) — падаем на обычный якорь по id карточки.
+    const resolvePracticeTarget = (card: HTMLElement): number => {
+      const st = ScrollTrigger.getById('practices-collage')
+      const track = document.getElementById('practices-track')
+      if (st && track && Number.isFinite(st.start) && Number.isFinite(st.end) && st.end > st.start) {
+        const currentX = Number(gsap.getProperty(track, 'x')) || 0
+        const cardRect = card.getBoundingClientRect()
+        const pinRect = (st.trigger as HTMLElement).getBoundingClientRect()
+        const cardStaticLeft = cardRect.left - currentX - pinRect.left
+        const desiredViewportLeft = (window.innerWidth - cardRect.width) / 2
+        const desired = st.start + (cardStaticLeft - desiredViewportLeft)
+        return Math.max(0, Math.min(Math.max(st.start, Math.min(desired, st.end)), max()))
+      }
+      // Фолбэк: пина нет (мобайл/reduced-motion) — карточка в обычном потоке
+      const scrollMargin = parseFloat(getComputedStyle(card).scrollMarginTop) || 0
+      const desired = card.getBoundingClientRect().top + window.scrollY - scrollMargin
+      return Math.max(0, Math.min(desired, max()))
+    }
+
+    // Общий якорь (секции, карточки кейсов): элемент стоит в обычном потоке.
+    const resolveGenericTarget = (el: HTMLElement): number => {
+      // Карточку кейса — примерно в центр экрана (offset поднимает её
+      // вверх); секции — ровно к их верху
+      const offset = id.startsWith('case-') ? -window.innerHeight * 0.28 : 0
+      // Lenis (как и нативный якорный скролл) учитывает scroll-margin-top
+      // элемента (scroll-mt-[30dvh] у карточек) — повторяем в расчёте цели
+      const scrollMargin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0
+      const desired =
+        el.getBoundingClientRect().top + window.scrollY - scrollMargin + offset
+      return Math.max(0, Math.min(desired, max()))
+    }
+
     const go = () => {
       const el = document.getElementById(id)
       if (el) {
-        // Карточку кейса — примерно в центр экрана (offset поднимает её
-        // вверх); секции — ровно к их верху
-        const offset = id.startsWith('case-') ? -window.innerHeight * 0.28 : 0
-        // Lenis (как и нативный якорный скролл) учитывает scroll-margin-top
-        // элемента (scroll-mt-[30dvh] у карточек) — повторяем в расчёте цели
-        const scrollMargin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0
-        const desired =
-          el.getBoundingClientRect().top + window.scrollY - scrollMargin + offset
-        const max = document.documentElement.scrollHeight - window.innerHeight
-        const target = Math.max(0, Math.min(desired, max))
+        const target = id.startsWith('practice-')
+          ? resolvePracticeTarget(el)
+          : resolveGenericTarget(el)
         applyScroll(target)
         // Оверлей отпускаем, когда (а) скролл реально доехал до цели, (б) цель
         // два замера подряд не менялась (раскладка устаканилась) и (в) story-
