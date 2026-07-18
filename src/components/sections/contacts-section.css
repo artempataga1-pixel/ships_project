@@ -37,7 +37,7 @@
   margin-inline: auto;
   overflow: hidden;
   background-color: #f4f3f1;
-  background-image: url("/contact-assets/contact-background.png");
+  background-image: url("/contact-assets/contact-background-2.png");
   background-repeat: no-repeat;
   background-position: 50% 50%;
   background-size: 100% 100%;
@@ -68,9 +68,9 @@
 .pb-contact__intro {
   position: absolute;
   z-index: 3;
-  top: 15.15%;
-  left: 51.5%;
-  width: 34%;
+  top: 20.7%;
+  left: 49%;
+  width: 29%;
   margin: 0;
   text-align: center;
   transform: translateX(-50%);
@@ -105,8 +105,8 @@
 .pb-contact__form {
   position: absolute;
   z-index: 4;
-  top: 38.18%;
-  left: 51.5%;
+  top: 43.7%;
+  left: 49%;
   display: flex;
   width: 19.25%;
   margin: 0;
@@ -316,7 +316,7 @@
 .pb-contact__details {
   position: absolute;
   z-index: 4;
-  top: 58.1%;
+  top: 92.4%;
   left: 2.7%;
   display: flex;
   width: 17%;
@@ -324,6 +324,7 @@
   flex-direction: column;
   gap: 1.75cqw;
   font-style: normal;
+  transform: translateY(-50%);
 }
 
 .pb-contact__detail {
@@ -333,8 +334,7 @@
   column-gap: 1.05cqw;
 }
 
-.pb-contact__detail-icon,
-.pb-contact__benefit-icon {
+.pb-contact__detail-icon {
   display: grid;
   border: 1px solid rgba(255, 255, 255, 0.64);
   color: #96bf19;
@@ -392,81 +392,6 @@
   font-size: 0.68cqw;
   font-weight: 520;
   line-height: 1.35;
-}
-
-.pb-contact__benefits {
-  position: absolute;
-  z-index: 4;
-  top: 58.2%;
-  right: 2.5%;
-  display: flex;
-  width: 15%;
-  padding-left: 1.25cqw;
-  flex-direction: column;
-  gap: 1.38cqw;
-}
-
-.pb-contact__benefits::before {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 1px;
-  background: rgba(143, 146, 139, 0.22);
-  content: "";
-}
-
-.pb-contact__benefit {
-  position: relative;
-  display: grid;
-  grid-template-columns: 2.35cqw 1fr;
-  align-items: start;
-  column-gap: 0.82cqw;
-}
-
-.pb-contact__benefit::before {
-  position: absolute;
-  top: 1.08cqw;
-  left: -1.35cqw;
-  width: 0.22cqw;
-  height: 0.22cqw;
-  border-radius: 50%;
-  background: #9dcc1b;
-  box-shadow: 0 0 0.45cqw rgba(172, 218, 35, 0.4);
-  content: "";
-}
-
-.pb-contact__benefit-icon {
-  width: 2.35cqw;
-  height: 2.35cqw;
-  border-radius: 0.5cqw;
-}
-
-.pb-contact__benefit-icon svg {
-  width: 1.2cqw;
-  height: 1.2cqw;
-}
-
-.pb-contact__benefit > span:last-child {
-  display: flex;
-  padding-top: 0.14cqw;
-  flex-direction: column;
-}
-
-.pb-contact__benefit strong {
-  font-size: 0.72cqw;
-  font-weight: 640;
-  line-height: 1.35;
-  white-space: normal;
-}
-
-.pb-contact__benefit small {
-  margin-top: 0.28cqw;
-  color: #747774;
-  font-size: 0.64cqw;
-  font-weight: 400;
-  line-height: 1.48;
-  white-space: normal;
 }
 
 .pb-contact__trust {
@@ -538,8 +463,7 @@
 /* Ноутбуки и планшеты: сохраняем исходную композицию до 901 px. */
 @media (max-width: 1100px) and (min-width: 901px) {
   .pb-contact__detail a:not(.pb-contact__map-link),
-  .pb-contact__detail strong,
-  .pb-contact__benefit strong {
+  .pb-contact__detail strong {
     font-weight: 650;
   }
 }
@@ -558,6 +482,7 @@
     padding: calc(66.56vw + 20px) clamp(16px, 5vw, 32px) 32px;
     overflow: visible;
     flex-direction: column;
+    background-image: url("/contact-assets/contact-background.png");
     background-position: 50% 0;
     background-size: 100% auto;
   }
@@ -565,7 +490,6 @@
   .pb-contact__intro,
   .pb-contact__form,
   .pb-contact__details,
-  .pb-contact__benefits,
   .pb-contact__trust {
     position: relative;
     top: auto;
@@ -742,59 +666,8 @@
     white-space: normal;
   }
 
-  .pb-contact__benefits {
-    order: 4;
-    display: grid;
-    margin-top: 18px;
-    padding: clamp(20px, 5vw, 28px);
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    border-radius: 22px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px 16px;
-    background: rgba(255, 255, 255, 0.3);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  .pb-contact__benefits::before,
-  .pb-contact__benefit::before {
-    display: none;
-  }
-
-  .pb-contact__benefit {
-    grid-template-columns: 42px minmax(0, 1fr);
-    column-gap: 12px;
-  }
-
-  .pb-contact__benefit-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 9px;
-  }
-
-  .pb-contact__benefit-icon svg {
-    width: 21px;
-    height: 21px;
-  }
-
-  .pb-contact__benefit strong {
-    font-size: 12px;
-    white-space: normal;
-  }
-
-  .pb-contact__benefit small {
-    margin-top: 4px;
-    font-size: 11px;
-    white-space: normal;
-  }
-
-  .pb-contact__benefit small br {
-    display: none;
-  }
-
   .pb-contact__trust {
-    order: 5;
+    order: 4;
     min-height: 118px;
     margin-top: 18px;
     padding: 18px 20px 20px;
@@ -827,8 +700,7 @@
 }
 
 @media (max-width: 560px) {
-  .pb-contact__details,
-  .pb-contact__benefits {
+  .pb-contact__details {
     grid-template-columns: 1fr;
   }
 
