@@ -74,6 +74,13 @@ export interface PracticeArea {
   desc: string
   /* фото-заглушка карточки в коллаже (public/reference3/…) */
   image: string
+  /* URL-идентификатор для /practices/[slug] и якоря #practice-<slug> */
+  slug: string
+  /* 1–2 предложения для блока «Результат» на отдельной странице практики */
+  summary: string
+  /* Пропорция исходного фото (совпадает с ratio в CARD_VARIANTS коллажа) —
+     чтобы object-cover на отдельной странице практики не обрезал кадр */
+  imageRatio: string
 }
 
 export interface Case {
@@ -89,6 +96,8 @@ export interface MediaItem {
   date: string
   /* готовое фото-превью статьи (public/images/articles/…) */
   image: string
+  /* ссылка на реальную публикацию в источнике; пока не расставлена — кнопка "Читать" неактивна */
+  url?: string
 }
 
 export interface CaseStudy {

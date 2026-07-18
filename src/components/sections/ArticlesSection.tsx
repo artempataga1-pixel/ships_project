@@ -72,12 +72,14 @@ function ArticleCard({ item, index, total }: { item: MediaItem; index: number; t
             <span className="text-sm md:text-base">{item.date}</span>
             <span aria-hidden className="h-[22px] w-px bg-[var(--color-line)]" />
             <a
-              href="#"
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label={`Читать статью «${item.title}»`}
-              className="flex items-center gap-1.5 text-sm md:text-base font-extrabold hover:underline underline-offset-4"
+              className="flex items-center gap-1.5 text-sm md:text-base font-extrabold text-[var(--color-lime-ink)] hover:underline underline-offset-4"
             >
               Читать{' '}
-              <span aria-hidden className="text-xl text-[var(--color-lime-ink)]">
+              <span aria-hidden className="text-xl">
                 →
               </span>
             </a>
