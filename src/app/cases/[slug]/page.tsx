@@ -187,6 +187,18 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
             {item.summary}
           </p>
         </div>
+
+        {/* CTA под рамкой результата — обычный <a>, не next/link: переход на
+            главную с якорем на блок контактов. handleStoryAwareAnchorClick
+            здесь не нужен — story-режим есть только на главной (см. отчёт
+            исследования компонента Header). .btn-lime-breathe добавляет
+            пульсацию свечения в покое поверх .btn-lime-fill. */}
+        <a
+          href="/#contacts"
+          className="btn-lime-fill btn-lime-breathe mt-8 inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
+        >
+          Оставить заявку
+        </a>
       </div>
     </main>
   )

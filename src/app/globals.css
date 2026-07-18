@@ -106,6 +106,33 @@ body {
   }
 }
 
+/* Модификатор «дышащей» кнопки: поверх .btn-lime-fill добавляет медленную
+   пульсацию внешнего лайм-свечения в состоянии покоя — привлекает взгляд
+   к CTA под кейсом. При наведении анимация уступает обычному hover-эффекту
+   .btn-lime-fill (заливка схлопывается так же, как у «Все кейсы»). */
+@keyframes btn-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 40px 200px var(--color-lime) inset, 0 0 0 0 var(--color-lime-glow);
+  }
+  50% {
+    box-shadow: 0 0 40px 200px var(--color-lime) inset, 0 0 20px 6px var(--color-lime-glow);
+  }
+}
+.btn-lime-breathe {
+  animation: btn-breathe 2.6s ease-in-out infinite;
+}
+.btn-lime-breathe:hover,
+.btn-lime-breathe:focus-visible {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-lime-breathe {
+    animation: none;
+  }
+}
+
 /* Тонкая чёрная окантовка по кромке. Через outline (offset -1px), чтобы не
    трогать border/box-shadow — те заняты лайм-заливкой и свечением. */
 .btn-outline-thin {
