@@ -227,7 +227,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
       className={
         isStory
           ? 'relative flex h-full w-full items-center overflow-hidden'
-          : 'relative min-h-dvh flex items-center overflow-hidden bg-[var(--color-bg)]'
+          : 'relative min-h-svh scroll-mt-16 flex items-center overflow-hidden bg-[var(--color-bg)] lg:min-h-dvh'
       }
     >
       {/* Мягкий лайм-glow за заголовком — по референсу 03_competencies_block.
@@ -311,10 +311,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                     className="pointer-events-none absolute right-[-2px] top-[min(1.09375vw,1.75rem)] bottom-[min(1.09375vw,1.75rem)] w-1 rounded-full bg-[var(--color-lime)]"
                     style={{ boxShadow: '0 0 24px var(--color-lime)' }}
                   />
-                  <strong className="font-heading text-[min(2.2266vw,57px)] font-black leading-none tracking-[-0.05em] text-[var(--color-text)]">
-                    {String(i + 1).padStart(2, '0')}
-                  </strong>
-                  <p className="mt-[min(0.9375vw,1.5rem)] px-4 text-center text-[clamp(11px,0.6641vw,17px)] font-semibold leading-tight text-[var(--color-text)]">
+                  <p className="px-4 text-center text-[clamp(11px,0.6641vw,17px)] font-semibold leading-tight text-[var(--color-text)]">
                     {practice.title}
                   </p>
                 </div>
@@ -325,7 +322,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
 
         {/* Мобильная и планшетная раскладка карточек — без орбиты */}
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
-          {PRACTICES.map((practice, i) => (
+          {PRACTICES.map((practice) => (
             <div
               key={practice.title}
               className="
@@ -338,10 +335,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                 className="pointer-events-none absolute right-[-2px] top-6 bottom-6 w-1 rounded-full bg-[var(--color-lime)]"
                 style={{ boxShadow: '0 0 24px var(--color-lime)' }}
               />
-              <span className="font-heading text-4xl font-black tracking-[-0.05em] text-[var(--color-text)]">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <h3 className="mt-3 font-heading text-lg font-semibold leading-snug text-[var(--color-text)]">
+              <h3 className="font-heading text-lg font-semibold leading-snug text-[var(--color-text)]">
                 {practice.title}
               </h3>
             </div>
