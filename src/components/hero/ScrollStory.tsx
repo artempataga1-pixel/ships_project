@@ -49,9 +49,23 @@ function HeroLayer() {
         >
           <span
             aria-hidden="true"
-            className="grid h-16 w-16 place-items-center rounded-full border border-[var(--color-black)] bg-[var(--color-lime)] text-2xl text-[var(--color-black)] shadow-[0_0_42px_var(--color-lime-glow)] transition-transform duration-300 group-hover:scale-105 lg:h-[clamp(48px,4.0625vw,104px)] lg:w-[clamp(48px,4.0625vw,104px)] lg:text-[clamp(17px,1.40625vw,36px)]"
+            className="grid h-14 w-14 place-items-center rounded-full border border-[var(--color-black)] bg-[var(--color-lime)] text-xl text-[var(--color-black)] shadow-[0_0_42px_var(--color-lime-glow)] transition-transform duration-300 group-hover:scale-105 lg:h-[clamp(48px,4.0625vw,104px)] lg:w-[clamp(48px,4.0625vw,104px)] lg:text-[clamp(17px,1.40625vw,36px)]"
           >
-            →
+            {/* SVG вместо текстового «→» — юникодный глиф смещён по метрикам
+                шрифта и не встаёт ровно в центр круга, SVG с viewBox центруется
+                геометрически точно. Размер 1em — следует за text-xl/clamp выше. */}
+            <svg
+              width="1em"
+              height="1em"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
           </span>
           <span className="text-lg font-semibold text-[var(--color-text)] lg:text-[clamp(0.9375rem,0.9375vw,1.5rem)]">
             {HERO.ctaLabel}

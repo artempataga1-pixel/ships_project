@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import Image from 'next/image'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
@@ -66,6 +66,94 @@ function PartnerCard({ member }: { member: TeamMember }) {
         className="object-cover"
         draggable={false}
       />
+    </div>
+  )
+}
+
+// Мобильная карточка-визитка с переворотом по тапу: лицо — фото, обратная
+// сторона — графитовая панель с регалиями (имя/роль уже есть на фото, поэтому
+// не дублируем). Список может быть длинным (у Максима и Анны 7-8 пунктов) —
+// не влезает даже мелким шрифтом, поэтому обратная сторона скроллится сама.
+function MobilePartnerCard({ member }: { member: TeamMember }) {
+  const [flipped, setFlipped] = useState(false)
+  const achievements = member.achievements ?? []
+
+  const toggle = () => setFlipped((v) => !v)
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      toggle()
+    }
+  }
+
+  return (
+    <div className="aspect-[3/2] w-full" style={{ perspective: '1200px' }}>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-pressed={flipped}
+        aria-label={`${member.name}, ${member.role}. Нажмите, чтобы посмотреть регалии`}
+        onClick={toggle}
+        onKeyDown={onKeyDown}
+        className="relative h-full w-full cursor-pointer outline-none transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{ transformStyle: 'preserve-3d', transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
+      >
+        {/* Лицевая сторона — готовая фото-визитка (как раньше) */}
+        <div
+          className="absolute inset-0 overflow-hidden rounded-2xl bg-white shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)] ring-1 ring-black/[0.06]"
+          style={{ backfaceVisibility: 'hidden' }}
+        >
+          <Image
+            src={member.photo!}
+            alt={`${member.name} — ${member.role}`}
+            fill
+            sizes="(max-width: 640px) 100vw, 50vw"
+            className="object-cover"
+          />
+          {/* Подсказка, что карточку можно перевернуть */}
+          <span className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1.5 text-[11px] font-medium text-white backdrop-blur-sm">
+            <svg
+              aria-hidden
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+            >
+              <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+              <path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.13 5.87l-2.12 2.12M7.99 15.89l-2.12 2.12M18.13 18.13l-2.12-2.12M7.99 8.11 5.87 5.99" />
+            </svg>
+            Нажмите
+          </span>
+        </div>
+
+        {/* Обратная сторона — графитовая панель с регалиями */}
+        <div
+          className="absolute inset-0 overflow-y-auto overscroll-contain rounded-2xl bg-[#25292c] p-4 ring-1 ring-white/10 shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)]"
+          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+        >
+          <span
+            className="pointer-events-none absolute left-0 top-[8%] h-[84%] w-[3px] bg-[var(--color-lime)]"
+            style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
+          />
+          {achievements.length > 0 ? (
+            <ul className="space-y-2 pl-2.5">
+              {achievements.map((item) => (
+                <li key={item} className="flex gap-2 text-[11px] leading-snug text-white/85">
+                  <span className="mt-[0.45em] h-[0.4em] w-[0.4em] shrink-0 rounded-full bg-[var(--color-lime)]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="pl-2.5 text-[13px] leading-snug text-white/70">
+              Информация о регалиях уточняется.
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -368,18 +456,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
             десктопной дуги выше — там позиция в массиве держит fanPosition/panelSide. */}
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-6 lg:hidden">
           {MOBILE_TEAM_ORDER.map((member) => (
-            <div
-              key={member.name}
-              className="relative w-full aspect-[3/2] overflow-hidden rounded-2xl bg-white shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)] ring-1 ring-black/[0.06]"
-            >
-              <Image
-                src={member.photo!}
-                alt={`${member.name} — ${member.role}`}
-                fill
-                sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-cover"
-              />
-            </div>
+            <MobilePartnerCard key={member.name} member={member} />
           ))}
         </div>
       </div>
