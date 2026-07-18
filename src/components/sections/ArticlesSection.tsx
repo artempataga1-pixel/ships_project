@@ -27,10 +27,7 @@ const PEEK_STEPS = [
   'lg:translate-x-9 lg:translate-y-9',
 ]
 
-function ArticleCard({ item, index, total }: { item: MediaItem; index: number; total: number }) {
-  const num = String(index + 1).padStart(2, '0')
-  const totalStr = String(total).padStart(2, '0')
-
+function ArticleCard({ item }: { item: MediaItem }) {
   return (
     <article
       className="
@@ -53,14 +50,9 @@ function ArticleCard({ item, index, total }: { item: MediaItem; index: number; t
       <div className="max-w-[1440px] w-full mx-auto px-8 md:px-16 py-14 md:py-0 grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         {/* Левая колонка — копия статьи */}
         <div>
-          <div className="flex items-center justify-between gap-6 mb-8">
+          <div className="mb-8">
             <span className="font-heading text-xs font-black tracking-[0.22em] uppercase text-[var(--color-text)]">
               {item.publisher}
-            </span>
-            {/* Счётчик 01/04 — текущий номер лайм, знаменатель приглушённый */}
-            <span className="font-heading text-base font-black leading-none">
-              <b className="font-medium text-2xl text-[var(--color-lime-ink)]">{num}</b>
-              <span className="text-[var(--color-muted)]">/{totalStr}</span>
             </span>
           </div>
 
@@ -238,7 +230,7 @@ export function ArticlesSection() {
             className={`relative lg:absolute lg:inset-x-[18%] lg:inset-y-[20%] ${PEEK_STEPS[Math.min(i, PEEK_STEPS.length - 1)]}`}
             style={{ zIndex: MEDIA.length - i }}
           >
-            <ArticleCard item={item} index={i} total={MEDIA.length} />
+            <ArticleCard item={item} />
           </div>
         ))}
 

@@ -110,7 +110,7 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
           className="
             absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2
             whitespace-nowrap font-heading font-black tracking-[-0.03em]
-            text-[clamp(1.75rem,4vw,3rem)] text-[var(--color-text)]
+            text-[clamp(1.1rem,4vw,3rem)] text-[var(--color-text)]
           "
         >
           {item.amount}

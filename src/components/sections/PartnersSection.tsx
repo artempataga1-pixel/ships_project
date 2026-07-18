@@ -47,6 +47,12 @@ function fanPosition(index: number, total: number): FanPos {
   return total === FAN.length ? FAN[index] : arcFallback(index, total)
 }
 
+// Только для мобильной сетки (см. ниже) — управляющий партнёр первой карточкой.
+// sort стабилен (ES2019+), остальные сохраняют исходный порядок TEAM.
+const MOBILE_TEAM_ORDER: TeamMember[] = [...TEAM].sort(
+  (a, b) => Number(b.role === 'Управляющий партнёр') - Number(a.role === 'Управляющий партнёр'),
+)
+
 // Готовая карточка-визитка: контент (фото, имя, роль) впечатан в JPG,
 // а «карточность» — скругление, белую подложку и тень — даёт обёртка.
 function PartnerCard({ member }: { member: TeamMember }) {
@@ -301,7 +307,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
       className={
         isStory
           ? 'relative flex h-full w-full flex-col justify-center lg:justify-start overflow-hidden'
-          : 'relative min-h-dvh flex flex-col justify-center lg:justify-start overflow-hidden'
+          : 'relative min-h-svh scroll-mt-16 flex flex-col justify-center overflow-hidden lg:min-h-dvh lg:justify-start'
       }
       style={
         isStory
@@ -355,9 +361,13 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
           ))}
         </div>
 
-        {/* Мобильная и планшетная раскладка — простая сетка карточек-визиток */}
+        {/* Мобильная и планшетная раскладка — простая сетка карточек-визиток.
+            Управляющий партнёр (Шумская Анна) — первой карточкой: в десктоп-веере
+            её акцентирует центральное место, в плоской сетке та же роль работает
+            только через порядок. Локальная сортировка не трогает TEAM/cardsRef
+            десктопной дуги выше — там позиция в массиве держит fanPosition/panelSide. */}
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-6 lg:hidden">
-          {TEAM.map((member) => (
+          {MOBILE_TEAM_ORDER.map((member) => (
             <div
               key={member.name}
               className="relative w-full aspect-[3/2] overflow-hidden rounded-2xl bg-white shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)] ring-1 ring-black/[0.06]"

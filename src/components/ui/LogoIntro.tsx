@@ -86,23 +86,30 @@ export function LogoIntro() {
       },
     })
 
-    // Свежий замер цели в момент старта фазы 2. Кешируем, чтобы 4 function-value
-    // (top/left/width/height) не дёргали layout по отдельности — все они стартуют
-    // одновременно, первый вычислит, остальные возьмут готовое.
-    let target: ReturnType<typeof measureTarget> | null = null
-    const t = () => (target ??= measureTarget())
-
     // Фаза 1: появление в центре
     tl.to(logo, { opacity: 1, duration: 0.8, ease: 'power2.out' })
-      // Фаза 2: сжатие и перелёт точно в хедер
-      .to(logo, {
-        top: () => t().top,
-        left: () => t().left,
-        width: () => t().width,
-        height: () => t().height,
-        duration: 1.7,
-        ease: 'power3.inOut',
+      // Свежий замер цели ровно в момент старта фазы 2 (layout уже стабилен) —
+      // тот же тайминг, что раньше давали function-based top/left/width/height,
+      // но здесь замер разовый и синхронный, без пересчёта на каждый кадр.
+      // Layout геометрию элемента сразу переставляем на ЦЕЛЕВУЮ (хедерную) —
+      // и в том же тике компенсируем transform'ом (x/y/scale), чтобы визуально
+      // логотип остался на месте. Дальше твинится только transform: перелёт —
+      // чистый compositor-слой, без рефлоу на каждый кадр (критично для мобилки).
+      .call(() => {
+        const target = measureTarget()
+        gsap.set(logo, {
+          top: target.top,
+          left: target.left,
+          width: target.width,
+          height: target.height,
+          transformOrigin: 'top left',
+          x: startLeft - target.left,
+          y: startTop - target.top,
+          scale: startWidth / target.width,
+        })
       })
+      // Фаза 2: сжатие и перелёт точно в хедер — только transform
+      .to(logo, { x: 0, y: 0, scale: 1, duration: 1.7, ease: 'power3.inOut' })
       // Фаза 3: оверлей тает, открывая сайт (лого уже стоит поверх хедерного)
       .to(overlay, { opacity: 0, duration: 0.4 })
 
