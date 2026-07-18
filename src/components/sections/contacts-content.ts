@@ -7,12 +7,6 @@ export interface ContactDetailItem {
   href?: string
 }
 
-export interface BenefitItem {
-  type: 'privacy' | 'speed' | 'approach' | 'result'
-  title: string
-  text: string
-}
-
 /* Редактируемый текст блока «Контакты». Телефон/почта/адрес — из
    канонического CONTACT_INFO (src/constants/content/contacts.ts), синхронно
    с футером. Telegram-ссылки в проекте нет (в футере — заглушка href="#"),
@@ -47,26 +41,4 @@ export const contactsContent = {
       title: CONTACT_INFO.address,
     },
   ] satisfies ContactDetailItem[] as ContactDetailItem[],
-  benefits: [
-    {
-      type: 'privacy',
-      title: 'Конфиденциальность',
-      text: 'Гарантируем защиту вашей информации',
-    },
-    {
-      type: 'speed',
-      title: 'Быстрый отклик',
-      text: 'Ответим в течение рабочего дня',
-    },
-    {
-      type: 'approach',
-      title: 'Индивидуальный подход',
-      text: 'Решение под вашу ситуацию',
-    },
-    {
-      type: 'result',
-      title: 'Опыт и результат',
-      text: 'В рейтингах Best Lawyers, Коммерсантъ и Право-300',
-    },
-  ] satisfies BenefitItem[] as BenefitItem[],
 }

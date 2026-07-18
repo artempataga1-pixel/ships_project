@@ -4,14 +4,10 @@ import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
   ArrowRight,
-  Clock,
   Mail,
   MapPin,
   MessageSquare,
   Phone,
-  ShieldCheck,
-  Target,
-  Trophy,
   UserRound,
 } from 'lucide-react'
 
@@ -34,13 +30,6 @@ const detailIcons = {
   email: Mail,
   address: MapPin,
 } satisfies Record<string, typeof Phone>
-
-const benefitIcons = {
-  privacy: ShieldCheck,
-  speed: Clock,
-  approach: Target,
-  result: Trophy,
-} satisfies Record<string, typeof ShieldCheck>
 
 /* Маска телефона: цифры нормализуются в +7, остальное отбрасывается —
    та же логика, что была в прежнем виджете контактов. */
@@ -270,23 +259,6 @@ export function ContactsSection() {
             )
           })}
         </address>
-
-        <aside className="pb-contact__benefits" aria-label="Преимущества">
-          {contactsContent.benefits.map((item) => {
-            const Icon = benefitIcons[item.type]
-            return (
-              <div className="pb-contact__benefit" key={item.type}>
-                <span className="pb-contact__benefit-icon">
-                  <Icon aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>{item.title}</strong>
-                  <small>{item.text}</small>
-                </span>
-              </div>
-            )
-          })}
-        </aside>
 
         <section className="pb-contact__trust" aria-labelledby="pb-trust-title">
           <h3 id="pb-trust-title">Нам доверяют</h3>
