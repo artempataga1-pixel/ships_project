@@ -39,7 +39,16 @@ export function LogoLink() {
       aria-label="На главную — Шумская и Партнёры"
       data-header-logo=""
     >
-      <Image src="/images/logo.svg" alt="Шумская и Партнёры" width={199} height={28} priority />
+      {/* Мобилка: логотип мельче + invert (SVG залит #111 — на чёрной плашке
+          header иначе не виден). На lg+ — исходный размер и цвет, без изменений. */}
+      <Image
+        src="/images/logo.svg"
+        alt="Шумская и Партнёры"
+        width={199}
+        height={28}
+        priority
+        className="h-5 w-auto invert lg:h-7 lg:invert-0"
+      />
     </Link>
   )
 }

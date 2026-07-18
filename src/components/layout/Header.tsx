@@ -8,8 +8,11 @@ import { handleStoryAwareAnchorClick } from '@/components/hero/useStoryControlle
 export function Header() {
   // z-[90] — ниже оверлея LogoIntro (z-[100]), если интро вернут
   return (
-    <header className="fixed top-0 inset-x-0 z-[90]">
-      <div className="max-w-[1440px] mx-auto h-16 px-8 flex items-center justify-between gap-8">
+    // Чёрная плашка — только мобилка/планшет (<lg): без неё логотип сливается
+    // с контентом секций при скролле (header прозрачный). На lg+ header
+    // остаётся прозрачным, как и был.
+    <header className="fixed top-0 inset-x-0 z-[90] bg-[var(--color-black)] lg:bg-transparent">
+      <div className="max-w-[1440px] mx-auto h-12 px-8 flex items-center justify-between gap-8 lg:h-16">
         {/* Логотип — клиентский якорь «домой»: из любой точки сайта на hero.
             data-header-logo для LogoIntro внутри. */}
         <LogoLink />

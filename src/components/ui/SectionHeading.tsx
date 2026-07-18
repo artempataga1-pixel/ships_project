@@ -53,7 +53,7 @@ export function SectionHeading({ title, subtitle, className }: SectionHeadingPro
     <div ref={containerRef} className={className}>
       <h2
         ref={titleRef}
-        className="font-heading text-5xl font-extrabold leading-tight"
+        className="font-heading text-3xl font-extrabold uppercase leading-tight lg:text-5xl"
       >
         {title}
       </h2>
