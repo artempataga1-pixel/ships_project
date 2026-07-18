@@ -227,7 +227,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
       className={
         isStory
           ? 'relative flex h-full w-full items-center overflow-hidden'
-          : 'relative min-h-svh scroll-mt-16 flex items-center overflow-hidden bg-[var(--color-bg)] lg:min-h-dvh'
+          : 'relative min-h-svh scroll-mt-16 flex items-start overflow-hidden bg-[var(--color-bg)] lg:min-h-dvh lg:items-center'
       }
     >
       {/* Мягкий лайм-glow за заголовком — по референсу 03_competencies_block.
@@ -242,7 +242,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
 
       <div
         className={`relative max-w-[1440px] w-full mx-auto px-6 md:px-12 lg:px-16 ${
-          isStory ? 'py-10' : 'py-32'
+          isStory ? 'py-10' : 'py-16 lg:py-32'
         }`}
       >
         {/* Сцена: заголовок неподвижен в центре (десктоп — внутри орбиты, мобильный — обычным блоком).

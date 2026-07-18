@@ -14,12 +14,17 @@ export function RevealOnScroll({ children, className, delay = 0 }: RevealOnScrol
   const ref = useRef<HTMLDivElement>(null)
 
   useGSAP(() => {
+    // blur() — дорогой для мобильного GPU compositing, особенно когда несколько
+    // reveal-блоков анимируются почти одновременно (заметный джанк на слабых
+    // телефонах) — на узких экранах оставляем только fade/translate.
+    const withBlur = !window.matchMedia('(max-width: 1023px)').matches
+
     // set сразу задаёт начальное состояние синхронно — исключает FOUC
-    gsap.set(ref.current, { opacity: 0, y: 40, filter: 'blur(8px)' })
+    gsap.set(ref.current, { opacity: 0, y: 40, ...(withBlur && { filter: 'blur(8px)' }) })
     gsap.to(ref.current, {
       opacity: 1,
       y: 0,
-      filter: 'blur(0px)',
+      ...(withBlur && { filter: 'blur(0px)' }),
       duration: 0.8,
       delay,
       ease: 'power3.out',

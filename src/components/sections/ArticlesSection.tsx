@@ -184,12 +184,6 @@ export function ArticlesSection() {
 
   return (
     <section id="articles" ref={sectionRef} className="relative bg-[var(--color-bg)]">
-      {/* На мобильных — обычный заголовок сверху. На десктопе он скрыт: вместо
-          него внутри пина работает вариант, оседающий в нижней полосе (см. ниже) */}
-      <div className="lg:hidden max-w-[1440px] w-full mx-auto px-8 pt-24">
-        <SectionHeading title="Статьи" subtitle="Публикации и комментарии экспертов компании" />
-      </div>
-
       <div
         ref={pinRef}
         className="relative mt-12 lg:mt-0 flex flex-col gap-6 lg:gap-0 lg:h-dvh lg:overflow-hidden"
@@ -230,6 +224,14 @@ export function ArticlesSection() {
             className={`relative lg:absolute lg:inset-x-[18%] lg:inset-y-[20%] ${PEEK_STEPS[Math.min(i, PEEK_STEPS.length - 1)]}`}
             style={{ zIndex: MEDIA.length - i }}
           >
+            {/* На мобильных — заголовок секции вплотную над первой карточкой
+                (без отступа). На десктопе скрыт: вместо него внутри пина
+                работает вариант, оседающий в нижней полосе (см. ниже) */}
+            {i === 0 && (
+              <div className="lg:hidden max-w-[1440px] w-full mx-auto px-8">
+                <SectionHeading title="Статьи" subtitle="Публикации и комментарии экспертов компании" />
+              </div>
+            )}
             <ArticleCard item={item} />
           </div>
         ))}

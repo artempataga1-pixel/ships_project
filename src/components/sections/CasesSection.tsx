@@ -144,8 +144,9 @@ export function CasesSection() {
       <div
         className="
           sticky top-0 z-0 h-svh overflow-hidden lg:h-dvh
-          flex flex-col items-center justify-center gap-6
-          text-center px-6
+          flex flex-col items-center justify-start gap-6
+          pt-28 text-center px-6
+          lg:justify-center lg:pt-0
         "
       >
         {/* Фоновые эллиптические орбиты */}
