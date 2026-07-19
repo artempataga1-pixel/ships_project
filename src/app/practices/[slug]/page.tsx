@@ -149,8 +149,8 @@ export default async function PracticePage({ params }: PracticePageProps) {
               однoколоночным и на мобиле), чтобы ширина посчиталась из
               aspect-ratio и явной высоты, а не наоборот. */}
           <div
-            className={`relative aspect-[${item.imageRatio}] overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-line)] ${isPortraitImage ? 'h-[320px] justify-self-center lg:h-[420px]' : ''}`}
-            style={{ boxShadow: 'var(--shadow-card)' }}
+            className={`relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-line)] ${isPortraitImage ? 'h-[320px] justify-self-center lg:h-[420px]' : ''}`}
+            style={{ aspectRatio: item.imageRatio, boxShadow: 'var(--shadow-card)' }}
           >
             <Image
               src={item.image}
