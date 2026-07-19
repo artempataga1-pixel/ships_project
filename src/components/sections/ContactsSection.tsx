@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
   ArrowRight,
@@ -25,6 +25,11 @@ const EXCLUDED_TRUST_LOGOS = new Set(['Континент Сибирь', 'Рос
 const trustLogos = MEDIA_MENTIONS.filter(
   (m): m is typeof m & { logo: string } => Boolean(m.logo) && !EXCLUDED_TRUST_LOGOS.has(m.name),
 )
+
+// Плейсхолдер селекта «Направление» — на узких экранах полный текст
+// «Направление обращения» упирается в стрелку селекта, поэтому мобилка
+// получает укороченный вариант.
+const MOBILE_MEDIA = '(max-width: 560px)'
 
 const detailIcons = {
   phone: Phone,
@@ -70,6 +75,15 @@ export function ContactsSection() {
   const [errors, setErrors] = useState<FieldErrors>({})
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
   const [statusMessage, setStatusMessage] = useState('')
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_MEDIA)
+    const apply = () => setIsMobile(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
 
   function clearFieldError(field: keyof FieldErrors) {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: false } : prev))
@@ -202,7 +216,7 @@ export function ContactsSection() {
               onChange={(e) => setPractice(e.target.value)}
               data-empty={practice === '' ? 'true' : undefined}
             >
-              <option value="">Направление обращения</option>
+              <option value="">{isMobile ? 'Направление' : 'Направление обращения'}</option>
               {PRACTICE_OPTIONS.map((option) => (
                 <option key={option} value={option}>
                   {option}
