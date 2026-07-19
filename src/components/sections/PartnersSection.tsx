@@ -112,7 +112,7 @@ function MobilePartnerCard({ member }: { member: TeamMember }) {
             src={member.photo!}
             alt={`${member.name} — ${member.role}`}
             fill
-            sizes="(max-width: 640px) 100vw, 50vw"
+            sizes="(max-width: 640px) 100vw, 640px"
             className="object-cover"
           />
           {/* Подсказка, что карточку можно перевернуть */}

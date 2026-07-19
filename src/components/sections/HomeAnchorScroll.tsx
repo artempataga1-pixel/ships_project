@@ -53,6 +53,12 @@ const STABLE_HITS_NEEDED = 2
 // как в режиме 2).
 const POST_SETTLE_DELAYS = [500, 1400]
 
+// Сколько после settle() слушаем ScrollTrigger 'refresh' и довозим scrollY
+// при каждом реальном пересчёте раскладки — подстраховка сверх
+// POST_SETTLE_DELAYS для сдвигов с непредсказуемым таймингом (тяжёлые
+// ассеты на планшетах и т.п.).
+const POST_SETTLE_REFRESH_GUARD_MS = 8000
+
 // Моменты попыток для режима 2 (клик на открытой странице) — раскладка уже
 // стабильна, нужно только перебить нативный смус-скролл браузера.
 const QUICK_DELAYS = [0, 120, 300]
@@ -223,19 +229,38 @@ export function HomeAnchorScroll() {
       let timer = 0
       let fadeTimer = 0
       let postTimers: number[] = []
+      let onRefresh: (() => void) | null = null
+      let refreshGuardTimer = 0
 
       const settle = () => {
         setFaded(true)
         fadeTimer = window.setTimeout(() => setCover(false), 400)
         // Оверлея больше нет — если раскладка всё же сдвинётся ещё раз позже
         // (вторая волна на реальном устройстве), молча довозим scrollY без
-        // повторного мелькания фона.
+        // повторного мелькания фона. Фиксированные таймеры покрывают
+        // предсказуемый хвост (шрифты/видео на телефоне), но на планшетах с
+        // более тяжёлыми ассетами (крупные картинки в PracticesSection/
+        // CasesSection, пин пересчитывается по фактической ширине трека)
+        // сдвиг раскладки может произойти позже отведённых 500/1400мс —
+        // фиксированные тайминги её просто не поймают. ScrollTrigger.refresh
+        // — это и есть момент, когда GSAP пересчитал позиции триггеров из-за
+        // реальной перекладки, поэтому вешаем коррекцию прямо на него —
+        // сработает при любой задержке, а не только в подобранное окно.
         postTimers = POST_SETTLE_DELAYS.map((delay) =>
           window.setTimeout(() => {
             const el = getTargetElement(id)
             if (el) applyScroll(resolveTarget(id, el))
           }, delay)
         )
+        onRefresh = () => {
+          const el = getTargetElement(id)
+          if (el) applyScroll(resolveTarget(id, el))
+        }
+        ScrollTrigger.addEventListener('refresh', onRefresh)
+        refreshGuardTimer = window.setTimeout(() => {
+          if (onRefresh) ScrollTrigger.removeEventListener('refresh', onRefresh)
+          onRefresh = null
+        }, POST_SETTLE_REFRESH_GUARD_MS)
       }
 
       const step = () => {
@@ -262,6 +287,8 @@ export function HomeAnchorScroll() {
         window.clearTimeout(timer)
         window.clearTimeout(fadeTimer)
         postTimers.forEach((t) => window.clearTimeout(t))
+        window.clearTimeout(refreshGuardTimer)
+        if (onRefresh) ScrollTrigger.removeEventListener('refresh', onRefresh)
       }
     }
 
