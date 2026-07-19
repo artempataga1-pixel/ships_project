@@ -1,17 +1,6 @@
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { ABOUT } from '@/constants/content/home'
 
-/* Белые панели убывающей высоты со skew и лайм-торцом справа — тот же паттерн
-   сцены, что в Hero/референс-коде 01_about_company (.bars-scene/.bar). Значения
-   позиций/высот перенесены из демки дизайнера, декор — скрыт на мобиле. */
-const BARS = [
-  { left: 70, height: 148, opacity: 0.44 },
-  { left: 150, height: 214, opacity: 0.5 },
-  { left: 240, height: 298, opacity: 0.58 },
-  { left: 345, height: 405, opacity: 0.66 },
-  { left: 485, height: 545, opacity: 0.82 },
-]
-
 /* Passthrough вместо RevealOnScroll в story-режиме: внутри скролл-стори
    появлением секции рулит таймлайн (opacity оверлея), собственный reveal по
    вьюпорту здесь только мешал бы (sticky-контейнер ломает его триггер). */
@@ -67,82 +56,10 @@ export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
         }
       />
 
-      {/* Сцена из белых панелей с орбитами и точками — декоративная, слева.
-          В story её роль играют реальные панели из видео → CSS-декор не рендерим. */}
-      {!isStory && (
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-[3%] top-1/2 hidden h-[720px] w-[760px] -translate-y-1/2 lg:block"
-      >
-        {/* линия-пол */}
-        <div
-          className="absolute bottom-[150px] left-0 right-[-90px] h-px"
-          style={{
-            background:
-              'linear-gradient(90deg,transparent,rgba(0,0,0,.09),transparent)',
-          }}
-        />
-        {/* орбиты */}
-        <div
-          className="absolute left-[-20px] top-[35px] h-[575px] w-[675px] rounded-full border"
-          style={{ borderColor: 'var(--color-lime-soft)', transform: 'rotate(-28deg)' }}
-        />
-        <div
-          className="absolute left-[65px] top-[65px] h-[460px] w-[540px] rounded-full border"
-          style={{ borderColor: 'rgba(0,0,0,.08)', transform: 'rotate(-25deg)' }}
-        />
-        {/* панели */}
-        {BARS.map((bar) => (
-          <span
-            key={bar.left}
-            className="absolute bottom-[145px] w-[74px]"
-            style={{
-              left: bar.left,
-              height: bar.height,
-              opacity: bar.opacity,
-              transform: 'skewY(-7deg)',
-              background: 'linear-gradient(90deg,#f7f7f5,#fff 50%,#e8e8e6)',
-              boxShadow:
-                '22px 34px 42px rgba(0,0,0,.08),inset -3px 0 8px rgba(0,0,0,.08)',
-            }}
-          >
-            {/* лайм-торец справа */}
-            <span
-              className="absolute right-[-7px] top-0 h-full w-[7px]"
-              style={{
-                background:
-                  'linear-gradient(180deg,var(--color-lime),var(--color-lime-soft))',
-                filter: 'drop-shadow(0 0 18px var(--color-lime-glow))',
-              }}
-            />
-          </span>
-        ))}
-        {/* точки */}
-        {[
-          { left: 546, top: 54 },
-          { left: 632, top: 234 },
-          { left: 570, top: 610 },
-        ].map((dot) => (
-          <span
-            key={`${dot.left}-${dot.top}`}
-            className="absolute h-[10px] w-[10px] rounded-full"
-            style={{
-              left: dot.left,
-              top: dot.top,
-              background: 'var(--color-lime)',
-              boxShadow: '0 0 20px var(--color-lime-glow)',
-            }}
-          />
-        ))}
-      </div>
-      )}
-
-      {/* Контент — ghost-panel карточка, прижата вправо */}
-      <div
-        className={`relative mx-auto flex w-full max-w-[1440px] px-6 md:px-12 lg:px-16 ${
-          isStory ? 'justify-center' : 'justify-end'
-        }`}
-      >
+      {/* Контент — ghost-panel карточка, по центру (старый декор из белых
+          панелей слева — референсный фон времён редизайна, убран, карточка
+          отцентрована как на мобилке) */}
+      <div className="relative mx-auto flex w-full max-w-[1440px] justify-center px-6 md:px-12 lg:px-16">
         <div
           id="about-card"
           className="w-full max-w-[720px] rounded-[var(--radius-xl)] border p-8 md:p-12 lg:p-16"
