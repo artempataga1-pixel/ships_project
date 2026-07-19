@@ -60,8 +60,8 @@ type FieldErrors = {
 
 /* Секция «Контакты» — блок из contact-section-package, перенесённый в React.
    Фон (люди, интерьер, стеклянная панель, подиум) — public/contact-assets/
-   contact-background.png, заголовки/форма/иконки/панели — кодом. Заявка уходит
-   в тот же /api/contact (Telegram-уведомления), что и раньше. */
+   contact-background-2.webp, заголовки/форма/иконки/панели — кодом. Заявка
+   уходит в тот же /api/contact (Telegram-уведомления), что и раньше. */
 export function ContactsSection() {
   const formRef = useRef<HTMLFormElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
