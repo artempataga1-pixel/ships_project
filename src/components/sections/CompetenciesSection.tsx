@@ -252,9 +252,10 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
               экранировал бы карточки орбиты от событий мыши (hover/tilt) */}
           <div className="flex items-center justify-center lg:pointer-events-none lg:absolute lg:inset-0 lg:z-10">
             <SectionHeading
+              id="competencies-heading"
               title="Наши компетенции"
               subtitle="Профессионалы с многолетним опытом в ключевых отраслях права"
-              className="text-center lg:max-w-2xl"
+              className="scroll-mt-16 text-center lg:max-w-2xl"
             />
           </div>
 
@@ -320,24 +321,37 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
           </div>
         </div>
 
-        {/* Мобильная и планшетная раскладка карточек — без орбиты */}
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
+        {/* Мобильная и планшетная раскладка — те же квадратные карточки, что и в
+            десктопной орбите (рамка-скобка по углам, лайм-полоса, текст по центру),
+            но статичные, без анимации, в простой сетке на 2 колонки */}
+        <div className="mt-16 grid grid-cols-2 gap-4 sm:gap-6 lg:hidden">
           {PRACTICES.map((practice) => (
-            <div
-              key={practice.title}
-              className="
-                relative p-6 rounded-[18px] border border-[var(--color-line)]
-                bg-gradient-to-br from-white to-[var(--color-surface-soft)]
-                shadow-[var(--shadow-card)]
-              "
-            >
-              <span
-                className="pointer-events-none absolute right-[-2px] top-6 bottom-6 w-1 rounded-full bg-[var(--color-lime)]"
-                style={{ boxShadow: '0 0 24px var(--color-lime)' }}
-              />
-              <h3 className="font-heading text-lg font-semibold leading-snug text-[var(--color-text)]">
-                {practice.title}
-              </h3>
+            <div key={practice.title} className="relative mx-auto aspect-square w-full max-w-[280px]">
+              <div
+                className="
+                  relative flex h-full w-full flex-col items-center justify-center
+                  rounded-[18px] border border-[var(--color-line)]
+                  bg-gradient-to-br from-white to-[var(--color-surface-soft)]
+                  shadow-[0_30px_70px_rgba(0,0,0,0.13),inset_0_1px_0_rgba(255,255,255,0.95)]
+                "
+              >
+                {/* Угловая рамка-скобка — видна только по углам, как в орбите */}
+                <span
+                  className="pointer-events-none absolute -inset-2.5 rounded-[24px] border-[1.5px] border-black/[0.38] opacity-70"
+                  style={{
+                    clipPath:
+                      'polygon(0 0,28% 0,28% 7%,72% 7%,72% 0,100% 0,100% 28%,93% 28%,93% 72%,100% 72%,100% 100%,72% 100%,72% 93%,28% 93%,28% 100%,0 100%,0 72%,7% 72%,7% 28%,0 28%)',
+                  }}
+                />
+                {/* Лайм-полоса у правого края */}
+                <span
+                  className="pointer-events-none absolute right-[-2px] top-6 bottom-6 w-1 rounded-full bg-[var(--color-lime)]"
+                  style={{ boxShadow: '0 0 24px var(--color-lime)' }}
+                />
+                <p className="px-4 text-center text-[clamp(26px,6.8vw,34px)] font-semibold leading-tight text-[var(--color-text)]">
+                  {practice.title}
+                </p>
+              </div>
             </div>
           ))}
         </div>

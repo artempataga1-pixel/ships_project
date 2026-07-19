@@ -92,9 +92,20 @@ export function HomeAnchorScroll() {
     // секции (по нему считает активный пункт нижней навигации — см.
     // useActiveSection), а якорем ПРИЗЕМЛЕНИЯ служит вложенный
     // #contacts-anchor (header .pb-contact__intro, см. ContactsSection).
+    // «Контакты»/«Партнёры»/«Компетенции» — секция сама садится под шапку
+    // верно (scroll-mt-16), но перед заголовком у неё большой py (дизайнерский
+    // «воздух» для десктопного центрирования) — если целиться в край секции,
+    // заголовок оказывается заметно ниже верха экрана (не так, как у «Статьи»,
+    // где заголовок стоит почти вплотную к краю). Целимся прямо в заголовок.
+    const HEADING_ANCHOR: Record<string, string> = {
+      contacts: 'contacts-anchor',
+      partners: 'partners-heading',
+      competencies: 'competencies-heading',
+    }
     const getTargetElement = (id: string): HTMLElement | null => {
-      if (id === 'contacts') {
-        return document.getElementById('contacts-anchor') ?? document.getElementById('contacts')
+      const headingId = HEADING_ANCHOR[id]
+      if (headingId) {
+        return document.getElementById(headingId) ?? document.getElementById(id)
       }
       return document.getElementById(id)
     }
