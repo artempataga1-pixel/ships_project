@@ -57,7 +57,7 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
 
   return (
     <main
-      className="relative min-h-dvh overflow-hidden bg-[var(--color-bg)]"
+      className="relative min-h-svh lg:min-h-dvh overflow-hidden bg-[var(--color-bg)]"
       style={{
         background:
           'radial-gradient(circle at 74% 30%, rgba(201,255,31,.09), transparent 26%), linear-gradient(180deg,#ffffff 0%,#fafafa 58%,#f7f7f5 100%)',
@@ -94,8 +94,13 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
       <div className="relative z-10 mx-auto max-w-[1120px] px-6 pb-28 pt-36 md:pt-44">
         {/* Возврат ровно к карточке этого кейса в блоке «Кейсы».
             Эффект .btn-lime-fill: залита лаймом → при наведении белеет + лайм-glow. */}
+        {/* scroll={false} — свой скролл к карточке делает HomeAnchorScroll на
+            главной (с повторными попытками, пока раскладка не устаканится);
+            встроенный hash-scroll Next.js делает это одним ранним прыжком и
+            гонится с ним, из-за чего страница иногда оставалась в самом верху. */}
         <Link
           href={`/#case-${item.slug}`}
+          scroll={false}
           className="btn-lime-fill inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
         >
           ← Все кейсы

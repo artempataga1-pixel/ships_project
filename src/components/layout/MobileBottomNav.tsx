@@ -58,7 +58,7 @@ export function MobileBottomNav() {
     <nav
       aria-label="Основная навигация"
       aria-hidden={isFormFocused}
-      className={`xl:hidden fixed inset-x-0 bottom-0 z-[90] bg-[var(--color-bg)]/92 backdrop-blur-md border-t border-[var(--color-line)] transition-transform duration-200 ${
+      className={`xl:hidden fixed inset-x-0 bottom-0 z-[90] isolate transform-gpu bg-[var(--color-bg)]/92 backdrop-blur-md border-t border-[var(--color-line)] transition-transform duration-200 ${
         isFormFocused ? 'translate-y-full pointer-events-none' : 'translate-y-0'
       }`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
