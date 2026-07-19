@@ -25,37 +25,40 @@ const VIDEO_SRC = ['/video/story1.mp4', '/video/story2.mp4', '/video/story3.mp4'
 
 // ── Контент героя: заголовок / подзаголовок / CTA / счётчики / нижняя строка.
 // Общий и для story-оверлея, и для flow-hero (постер-режим на мобилке).
-// Адаптив ≥lg: все размеры пропорциональны ширине экрана относительно эталона
-// 2560×1440 (vw-коэффициент = эталонный px / 25.6). На 2560px значения совпадают
-// с эталоном пиксель-в-пиксель, ниже — масштабируются, выше — упираются в потолок.
+// Адаптив ≥xl (1280px, синхронизировано с Header.tsx/STORY_MEDIA — до этого
+// порога десктопной раскладки просто нет): все размеры пропорциональны ширине
+// экрана относительно эталона 2560×1440 (vw-коэффициент = эталонный px / 25.6).
+// На 2560px значения совпадают с эталоном пиксель-в-пиксель, ниже — масштабируются,
+// выше — упираются в потолок. Порог был lg (1024px) — на 1024–1279 vw-формулы
+// давали текст МЕЛЬЧЕ мобильного clamp() (пустое место в hero на iPad landscape).
 function HeroLayer() {
   // Второе слово заголовка и разбивка подзаголовка выносятся на отдельные
-  // строки только на мобилке (lg:hidden <br/>) — на десктопе тот же текст
+  // строки только на мобилке/планшете (xl:hidden <br/>) — на десктопе тот же текст
   // остаётся в исходных строках. Точки разбивки подзаголовка подобраны так,
   // чтобы текст не наезжал на лаймовую полосу плиты на фоновом фото/видео.
   const [titleWord2, titleWord3] = HERO.titleLine2.split(' ')
   const subtitleWords = HERO.subtitle.split(' ')
 
   return (
-    <div className="relative h-full min-h-[720px] w-full px-8 lg:px-[min(2.1875vw,3.5rem)]">
+    <div className="relative h-full min-h-[720px] w-full px-8 xl:px-[min(2.1875vw,3.5rem)]">
       {/* Левая колонка: заголовок, подзаголовок, CTA — крупный кегль (×2). */}
-      <div className="relative z-10 max-w-[70rem] pt-[clamp(80px,10vh,130px)] lg:max-w-[min(43.75vw,70rem)] lg:pt-[min(5.0781vw,130px)]">
-        <h1 className="font-heading font-medium leading-[1.03] tracking-[-0.055em] text-[clamp(2rem,8vw,9rem)] lg:text-[min(5.625vw,9rem)]">
+      <div className="relative z-10 max-w-[70rem] pt-[clamp(80px,10vh,130px)] xl:max-w-[min(43.75vw,70rem)] xl:pt-[min(5.0781vw,130px)]">
+        <h1 className="font-heading font-medium leading-[1.03] tracking-[-0.055em] text-[clamp(2rem,8vw,9rem)] xl:text-[min(5.625vw,9rem)]">
           <span data-hero-fade className="block">{HERO.titleLine1}</span>
           <span data-hero-fade className="block">
             {titleWord2}
-            <br className="lg:hidden" />
-            <span className="hidden lg:inline"> </span>
+            <br className="xl:hidden" />
+            <span className="hidden xl:inline"> </span>
             {titleWord3}
           </span>
-          <span data-hero-fade className="block text-black/25 text-[0.78em] sm:text-[0.64em] lg:text-[1em]">
+          <span data-hero-fade className="block text-black/25 text-[0.78em] sm:text-[0.64em] xl:text-[1em]">
             {HERO.titleMuted}
           </span>
         </h1>
 
         <p
           data-hero-fade
-          className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[40rem] text-[clamp(1rem,3.2vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)] sm:max-w-[27rem] sm:text-[clamp(0.95rem,2.6vw,1.6rem)] lg:mt-[min(1.5625vw,2.5rem)] lg:max-w-[min(25vw,40rem)] lg:text-[clamp(1.125rem,1.40625vw,2.25rem)]"
+          className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[40rem] text-[clamp(1rem,3.2vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)] sm:max-w-[27rem] sm:text-[clamp(0.95rem,2.6vw,1.6rem)] xl:mt-[min(1.5625vw,2.5rem)] xl:max-w-[min(25vw,40rem)] xl:text-[clamp(1.125rem,1.40625vw,2.25rem)]"
         >
           {/* Телефон (<640): 3 строки, как было */}
           <span className="sm:hidden">
@@ -65,14 +68,14 @@ function HeroLayer() {
             <br />
             {subtitleWords[5]}
           </span>
-          {/* Планшет (640–1023): 2 строки, чтобы не наезжать на лаймовую плиту */}
-          <span className="hidden sm:inline lg:hidden">
+          {/* Планшет (640–1279): 2 строки, чтобы не наезжать на лаймовую плиту */}
+          <span className="hidden sm:inline xl:hidden">
             {subtitleWords.slice(0, 3).join(' ')}
             <br />
             {subtitleWords.slice(3).join(' ')}
           </span>
           {/* Десктоп: одна строка */}
-          <span className="hidden lg:inline">{HERO.subtitle}</span>
+          <span className="hidden xl:inline">{HERO.subtitle}</span>
         </p>
 
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
@@ -80,11 +83,11 @@ function HeroLayer() {
           href="/#contacts"
           onClick={(e) => handleStoryAwareAnchorClick(e, 'contacts')}
           data-hero-fade
-          className="group mt-[clamp(3.5rem,10vh,4.5rem)] inline-flex flex-col items-center gap-4 lg:mt-[min(2.8125vw,4.5rem)] lg:flex-row lg:gap-[min(1.25vw,2rem)]"
+          className="group mt-[clamp(3.5rem,10vh,4.5rem)] inline-flex flex-col items-center gap-4 xl:mt-[min(2.8125vw,4.5rem)] xl:flex-row xl:gap-[min(1.25vw,2rem)]"
         >
           <span
             aria-hidden="true"
-            className="grid h-14 w-14 place-items-center rounded-full border border-[var(--color-black)] bg-[var(--color-lime)] text-xl text-[var(--color-black)] shadow-[0_0_42px_var(--color-lime-glow)] transition-transform duration-300 group-hover:scale-105 sm:h-16 sm:w-16 sm:text-2xl lg:h-[clamp(48px,4.0625vw,104px)] lg:w-[clamp(48px,4.0625vw,104px)] lg:text-[clamp(17px,1.40625vw,36px)]"
+            className="grid h-14 w-14 place-items-center rounded-full border border-[var(--color-black)] bg-[var(--color-lime)] text-xl text-[var(--color-black)] shadow-[0_0_42px_var(--color-lime-glow)] transition-transform duration-300 group-hover:scale-105 sm:h-16 sm:w-16 sm:text-2xl xl:h-[clamp(48px,4.0625vw,104px)] xl:w-[clamp(48px,4.0625vw,104px)] xl:text-[clamp(17px,1.40625vw,36px)]"
           >
             {/* SVG вместо текстового «→» — юникодный глиф смещён по метрикам
                 шрифта и не встаёт ровно в центр круга, SVG с viewBox центруется
@@ -102,14 +105,14 @@ function HeroLayer() {
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>
           </span>
-          <span className="text-lg font-semibold text-[var(--color-text)] sm:text-xl lg:text-[clamp(0.9375rem,0.9375vw,1.5rem)]">
+          <span className="text-lg font-semibold text-[var(--color-text)] sm:text-xl xl:text-[clamp(0.9375rem,0.9375vw,1.5rem)]">
             {HERO.ctaLabel}
           </span>
         </a>
       </div>
 
       {/* Нижняя строка: слоган — только десктоп (на мобилке убрана по просьбе заказчика) */}
-      <div className="absolute inset-x-8 bottom-7 hidden h-[70px] items-center border-t border-[var(--color-line)] lg:flex lg:inset-x-[min(2.1875vw,3.5rem)] lg:bottom-[min(1.09375vw,1.75rem)] lg:h-[min(2.7344vw,70px)]">
+      <div className="absolute inset-x-8 bottom-7 hidden h-[70px] items-center border-t border-[var(--color-line)] xl:flex xl:inset-x-[min(2.1875vw,3.5rem)] xl:bottom-[min(1.09375vw,1.75rem)] xl:h-[min(2.7344vw,70px)]">
         <p className="flex items-center gap-3.5 text-xs font-extrabold uppercase tracking-[0.46em] text-[#3c3c3c]">
           <i className="h-2.5 w-2.5 rounded-[2px] bg-[var(--color-lime)]" />
           {HERO.bottomLine}
