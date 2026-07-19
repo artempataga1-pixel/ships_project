@@ -12,8 +12,13 @@ import { handleStoryAwareAnchorClick, useStoryController } from './useStoryContr
 
 // Story-режим только на десктопе без reduced-motion — scroll-jacking с
 // перехватом ввода на телефоне капризен, там секции идут обычным потоком
-// (см. flow-ветку).
-const STORY_MEDIA = '(min-width: 1024px) and (prefers-reduced-motion: no-preference)'
+// (см. flow-ветку). Порог 1280px (xl), не 1024 (lg) — синхронизирован с
+// Header.tsx/CompetenciesSection.tsx: на 1024–1279px (iPad landscape и
+// похожие ширины) нет места под полноценную десктопную навигацию, поэтому
+// весь «десктопный» набор (шапка, scroll-jacking, орбита карточек)
+// включается только с 1280px, а до этого — единый согласованный
+// планшетный/мобильный вид.
+const STORY_MEDIA = '(min-width: 1280px) and (prefers-reduced-motion: no-preference)'
 
 // Источники видео-сегментов. Индекс = сегмент между шагами N и N+1.
 const VIDEO_SRC = ['/video/story1.mp4', '/video/story2.mp4', '/video/story3.mp4']
