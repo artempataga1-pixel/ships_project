@@ -37,8 +37,21 @@ const useClientLayoutEffect = typeof window === 'undefined' ? useEffect : useLay
    страницы останавливает Lenis на ~350мс. */
 
 // Моменты попыток от старта, мс (режим 1 — полная загрузка). Первая — сразу;
-// хвост страхует поздние сдвиги раскладки (шрифты/видео) при полной загрузке.
-const DELAYS = [0, 120, 260, 420, 620, 900, 1150]
+// хвост страхует поздние сдвиги раскладки (шрифты/видео, а на реальном iOS
+// ещё и resize от схлопывания адресной строки при живом touch-скролле —
+// не воспроизводится синтетическим scrollTo/scrollBy) при полной загрузке.
+const DELAYS = [0, 120, 260, 420, 620, 900, 1150, 1600, 2200]
+
+// Одного совпадения "цель не изменилась" недостаточно — раскладка может
+// стабилизироваться на временном плато и сдвинуться ещё раз позже (вторая
+// волна). Требуем несколько подряд совпадений, прежде чем считать устоявшимся.
+const STABLE_HITS_NEEDED = 2
+
+// Молчаливые пост-коррекции ПОСЛЕ того как оверлей уже растворился —
+// страховка на случай если позиция всё же сдвинулась позже отведённого
+// окна ретраев (без повторного показа оверлея, просто тихо поправляем scrollY,
+// как в режиме 2).
+const POST_SETTLE_DELAYS = [500, 1400]
 
 // Моменты попыток для режима 2 (клик на открытой странице) — раскладка уже
 // стабильна, нужно только перебить нативный смус-скролл браузера.
@@ -206,12 +219,23 @@ export function HomeAnchorScroll() {
       setFaded(false)
       let i = 0
       let lastTarget: number | null = null
+      let stableHits = 0
       let timer = 0
       let fadeTimer = 0
+      let postTimers: number[] = []
 
       const settle = () => {
         setFaded(true)
         fadeTimer = window.setTimeout(() => setCover(false), 400)
+        // Оверлея больше нет — если раскладка всё же сдвинётся ещё раз позже
+        // (вторая волна на реальном устройстве), молча довозим scrollY без
+        // повторного мелькания фона.
+        postTimers = POST_SETTLE_DELAYS.map((delay) =>
+          window.setTimeout(() => {
+            const el = getTargetElement(id)
+            if (el) applyScroll(resolveTarget(id, el))
+          }, delay)
+        )
       }
 
       const step = () => {
@@ -222,7 +246,8 @@ export function HomeAnchorScroll() {
           const arrived = Math.abs(window.scrollY - target) < 2
           const stable = lastTarget !== null && Math.abs(target - lastTarget) < 2
           lastTarget = target
-          if (arrived && stable && i >= 2) return settle()
+          stableHits = arrived && stable ? stableHits + 1 : 0
+          if (stableHits >= STABLE_HITS_NEEDED && i >= 2) return settle()
         }
         i += 1
         if (i < DELAYS.length) {
@@ -236,6 +261,7 @@ export function HomeAnchorScroll() {
       return () => {
         window.clearTimeout(timer)
         window.clearTimeout(fadeTimer)
+        postTimers.forEach((t) => window.clearTimeout(t))
       }
     }
 
