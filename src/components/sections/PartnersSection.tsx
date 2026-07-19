@@ -438,9 +438,10 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
           внизу остаётся полоса под выезжающую панель с регалиями. */}
       <div className="relative z-[5] max-w-[1440px] w-full mx-auto px-8 md:px-16 py-24 md:py-28 lg:pt-16 lg:pb-10">
         <SectionHeading
+          id="partners-heading"
           title="Партнёры"
           subtitle="Профессиональная защита в ключевых областях права"
-          className="text-center"
+          className="scroll-mt-16 text-center"
         />
 
         {/* Плотная дуга-веер карточек — только десктоп */}

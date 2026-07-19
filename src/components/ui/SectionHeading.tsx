@@ -8,9 +8,12 @@ interface SectionHeadingProps {
   title: string
   subtitle?: string
   className?: string
+  // Якорь для точной посадки скролла на сам заголовок, а не на край секции
+  // (см. HomeAnchorScroll — актуально для полок с большим py перед заголовком).
+  id?: string
 }
 
-export function SectionHeading({ title, subtitle, className }: SectionHeadingProps) {
+export function SectionHeading({ title, subtitle, className, id }: SectionHeadingProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
@@ -50,7 +53,7 @@ export function SectionHeading({ title, subtitle, className }: SectionHeadingPro
   }, { scope: containerRef, dependencies: [] })
 
   return (
-    <div ref={containerRef} className={className}>
+    <div ref={containerRef} id={id} className={className}>
       <h2
         ref={titleRef}
         className="font-heading text-3xl font-extrabold uppercase leading-tight lg:text-5xl"
