@@ -63,10 +63,16 @@
 }
 
 /* Тач-устройства: Lenis не монтируется (SmoothScrollProvider), якоря
-   <a href="/#id"> едут нативным скроллом — включаем плавность через CSS */
+   <a href="/#id"> едут нативным скроллом — включаем плавность через CSS.
+   overflow-anchor:none — глушим браузерную авто-коррекцию скролла при
+   изменениях раскладки выше вьюпорта: на сайте и так весь скролл управляется
+   вручную (HomeAnchorScroll/GSAP ScrollTrigger), встроенная эвристика может
+   конфликтовать с ней именно в WebKit. Ограничено тач-медиа — на десктопе
+   скроллом рулит Lenis, там не трогаем. */
 @media (hover: none) and (pointer: coarse) {
   html {
     scroll-behavior: smooth;
+    overflow-anchor: none;
   }
 }
 
@@ -144,11 +150,6 @@ body {
 .btn-outline-thin:hover,
 .btn-outline-thin:focus-visible {
   outline-color: transparent;
-}
-
-/* GPU-слой для GSAP-анимаций (blur + transform) */
-[data-reveal] {
-  will-change: transform, filter;
 }
 
 /* Скроллер нижнего меню (MobileBottomNav) — горизонтальный скролл пунктов

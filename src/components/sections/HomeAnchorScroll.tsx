@@ -70,9 +70,34 @@ export function HomeAnchorScroll() {
   }, [])
 
   useEffect(() => {
+    // Без Lenis (тач/iOS) html имеет CSS `scroll-behavior: smooth` (globals.css,
+    // для нативных <a href="#id">). В WebKit behavior:'instant' в scrollTo
+    // ненадёжно перебивает этот CSS (W3C csswg-drafts#3497, WebKit bug #238497) —
+    // скролл иногда едет анимированно вместо мгновенного, серия попыток ниже не
+    // успевает доехать за отведённое время и оверлей открывает недокрученную
+    // позицию (обычно у самого верха). Лечим точечным inline-toggle вокруг
+    // каждого мгновенного прыжка — инлайн-стиль перебивает media-query по
+    // каскаду независимо от того, как конкретная версия WebKit трактует 'instant'.
+    let restoreRaf = 0
+    const scrollToInstant = (target: number) => {
+      if (restoreRaf) cancelAnimationFrame(restoreRaf)
+      const html = document.documentElement
+      html.style.scrollBehavior = 'auto'
+      window.scrollTo({ top: target, behavior: 'instant' })
+      // Двойной rAF — гарантия, что браузер закоммитил скролл на текущем кадре
+      // до того как мы снимем override; одинарного иногда не хватает.
+      restoreRaf = requestAnimationFrame(() => {
+        restoreRaf = requestAnimationFrame(() => {
+          html.style.scrollBehavior = ''
+          restoreRaf = 0
+        })
+      })
+    }
+
     // С Lenis — как раньше (его RAF-цикл иначе тут же перебивает нативный
-    // скролл). Без Lenis (тач, см. useIsTouch/SmoothScrollProvider) — обычный
-    // window.scrollTo; target уже включает offset и scroll-margin-top.
+    // скролл). Без Lenis (тач, см. useIsTouch/SmoothScrollProvider) — instant
+    // scrollTo с обходом WebKit-бага выше; target уже включает offset и
+    // scroll-margin-top.
     const applyScroll = (target: number) => {
       if (lenis) {
         // Lenis кеширует высоту документа: сразу после навигации limit ещё от
@@ -81,7 +106,7 @@ export function HomeAnchorScroll() {
         lenis.resize()
         lenis.scrollTo(target, { immediate: true, force: true })
       } else {
-        window.scrollTo({ top: target, behavior: 'instant' })
+        scrollToInstant(target)
       }
     }
 
@@ -271,6 +296,10 @@ export function HomeAnchorScroll() {
 
     return () => {
       cancelCurrent?.()
+      // Защита от размонтирования (переход на другую страницу) посреди
+      // цепочки instant-попыток — не оставлять html залипшим на 'auto'.
+      if (restoreRaf) cancelAnimationFrame(restoreRaf)
+      document.documentElement.style.scrollBehavior = ''
       window.removeEventListener('hashchange', onHashChange)
       document.removeEventListener('click', onAnchorClick)
     }

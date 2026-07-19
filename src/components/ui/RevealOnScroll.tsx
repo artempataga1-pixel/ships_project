@@ -19,8 +19,17 @@ export function RevealOnScroll({ children, className, delay = 0 }: RevealOnScrol
     // телефонах) — на узких экранах оставляем только fade/translate.
     const withBlur = !window.matchMedia('(max-width: 1023px)').matches
 
-    // set сразу задаёт начальное состояние синхронно — исключает FOUC
-    gsap.set(ref.current, { opacity: 0, y: 40, ...(withBlur && { filter: 'blur(8px)' }) })
+    // set сразу задаёт начальное состояние синхронно — исключает FOUC.
+    // will-change ставим тут же (не постоянным CSS-правилом) и снимаем в
+    // onComplete — постоянный GPU-слой на элементах, которые уже отыграли
+    // анимацию, лишняя память компоузитора (заметно на iOS).
+    const willChange = `opacity, transform${withBlur ? ', filter' : ''}`
+    gsap.set(ref.current, {
+      opacity: 0,
+      y: 40,
+      willChange,
+      ...(withBlur && { filter: 'blur(8px)' }),
+    })
     gsap.to(ref.current, {
       opacity: 1,
       y: 0,
@@ -28,6 +37,7 @@ export function RevealOnScroll({ children, className, delay = 0 }: RevealOnScrol
       duration: 0.8,
       delay,
       ease: 'power3.out',
+      onComplete: () => gsap.set(ref.current, { clearProps: 'willChange' }),
       scrollTrigger: {
         trigger: ref.current,
         start: 'top 85%',
@@ -37,7 +47,6 @@ export function RevealOnScroll({ children, className, delay = 0 }: RevealOnScrol
   }, { scope: ref, dependencies: [delay] })
 
   return (
-    // will-change: filter задан на [data-reveal] в globals.css
     <div ref={ref} data-reveal className={className}>
       {children}
     </div>
