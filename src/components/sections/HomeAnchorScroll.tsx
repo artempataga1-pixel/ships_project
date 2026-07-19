@@ -251,9 +251,28 @@ export function HomeAnchorScroll() {
     const onHashChange = () => run(window.location.hash, false)
     window.addEventListener('hashchange', onHashChange)
 
+    // Повторный клик по якорю с ТЕМ ЖЕ хэшем, что уже стоит в URL (зелёная
+    // трубочка FAB → /#contacts, когда пользователь уже был в «Контактах»
+    // и проскроллил в сторону вручную) не меняет location.hash — событие
+    // 'hashchange' не срабатывает, и коррекция выше не запускается. Браузер
+    // всё равно выполняет свой нативный (неточный) scroll-to-fragment —
+    // ловим это отдельно кликом по самой ссылке, независимо от того,
+    // изменился ли хэш.
+    const onAnchorClick = (e: MouseEvent) => {
+      const anchor = (e.target as HTMLElement | null)?.closest('a[href*="#"]') as HTMLAnchorElement | null
+      if (!anchor) return
+      const url = new URL(anchor.href, window.location.href)
+      if (url.pathname !== window.location.pathname) return
+      if (!isHandledHash(url.hash)) return
+      // Даём браузеру сначала отработать нативный fragment-скролл, потом правим.
+      window.setTimeout(() => run(url.hash, false), 0)
+    }
+    document.addEventListener('click', onAnchorClick)
+
     return () => {
       cancelCurrent?.()
       window.removeEventListener('hashchange', onHashChange)
+      document.removeEventListener('click', onAnchorClick)
     }
   }, [lenis])
 
