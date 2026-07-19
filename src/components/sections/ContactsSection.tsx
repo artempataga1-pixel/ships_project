@@ -139,13 +139,11 @@ export function ContactsSection() {
           <h2 className="pb-contact__title" id="pb-contact-title">
             {contactsContent.titleLine1}
             <br />
-            {' '}
             {contactsContent.titleLine2}
           </h2>
           <p className="pb-contact__lead">
             {contactsContent.subtitleLine1}
             <br />
-            {' '}
             {contactsContent.subtitleLine2}
           </p>
         </header>
