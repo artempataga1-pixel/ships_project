@@ -134,7 +134,7 @@ export function CasesSection() {
   return (
     <section
       id="cases"
-      className="relative bg-[var(--color-bg)]"
+      className="relative scroll-mt-16 bg-[var(--color-bg)]"
       style={{
         background:
           'radial-gradient(circle at 72% 42%, rgba(201,255,31,.08), transparent 24%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
@@ -205,19 +205,24 @@ export function CasesSection() {
         </div>
       </div>
 
-      {/* Поток карточек: поднят на высоту экрана, чтобы ехать поверх заголовка */}
-      <div className="relative z-10 -mt-[100dvh] flex flex-col">
+      {/* Поток карточек: поднят на высоту экрана, чтобы ехать поверх заголовка.
+          svh, а не dvh, на мобиле — dvh пересчитывается при каждом схлопывании
+          адресной строки во время скролла, и эти огромные отступы (100/85/70vh)
+          заметно «прыгали» на стыке с блоком «Контакты». На lg адресной строки
+          нет — там dvh/svh не отличаются, оставляем dvh для консистентности со
+          sticky-заголовком выше (h-svh ... lg:h-dvh). */}
+      <div className="relative z-10 -mt-[100svh] flex flex-col lg:-mt-[100dvh]">
         {/* Первый экран — заголовок виден чистым, карточки ждут за нижней кромкой */}
-        <div className="h-[85dvh]" aria-hidden="true" />
+        <div className="h-[85svh] lg:h-[85dvh]" aria-hidden="true" />
 
         {CASE_STUDIES.map((item, i) => (
-          <div key={item.slug} className={i === 0 ? 'flex flex-col' : 'mt-[30dvh] lg:mt-[45dvh] flex flex-col'}>
+          <div key={item.slug} className={i === 0 ? 'flex flex-col' : 'mt-[30svh] flex flex-col lg:mt-[45dvh]'}>
             <FloatingCaseCard item={item} align={ALIGN_CYCLE[i % 3]} />
           </div>
         ))}
 
         {/* Хвост — последняя карточка уезжает, заголовок снова остаётся один */}
-        <div className="h-[70dvh]" aria-hidden="true" />
+        <div className="h-[70svh] lg:h-[70dvh]" aria-hidden="true" />
       </div>
     </section>
   )

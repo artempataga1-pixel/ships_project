@@ -43,7 +43,7 @@ export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
       className={
         isStory
           ? 'relative flex h-full w-full items-center overflow-hidden'
-          : 'relative flex min-h-svh scroll-mt-16 items-start overflow-hidden bg-[var(--color-bg)] py-24 lg:min-h-dvh lg:items-center'
+          : 'relative flex min-h-svh scroll-mt-16 items-center overflow-hidden bg-[var(--color-bg)] py-24 lg:min-h-dvh'
       }
     >
       {/* Фон-декор. В потоке — светлый градиент секции + лайм-glow. В story
@@ -144,6 +144,7 @@ export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
         }`}
       >
         <div
+          id="about-card"
           className="w-full max-w-[720px] rounded-[var(--radius-xl)] border p-8 md:p-12 lg:p-16"
           style={{
             // В story панель чуть плотнее — над видео контент должен читаться

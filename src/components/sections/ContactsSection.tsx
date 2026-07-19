@@ -131,7 +131,10 @@ export function ContactsSection() {
   return (
     <section className="pb-contact" id="contacts" aria-labelledby="pb-contact-title">
       <div className="pb-contact__stage">
-        <header className="pb-contact__intro">
+        {/* Отдельный id для якорной посадки: у секции сверху фото-баннер
+            (мобильный pb-contact__stage padding-top), и переход по «/#contacts»
+            должен долистывать ДО заголовка, а не до фото. См. HomeAnchorScroll. */}
+        <header className="pb-contact__intro scroll-mt-16" id="contacts-anchor">
           <p className="pb-contact__eyebrow">{contactsContent.eyebrow}</p>
           <h2 className="pb-contact__title" id="pb-contact-title">
             {contactsContent.titleLine1}

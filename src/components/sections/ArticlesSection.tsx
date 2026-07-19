@@ -183,7 +183,7 @@ export function ArticlesSection() {
   )
 
   return (
-    <section id="articles" ref={sectionRef} className="relative bg-[var(--color-bg)]">
+    <section id="articles" ref={sectionRef} className="relative scroll-mt-16 bg-[var(--color-bg)]">
       <div
         ref={pinRef}
         className="relative mt-12 lg:mt-0 flex flex-col gap-6 lg:gap-0 lg:h-dvh lg:overflow-hidden"

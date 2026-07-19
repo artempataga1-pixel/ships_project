@@ -72,11 +72,16 @@ function PartnerCard({ member }: { member: TeamMember }) {
 
 // Мобильная карточка-визитка с переворотом по тапу: лицо — фото, обратная
 // сторона — графитовая панель с регалиями (имя/роль уже есть на фото, поэтому
-// не дублируем). Список может быть длинным (у Максима и Анны 7-8 пунктов) —
-// не влезает даже мелким шрифтом, поэтому обратная сторона скроллится сама.
+// не дублируем). Обратная сторона НЕ скроллится (см. ниже, топ-5 регалий) —
+// собственный скролл внутри карточки конфликтовал с обычным скроллом
+// страницы (палец «застревал» в карточке).
 function MobilePartnerCard({ member }: { member: TeamMember }) {
   const [flipped, setFlipped] = useState(false)
-  const achievements = member.achievements ?? []
+  // На мобильной обратной стороне регалии не скроллятся (карточка занимает
+  // весь экран — скролл по ней конфликтовал с обычным скроллом страницы),
+  // поэтому берём не более 5 самых весомых пунктов, а не весь список
+  // (полный — только в десктопной выезжающей панели, там своя авто-подгонка).
+  const achievements = (member.achievements ?? []).slice(0, 5)
 
   const toggle = () => setFlipped((v) => !v)
   const onKeyDown = (e: KeyboardEvent) => {
@@ -129,13 +134,14 @@ function MobilePartnerCard({ member }: { member: TeamMember }) {
           </span>
         </div>
 
-        {/* Обратная сторона — графитовая панель с регалиями. pointer-events:none, пока
-            не перевёрнута: на iOS Safari backface-visibility:hidden не всегда
-            вырезает элемент из хит-тестинга — с overflow-y-auto здесь браузер иногда
-            перехватывает вертикальный тач-скролл страницы даже на невидимой стороне
-            (overscroll-contain «глотает» скролл), и палец «упирается» в карточку. */}
+        {/* Обратная сторона — графитовая панель с регалиями. overflow-hidden, не
+            overflow-y-auto: своя прокрутка внутри карточки перехватывала
+            вертикальный тач-скролл страницы (на iOS палец «упирался» в
+            карточку даже когда она не перевёрнута — известный баг WebKit с
+            backface-visibility:hidden). pointer-events:none, пока не
+            перевёрнута — дополнительная подстраховка от того же перехвата. */}
         <div
-          className="absolute inset-0 overflow-y-auto overscroll-contain rounded-2xl bg-[#25292c] p-4 ring-1 ring-white/10 shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)]"
+          className="absolute inset-0 overflow-hidden rounded-2xl bg-[#25292c] p-4 ring-1 ring-white/10 shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)]"
           style={{
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
@@ -147,9 +153,9 @@ function MobilePartnerCard({ member }: { member: TeamMember }) {
             style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
           />
           {achievements.length > 0 ? (
-            <ul className="space-y-2 pl-2.5">
+            <ul className="flex h-full flex-col justify-center gap-1.5 pl-2.5">
               {achievements.map((item) => (
-                <li key={item} className="flex gap-2 text-[11px] leading-snug text-white/85">
+                <li key={item} className="flex gap-2 text-[10.5px] leading-[1.3] text-white/85">
                   <span className="mt-[0.45em] h-[0.4em] w-[0.4em] shrink-0 rounded-full bg-[var(--color-lime)]" />
                   {item}
                 </li>
