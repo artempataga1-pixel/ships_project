@@ -39,15 +39,17 @@ export function LogoLink() {
       aria-label="На главную — Шумская и Партнёры"
       data-header-logo=""
     >
-      {/* Мобилка: логотип мельче + invert (SVG залит #111 — на чёрной плашке
-          header иначе не виден). На lg+ — исходный размер и цвет, без изменений. */}
+      {/* Мобилка/планшет: логотип мельче + invert (SVG залит #111 — на чёрной
+          плашке header иначе не виден). Чёрная плашка держится до xl (1280px,
+          см. Header.tsx), поэтому invert снимаем на том же пороге — на lg
+          (1024px) плашка ещё чёрная, а лого уже тёмное было бы невидимым. */}
       <Image
         src="/images/logo.svg"
         alt="Шумская и Партнёры"
         width={199}
         height={28}
         priority
-        className="h-5 w-auto invert lg:h-7 lg:invert-0"
+        className="h-5 w-auto invert xl:h-7 xl:invert-0"
       />
     </Link>
   )
