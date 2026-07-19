@@ -227,7 +227,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
       className={
         isStory
           ? 'relative flex h-full w-full items-center overflow-hidden'
-          : 'relative min-h-svh scroll-mt-16 flex items-start overflow-hidden bg-[var(--color-bg)] lg:min-h-dvh lg:items-center'
+          : 'relative min-h-svh scroll-mt-16 flex items-start overflow-hidden bg-[var(--color-bg)] xl:min-h-dvh xl:items-center'
       }
     >
       {/* Мягкий лайм-glow за заголовком — по референсу 03_competencies_block.
@@ -246,11 +246,13 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
         }`}
       >
         {/* Сцена: заголовок неподвижен в центре (десктоп — внутри орбиты, мобильный — обычным блоком).
-            В story сцена ниже — вся орбита должна уместиться в 100dvh оверлея. */}
-        <div ref={stageRef} className={`relative ${isStory ? 'lg:h-[760px]' : 'lg:h-[920px]'}`}>
+            В story сцена ниже — вся орбита должна уместиться в 100dvh оверлея.
+            Порог xl (1280px), не lg — см. Header.tsx: до этой ширины орбита
+            скрыта и вместо неё показана планшетная сетка ниже. */}
+        <div ref={stageRef} className={`relative ${isStory ? 'xl:h-[760px]' : 'xl:h-[920px]'}`}>
           {/* pointer-events-none: контейнер растянут на всю сцену и иначе
               экранировал бы карточки орбиты от событий мыши (hover/tilt) */}
-          <div className="flex items-center justify-center lg:pointer-events-none lg:absolute lg:inset-0 lg:z-10">
+          <div className="flex items-center justify-center xl:pointer-events-none xl:absolute xl:inset-0 xl:z-10">
             <SectionHeading
               id="competencies-heading"
               title="Наши компетенции"
@@ -259,8 +261,8 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
             />
           </div>
 
-          {/* Орбита карточек — только десктоп, проявляется по ScrollTrigger */}
-          <div ref={orbitRef} className="absolute inset-0 hidden lg:block">
+          {/* Орбита карточек — только десктоп (xl+), проявляется по ScrollTrigger */}
+          <div ref={orbitRef} className="absolute inset-0 hidden xl:block">
             {/* Фоновые эллиптические орбиты + точки-искры */}
             <div
               className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
@@ -312,7 +314,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                     className="pointer-events-none absolute right-[-2px] top-[min(1.09375vw,1.75rem)] bottom-[min(1.09375vw,1.75rem)] w-1 rounded-full bg-[var(--color-lime)]"
                     style={{ boxShadow: '0 0 24px var(--color-lime)' }}
                   />
-                  <p className="px-4 text-center text-[clamp(11px,0.6641vw,17px)] font-semibold leading-tight text-[var(--color-text)]">
+                  <p className="px-3 text-center text-[clamp(12px,0.9375vw,19px)] font-semibold leading-[1.15] text-[var(--color-text)]">
                     {practice.title}
                   </p>
                 </div>
@@ -344,10 +346,10 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
           ))}
         </div>
 
-        {/* Планшет (640–1023px) — те же квадратные карточки, что и в десктопной
+        {/* Планшет (640–1279px) — те же квадратные карточки, что и в десктопной
             орбите (рамка-скобка по углам, лайм-полоса, текст по центру), но
             статичные, без анимации, в простой сетке на 2 колонки */}
-        <div className="mt-16 hidden sm:grid grid-cols-2 gap-6 lg:hidden">
+        <div className="mt-16 hidden sm:grid grid-cols-2 gap-6 xl:hidden">
           {PRACTICES.map((practice) => (
             <div key={practice.title} className="relative mx-auto aspect-square w-full max-w-[320px]">
               <div
