@@ -447,10 +447,14 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
           className="scroll-mt-16 text-center"
         />
 
-        {/* Плотная дуга-веер карточек — только десктоп */}
+        {/* Плотная дуга-веер карточек — только десктоп. Порог 1280px (xl), не
+            1024 (lg): дуге из 3 карточек по 460px с разлётом ±300px нужно
+            ~1060px чистой ширины — на 1024–1279 (iPad landscape и похожие)
+            карточки налезали друг на друга (см. Header.tsx/ScrollStory.tsx —
+            тот же порог там уже синхронизирован). */}
         <div
           ref={arcRef}
-          className="relative mt-20 lg:mt-8 h-[460px] hidden lg:block"
+          className="relative mt-20 xl:mt-8 h-[460px] hidden xl:block"
           style={{ perspective: '1600px' }}
         >
           {TEAM.map((member, i) => (
@@ -472,7 +476,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
             её акцентирует центральное место, в плоской сетке та же роль работает
             только через порядок. Локальная сортировка не трогает TEAM/cardsRef
             десктопной дуги выше — там позиция в массиве держит fanPosition/panelSide. */}
-        <div className="mx-auto mt-16 grid max-w-[640px] grid-cols-1 gap-8 lg:hidden">
+        <div className="mx-auto mt-16 grid max-w-[640px] grid-cols-1 gap-8 xl:hidden">
           {MOBILE_TEAM_ORDER.map((member) => (
             <MobilePartnerCard key={member.name} member={member} />
           ))}
@@ -492,7 +496,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
           Арина слева. */}
       <div
         ref={panelSpaceRef}
-        className="pointer-events-none absolute inset-x-0 bottom-6 z-[6] mx-auto hidden w-full max-w-[1440px] px-8 lg:block md:px-16"
+        className="pointer-events-none absolute inset-x-0 bottom-6 z-[6] mx-auto hidden w-full max-w-[1440px] px-8 xl:block md:px-16"
         style={{ perspective: '1500px' }}
       >
         {TEAM.map((member, i) => {
