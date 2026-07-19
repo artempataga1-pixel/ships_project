@@ -74,7 +74,7 @@ function PracticeCard({ item, variant }: { item: PracticeArea; variant: CardVari
       id={`practice-${item.slug}`}
       href={`/practices/${item.slug}`}
       aria-label={`Практика «${item.title}» — узнать подробнее`}
-      className={`group block scroll-mt-[30dvh] shrink-0 lg:ml-[5vw] ${variant.align} ${variant.width}`}
+      className={`group block scroll-mt-[30dvh] shrink-0 sm:max-w-[340px] sm:mx-auto lg:mx-0 lg:max-w-none lg:ml-[5vw] ${variant.align} ${variant.width}`}
     >
       <figure>
         {/* Ярлык над фото — как «QATAR, 2024» в референсе */}
