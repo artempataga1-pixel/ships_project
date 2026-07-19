@@ -291,7 +291,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                 ref={(el) => {
                   cardsRef.current[i] = el
                 }}
-                className="absolute left-1/2 top-1/2 w-[min(9.7656vw,250px)]"
+                className="absolute left-1/2 top-1/2 w-[min(11vw,250px)]"
               >
                 <div
                   className="
@@ -314,7 +314,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                     className="pointer-events-none absolute right-[-2px] top-[min(1.09375vw,1.75rem)] bottom-[min(1.09375vw,1.75rem)] w-1 rounded-full bg-[var(--color-lime)]"
                     style={{ boxShadow: '0 0 24px var(--color-lime)' }}
                   />
-                  <p className="px-3 text-center text-[clamp(12px,0.9375vw,19px)] font-semibold leading-[1.15] text-[var(--color-text)]">
+                  <p className="px-3 text-center text-[clamp(13px,1.05vw,19px)] font-semibold leading-[1.15] text-[var(--color-text)]">
                     {practice.title}
                   </p>
                 </div>

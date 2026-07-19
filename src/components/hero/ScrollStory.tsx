@@ -83,11 +83,11 @@ function HeroLayer() {
           href="/#contacts"
           onClick={(e) => handleStoryAwareAnchorClick(e, 'contacts')}
           data-hero-fade
-          className="group mt-[clamp(4.5rem,13vh,6rem)] inline-flex flex-col items-center gap-4 xl:mt-[min(2.8125vw,4.5rem)] xl:flex-row xl:gap-[min(1.25vw,2rem)]"
+          className="group mt-[clamp(4.5rem,13vh,6rem)] inline-flex flex-col items-center gap-4 xl:mt-[min(3.75vw,6rem)] xl:flex-row xl:gap-[min(1.25vw,2rem)]"
         >
           <span
             aria-hidden="true"
-            className="grid h-24 w-24 place-items-center rounded-full border border-[var(--color-black)] bg-[var(--color-lime)] text-3xl text-[var(--color-black)] shadow-[0_0_42px_var(--color-lime-glow)] transition-transform duration-300 group-hover:scale-105 sm:h-28 sm:w-28 sm:text-4xl xl:h-[clamp(48px,4.0625vw,104px)] xl:w-[clamp(48px,4.0625vw,104px)] xl:text-[clamp(17px,1.40625vw,36px)]"
+            className="grid h-24 w-24 place-items-center rounded-full border border-[var(--color-black)] bg-[var(--color-lime)] text-3xl text-[var(--color-black)] shadow-[0_0_42px_var(--color-lime-glow)] transition-transform duration-300 group-hover:scale-105 sm:h-28 sm:w-28 sm:text-4xl xl:h-[clamp(80px,7vw,176px)] xl:w-[clamp(80px,7vw,176px)] xl:text-[clamp(29px,2.4vw,62px)]"
           >
             {/* SVG вместо текстового «→» — юникодный глиф смещён по метрикам
                 шрифта и не встаёт ровно в центр круга, SVG с viewBox центруется
@@ -105,7 +105,7 @@ function HeroLayer() {
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>
           </span>
-          <span className="text-[1.875rem] font-semibold text-[var(--color-text)] sm:text-[2.125rem] xl:text-[clamp(0.9375rem,0.9375vw,1.5rem)]">
+          <span className="text-[1.875rem] font-semibold text-[var(--color-text)] sm:text-[2.125rem] xl:text-[clamp(1.875rem,1.875vw,3rem)]">
             {HERO.ctaLabel}
           </span>
         </a>
