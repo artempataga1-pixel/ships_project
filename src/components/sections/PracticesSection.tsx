@@ -209,7 +209,7 @@ export function PracticesSection() {
   return (
     <section id="practices" ref={sectionRef} className="relative bg-[var(--color-bg)]">
       {/* Экран-заголовок: уезжает вверх обычным скроллом, как интро в референсе */}
-      <div className="relative flex min-h-svh flex-col items-center justify-start overflow-hidden px-6 pt-28 text-center lg:h-dvh lg:justify-center lg:pt-0">
+      <div className="relative flex flex-col items-center justify-start overflow-hidden px-6 pt-28 pb-16 text-center lg:h-dvh lg:justify-center lg:pt-0 lg:pb-0">
         {/* Светлый градиент секции + мягкий лайм-glow за заголовком */}
         <div
           aria-hidden

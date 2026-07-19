@@ -321,12 +321,35 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
           </div>
         </div>
 
-        {/* Мобильная и планшетная раскладка — те же квадратные карточки, что и в
-            десктопной орбите (рамка-скобка по углам, лайм-полоса, текст по центру),
-            но статичные, без анимации, в простой сетке на 2 колонки */}
-        <div className="mt-16 grid grid-cols-2 gap-4 sm:gap-6 lg:hidden">
+        {/* Телефон (<640px) — исходная раскладка: прямоугольные карточки,
+            текст слева, без изменений */}
+        <div className="mt-16 grid grid-cols-1 gap-4 sm:hidden">
           {PRACTICES.map((practice) => (
-            <div key={practice.title} className="relative mx-auto aspect-square w-full max-w-[280px]">
+            <div
+              key={practice.title}
+              className="
+                relative p-6 rounded-[18px] border border-[var(--color-line)]
+                bg-gradient-to-br from-white to-[var(--color-surface-soft)]
+                shadow-[var(--shadow-card)]
+              "
+            >
+              <span
+                className="pointer-events-none absolute right-[-2px] top-6 bottom-6 w-1 rounded-full bg-[var(--color-lime)]"
+                style={{ boxShadow: '0 0 24px var(--color-lime)' }}
+              />
+              <h3 className="font-heading text-lg font-semibold leading-snug text-[var(--color-text)]">
+                {practice.title}
+              </h3>
+            </div>
+          ))}
+        </div>
+
+        {/* Планшет (640–1023px) — те же квадратные карточки, что и в десктопной
+            орбите (рамка-скобка по углам, лайм-полоса, текст по центру), но
+            статичные, без анимации, в простой сетке на 2 колонки */}
+        <div className="mt-16 hidden sm:grid grid-cols-2 gap-6 lg:hidden">
+          {PRACTICES.map((practice) => (
+            <div key={practice.title} className="relative mx-auto aspect-square w-full max-w-[320px]">
               <div
                 className="
                   relative flex h-full w-full flex-col items-center justify-center
@@ -348,7 +371,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                   className="pointer-events-none absolute right-[-2px] top-6 bottom-6 w-1 rounded-full bg-[var(--color-lime)]"
                   style={{ boxShadow: '0 0 24px var(--color-lime)' }}
                 />
-                <p className="px-4 text-center text-[clamp(26px,6.8vw,34px)] font-semibold leading-tight text-[var(--color-text)]">
+                <p className="px-5 text-center text-[clamp(20px,5vw,26px)] font-semibold leading-tight text-[var(--color-text)]">
                   {practice.title}
                 </p>
               </div>
