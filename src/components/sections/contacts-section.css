@@ -506,12 +506,10 @@
     width: 100%;
     min-height: 0;
     aspect-ratio: auto;
-    padding: calc(66.56vw + 20px) clamp(16px, 5vw, 32px) 32px;
+    padding: clamp(24px, 6vw, 40px) clamp(16px, 5vw, 32px) 32px;
     overflow: visible;
     flex-direction: column;
-    background-image: url("/contact-assets/contact-background.png");
-    background-position: 50% 0;
-    background-size: 100% auto;
+    background-image: none;
   }
 
   .pb-contact__intro,

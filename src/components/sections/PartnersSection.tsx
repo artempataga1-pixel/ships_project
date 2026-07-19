@@ -141,7 +141,7 @@ function MobilePartnerCard({ member }: { member: TeamMember }) {
             backface-visibility:hidden). pointer-events:none, пока не
             перевёрнута — дополнительная подстраховка от того же перехвата. */}
         <div
-          className="absolute inset-0 overflow-hidden rounded-2xl bg-[#25292c] p-4 ring-1 ring-white/10 shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)]"
+          className="absolute inset-0 overflow-hidden rounded-2xl bg-[#25292c] p-[clamp(16px,4vw,32px)] ring-1 ring-white/10 shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)]"
           style={{
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
@@ -153,16 +153,19 @@ function MobilePartnerCard({ member }: { member: TeamMember }) {
             style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
           />
           {achievements.length > 0 ? (
-            <ul className="flex h-full flex-col justify-center gap-1.5 pl-2.5">
+            <ul className="flex h-full flex-col justify-center gap-[clamp(6px,1.6vw,14px)] pl-[clamp(10px,2.4vw,20px)]">
               {achievements.map((item) => (
-                <li key={item} className="flex gap-2 text-[10.5px] leading-[1.3] text-white/85">
+                <li
+                  key={item}
+                  className="flex gap-[0.6em] text-[clamp(10.5px,2.6vw,19px)] leading-[1.3] text-white/85"
+                >
                   <span className="mt-[0.45em] h-[0.4em] w-[0.4em] shrink-0 rounded-full bg-[var(--color-lime)]" />
                   {item}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="pl-2.5 text-[13px] leading-snug text-white/70">
+            <p className="pl-[clamp(10px,2.4vw,20px)] text-[clamp(14px,3vw,22px)] leading-snug text-white/70">
               Информация о регалиях уточняется.
             </p>
           )}
@@ -469,7 +472,7 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
             её акцентирует центральное место, в плоской сетке та же роль работает
             только через порядок. Локальная сортировка не трогает TEAM/cardsRef
             десктопной дуги выше — там позиция в массиве держит fanPosition/panelSide. */}
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-6 lg:hidden">
+        <div className="mx-auto mt-16 grid max-w-[640px] grid-cols-1 gap-8 lg:hidden">
           {MOBILE_TEAM_ORDER.map((member) => (
             <MobilePartnerCard key={member.name} member={member} />
           ))}
