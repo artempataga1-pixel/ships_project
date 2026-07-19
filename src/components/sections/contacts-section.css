@@ -735,11 +735,6 @@
   .pb-contact__details {
     grid-template-columns: 1fr;
   }
-
-  .pb-contact__title br,
-  .pb-contact__lead br {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
