@@ -8,17 +8,22 @@ import { HERO } from '@/constants/content/home'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { CompetenciesSection } from '@/components/sections/CompetenciesSection'
 import { PartnersSection } from '@/components/sections/PartnersSection'
+import { MobileScrubScene } from './MobileScrubScene'
 import { handleStoryAwareAnchorClick, useStoryController } from './useStoryController'
 
 // Story-режим только на десктопе без reduced-motion — scroll-jacking с
-// перехватом ввода на телефоне капризен, там секции идут обычным потоком
-// (см. flow-ветку). Порог 1280px (xl), не 1024 (lg) — синхронизирован с
-// Header.tsx/CompetenciesSection.tsx: на 1024–1279px (iPad landscape и
-// похожие ширины) нет места под полноценную десктопную навигацию, поэтому
-// весь «десктопный» набор (шапка, scroll-jacking, орбита карточек)
-// включается только с 1280px, а до этого — единый согласованный
-// планшетный/мобильный вид.
+// перехватом ввода на телефоне капризен, там вместо него continuous
+// scroll-scrub (см. MOBILE_SCRUB_MEDIA/scrub-ветку ниже). Порог 1280px (xl),
+// не 1024 (lg) — синхронизирован с Header.tsx/CompetenciesSection.tsx: на
+// 1024–1279px (iPad landscape и похожие ширины) нет места под полноценную
+// десктопную навигацию, поэтому весь «десктопный» набор (шапка,
+// scroll-jacking, орбита карточек) включается только с 1280px.
 const STORY_MEDIA = '(min-width: 1280px) and (prefers-reduced-motion: no-preference)'
+
+// Continuous scroll-scrub — зеркально нижней границе STORY_MEDIA (весь
+// путь <1280px, кроме reduced-motion — там ни один из двух медиа-запросов
+// не матчится, автоматический fallback в FlowFallback без единого байта видео).
+const MOBILE_SCRUB_MEDIA = '(max-width: 1279.98px) and (prefers-reduced-motion: no-preference)'
 
 // Источники видео-сегментов. Индекс = сегмент между шагами N и N+1.
 const VIDEO_SRC = ['/video/story1.mp4', '/video/story2.mp4', '/video/story3.mp4']
@@ -31,7 +36,7 @@ const VIDEO_SRC = ['/video/story1.mp4', '/video/story2.mp4', '/video/story3.mp4'
 // На 2560px значения совпадают с эталоном пиксель-в-пиксель, ниже — масштабируются,
 // выше — упираются в потолок. Порог был lg (1024px) — на 1024–1279 vw-формулы
 // давали текст МЕЛЬЧЕ мобильного clamp() (пустое место в hero на iPad landscape).
-function HeroLayer() {
+export function HeroLayer() {
   // Второе слово заголовка и разбивка подзаголовка выносятся на отдельные
   // строки только на мобилке/планшете (xl:hidden <br/>) — на десктопе тот же текст
   // остаётся в исходных строках. Точки разбивки подзаголовка подобраны так,
@@ -122,33 +127,49 @@ function HeroLayer() {
   )
 }
 
+type Mode = 'story' | 'scrub' | 'flow'
+
+function computeMode(): Mode {
+  if (window.matchMedia(STORY_MEDIA).matches) return 'story'
+  if (window.matchMedia(MOBILE_SCRUB_MEDIA).matches) return 'scrub'
+  return 'flow'
+}
+
 export function ScrollStory() {
-  // SSR-safe: по умолчанию flow (работает без JS). На маунте апгрейдим до story,
-  // если десктоп без reduced-motion. Следим за сменой медиа (ресайз/системная).
-  const [isStory, setIsStory] = useState(false)
+  // SSR-safe: по умолчанию flow (работает без JS). На маунте апгрейдим до
+  // story (десктоп ≥1280px) или scrub (<1280px), если reduced-motion не
+  // включён. Следим за сменой медиа (ресайз/системная настройка).
+  const [mode, setMode] = useState<Mode>('flow')
 
   useEffect(() => {
-    const mq = window.matchMedia(STORY_MEDIA)
-    const apply = () => setIsStory(mq.matches)
+    const storyMq = window.matchMedia(STORY_MEDIA)
+    const scrubMq = window.matchMedia(MOBILE_SCRUB_MEDIA)
+    const apply = () => setMode(computeMode())
     apply()
-    mq.addEventListener('change', apply)
-    return () => mq.removeEventListener('change', apply)
+    storyMq.addEventListener('change', apply)
+    scrubMq.addEventListener('change', apply)
+    return () => {
+      storyMq.removeEventListener('change', apply)
+      scrubMq.removeEventListener('change', apply)
+    }
   }, [])
 
-  // Переключение flow↔story меняет высоту документа на ~3 экрана. Триггеры
-  // нижних секций (пины Практик/Статей, reveal Кейсов/Контактов) создаются в
-  // ту же коммит-фазу, что и этот апгрейд, т.е. ещё при flow-разметке — их
-  // start'ы кешируются со сдвигом на высоту flow-секций (reveal Контактов
-  // улетает за пределы документа и не срабатывает никогда). На первичной
-  // загрузке позиции чинят refresh'ы SmoothScrollProvider (fonts/load/600мс),
-  // но при client-side возврате на главную (например «Все кейсы» со страницы
-  // кейса) тот эффект не перезапускается — пересчитываем сами, когда новая
+  // Переключение flow↔story/scrub меняет высоту документа. Триггеры нижних
+  // секций (пины Практик/Статей, reveal Кейсов/Контактов) создаются в ту же
+  // коммит-фазу, что и этот апгрейд, т.е. ещё при flow-разметке — их start'ы
+  // кешируются со сдвигом на высоту flow-секций (reveal Контактов улетает за
+  // пределы документа и не срабатывает никогда). На первичной загрузке
+  // позиции чинят refresh'ы SmoothScrollProvider (fonts/load/600мс), но при
+  // client-side возврате на главную (например «Все кейсы» со страницы кейса)
+  // тот эффект не перезапускается — пересчитываем сами, когда новая
   // разметка уже в DOM.
   useEffect(() => {
     ScrollTrigger.refresh()
-  }, [isStory])
+  }, [mode])
 
-  return isStory ? <StoryScene /> : <FlowFallback />
+  if (mode === 'story') return <StoryScene />
+  if (mode === 'scrub') return <MobileScrubScene />
+  return <FlowFallback />
 }
 
 // ══════════════════════════════════════════════════════════════════════════
