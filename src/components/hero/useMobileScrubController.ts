@@ -126,18 +126,26 @@ export function useMobileScrubController({ wrapperRef, videoRefs, overlayRefs, a
       })
     }
 
+    // Присвоение src сегменту 1/2. preload="none" в разметке (см. план, этап 4) —
+    // Chrome при нём НЕ начинает буферизацию только от установки src/currentTime,
+    // сеть трогается лишь по play()/load(). Мы никогда не зовём play() (currentTime
+    // рулит скролл), поэтому явно поднимаем preload и дёргаем load() сами —
+    // без этого видео виснет на readyState=HAVE_NOTHING (белый кадр) навсегда.
+    const assignSrc = (i: number) => {
+      if (srcAssigned[i]) return
+      const v = videos[i]
+      if (!v) return
+      v.src = VIDEO_SRC_MOBILE[i]
+      v.preload = 'auto'
+      v.load()
+      srcAssigned[i] = true
+    }
+
     // Домотка src сегментов 0..seg на случай прыжка навигацией (клик по
     // MobileBottomNav) мимо естественного скролла, где «подгрузка на подходе»
     // ниже ещё не успела сработать.
     const ensureSrcUpTo = (seg: number) => {
-      for (let i = 1; i <= seg; i++) {
-        if (srcAssigned[i]) continue
-        const v = videos[i]
-        if (v) {
-          v.src = VIDEO_SRC_MOBILE[i]
-          srcAssigned[i] = true
-        }
-      }
+      for (let i = 1; i <= seg; i++) assignSrc(i)
     }
 
     const trigger = ScrollTrigger.create({
@@ -174,12 +182,8 @@ export function useMobileScrubController({ wrapperRef, videoRefs, overlayRefs, a
         }
 
         // Подгрузка src следующего сегмента на подходе к концу текущего
-        if (seg < LAST_STEP - 1 && !srcAssigned[seg + 1] && localT / segWeight >= PRELOAD_NEXT_THRESHOLD) {
-          const nextV = videos[seg + 1]
-          if (nextV) {
-            nextV.src = VIDEO_SRC_MOBILE[seg + 1]
-            srcAssigned[seg + 1] = true
-          }
+        if (seg < LAST_STEP - 1 && localT / segWeight >= PRELOAD_NEXT_THRESHOLD) {
+          assignSrc(seg + 1)
         }
 
         overlays.forEach((el, i) => {
