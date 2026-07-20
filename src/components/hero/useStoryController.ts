@@ -13,8 +13,9 @@ export const STEP_COUNT = 4
 export const LAST_STEP = 3
 // id для подсветки навбара (Hero без пункта меню → null)
 export const STEP_NAV_ID = [null, 'about', 'competencies', 'partners'] as const
-// Длительности сегментов (fallback, если video.duration ещё не готов)
-const SEG_DURATION = [8, 8, 10]
+// Длительности сегментов (fallback, если video.duration ещё не готов).
+// Экспортирована для useMobileScrubController — те же 3 сегмента, тот же fallback.
+export const SEG_DURATION = [8, 8, 10]
 
 // Настройки перехвата ввода
 const WHEEL_THRESHOLD = 8 // мин. |deltaY| чтобы счесть за «тик»

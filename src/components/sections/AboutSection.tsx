@@ -18,9 +18,13 @@ function Passthrough({
 interface AboutSectionProps {
   /** 'flow' — обычная секция потока; 'story' — оверлей внутри ScrollStory. */
   variant?: 'flow' | 'story'
+  /** Мобильный скраб (<1280px, MobileScrubScene) — узкий 100dvh экран без
+   *  собственной прокрутки, десктопные clamp() из story-варианта туда не
+   *  влезают. Урезает паддинги/кегль, только вместе с variant='story'. */
+  compact?: boolean
 }
 
-export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
+export function AboutSection({ variant = 'flow', compact = false }: AboutSectionProps) {
   const isStory = variant === 'story'
   const Reveal = isStory ? Passthrough : RevealOnScroll
 
@@ -62,7 +66,11 @@ export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
       <div className="relative mx-auto flex w-full max-w-[1440px] justify-center px-6 md:px-12 lg:px-16">
         <div
           id="about-card"
-          className="w-full max-w-[720px] rounded-[var(--radius-xl)] border p-8 md:p-12 lg:p-16"
+          className={
+            compact
+              ? 'w-full max-w-[560px] rounded-[var(--radius-xl)] border p-6'
+              : 'w-full max-w-[720px] rounded-[var(--radius-xl)] border p-8 md:p-12 lg:p-16'
+          }
           style={{
             // В story панель чуть плотнее — над видео контент должен читаться
             background: isStory ? 'rgba(255,255,255,.78)' : 'rgba(255,255,255,.64)',
@@ -74,13 +82,25 @@ export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
           }}
         >
           <Reveal>
-            <h2 className="font-heading text-[clamp(2.5rem,5vw,5.375rem)] font-medium uppercase leading-[0.92] tracking-[-0.045em] [word-spacing:0.4em] text-[var(--color-text)]">
+            <h2
+              className={
+                compact
+                  ? 'font-heading text-[clamp(1.75rem,7vw,2.5rem)] font-medium uppercase leading-[0.96] tracking-[-0.04em] [word-spacing:0.3em] text-[var(--color-text)]'
+                  : 'font-heading text-[clamp(2.5rem,5vw,5.375rem)] font-medium uppercase leading-[0.92] tracking-[-0.045em] [word-spacing:0.4em] text-[var(--color-text)]'
+              }
+            >
               {ABOUT.heading}
             </h2>
           </Reveal>
 
-          <Reveal delay={0.1} className="mt-10 md:mt-14">
-            <p className="font-heading text-[clamp(1.6rem,2.6vw,2.375rem)] leading-[1.18] tracking-[-0.03em]">
+          <Reveal delay={0.1} className={compact ? 'mt-5' : 'mt-10 md:mt-14'}>
+            <p
+              className={
+                compact
+                  ? 'font-heading text-[clamp(1.15rem,4.6vw,1.5rem)] leading-[1.2] tracking-[-0.02em]'
+                  : 'font-heading text-[clamp(1.6rem,2.6vw,2.375rem)] leading-[1.18] tracking-[-0.03em]'
+              }
+            >
               <strong className="font-extrabold text-[var(--color-text)]">
                 {ABOUT.quoteLead}
               </strong>
@@ -91,15 +111,25 @@ export function AboutSection({ variant = 'flow' }: AboutSectionProps) {
             </p>
           </Reveal>
 
-          <Reveal delay={0.2} className="mt-10 md:mt-14">
-            <p className="text-lg font-semibold leading-[1.62] text-[var(--color-text)] md:text-xl">
+          <Reveal delay={0.2} className={compact ? 'mt-5' : 'mt-10 md:mt-14'}>
+            <p
+              className={
+                compact
+                  ? 'text-sm font-semibold leading-[1.5] text-[var(--color-text)]'
+                  : 'text-lg font-semibold leading-[1.62] text-[var(--color-text)] md:text-xl'
+              }
+            >
               {ABOUT.quoteRest}
             </p>
           </Reveal>
 
-          <Reveal delay={0.3} className="mt-8">
+          <Reveal delay={0.3} className={compact ? 'mt-4' : 'mt-8'}>
             <p
-              className="relative pl-6 text-base font-medium leading-[1.6] text-[var(--color-muted)] md:text-lg"
+              className={
+                compact
+                  ? 'relative pl-4 text-xs font-medium leading-[1.5] text-[var(--color-muted)]'
+                  : 'relative pl-6 text-base font-medium leading-[1.6] text-[var(--color-muted)] md:text-lg'
+              }
               style={{
                 borderLeft: '3px solid var(--color-lime)',
                 boxShadow: '-10px 0 24px -10px var(--color-lime-glow)',
