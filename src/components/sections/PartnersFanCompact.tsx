@@ -76,7 +76,7 @@ export function PartnersFanCompact() {
             className="absolute left-1/2 top-0 h-[150px] w-[150px] -ml-[75px]"
             style={{ transformOrigin: 'bottom center' }}
           >
-            <div className="pointer-events-none absolute inset-0 select-none overflow-hidden rounded-xl bg-white shadow-[0_20px_40px_-14px_rgba(25,35,10,0.35)] ring-1 ring-black/[0.06]">
+            <div className="pointer-events-none absolute inset-0 select-none overflow-hidden bg-white shadow-[0_20px_40px_-14px_rgba(25,35,10,0.35)] ring-1 ring-black/[0.06]">
               <Image
                 src={member.photo!}
                 alt={`${member.name} — ${member.role}`}
