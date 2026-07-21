@@ -92,7 +92,7 @@ export function HeroLayer() {
         >
           <span
             aria-hidden="true"
-            className="grid h-[50px] w-[50px] place-items-center rounded-full border border-[var(--color-black)] bg-[var(--color-lime)] text-[15px] text-[var(--color-black)] shadow-[0_0_42px_var(--color-lime-glow)] transition-transform duration-300 group-hover:scale-105 max-[380px]:h-[42px] max-[380px]:w-[42px] max-[380px]:text-[15px] sm:h-28 sm:w-28 sm:text-4xl xl:h-[clamp(80px,7vw,176px)] xl:w-[clamp(80px,7vw,176px)] xl:text-[clamp(29px,2.4vw,62px)]"
+            className="btn-lime-fill btn-outline-thin grid h-[50px] w-[50px] place-items-center rounded-full text-[15px] text-[var(--color-black)] max-[380px]:h-[42px] max-[380px]:w-[42px] max-[380px]:text-[15px] sm:h-28 sm:w-28 sm:text-4xl xl:h-[clamp(80px,7vw,176px)] xl:w-[clamp(80px,7vw,176px)] xl:text-[clamp(29px,2.4vw,62px)]"
           >
             {/* SVG вместо текстового «→» — юникодный глиф смещён по метрикам
                 шрифта и не встаёт ровно в центр круга, SVG с viewBox центруется

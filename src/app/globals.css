@@ -12,13 +12,15 @@
   --color-muted: #777a7d;
   --color-line: #dfe2df;
 
-  --color-lime: #c9ff1f;
-  --color-lime-soft: rgba(201, 255, 31, 0.28);
-  --color-lime-glow: rgba(201, 255, 31, 0.55);
+  /* Приглушённый лайм (было #c9ff1f — резало глаз неоновой яркостью):
+     та же тональность, но с меньшей насыщенностью и светлотой. */
+  --color-lime: #a8cc33;
+  --color-lime-soft: rgba(168, 204, 51, 0.28);
+  --color-lime-glow: rgba(168, 204, 51, 0.55);
   /* Тёмный «чернильный» лайм — для ТЕКСТА-акцента на белом (яркий лайм как
      текст нечитаем, контраст ~1.1:1). Декор/полосы/точки/glow — --color-lime,
      текстовые акценты (активные пункты, подписи-eyebrow) — --color-lime-ink. */
-  --color-lime-ink: #7da900;
+  --color-lime-ink: #657a1f;
 
   --radius-xl: 34px;
   --radius-lg: 26px;
@@ -30,10 +32,12 @@
   --font-body: var(--font-manrope-var), sans-serif;
 }
 
-/* Блик, бегущий по контуру star-button + бегущая строка Marquee */
+/* Блик, бегущий по контуру star-button + бегущая строка Marquee + медленное
+   вращение логотипа в шапке (LogoLink) — крутится всё время, как на подставке. */
 @theme inline {
   --animate-star-btn: star-btn calc(var(--duration) * 1s) linear infinite;
   --animate-marquee: marquee calc(var(--duration) * 1s) linear infinite;
+  --animate-logo-spin: logo-spin 10s linear infinite;
 }
 
 @keyframes star-btn {
@@ -57,9 +61,24 @@
   }
 }
 
+@keyframes logo-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-logo-spin {
+    animation: none;
+  }
+}
+
 :root {
   /* Мягкая тень белой карточки с лёгким лайм-glow (см. Card.tsx / .case-card) */
-  --shadow-card: 0 24px 70px rgba(0, 0, 0, 0.05), 0 0 34px rgba(201, 255, 31, 0.1);
+  --shadow-card: 0 24px 70px rgba(0, 0, 0, 0.05), 0 0 34px rgba(168, 204, 51, 0.1);
 }
 
 /* Тач-устройства: Lenis не монтируется (SmoothScrollProvider), якоря
@@ -92,18 +111,19 @@ body {
    заполняет и узкие, и широкие кнопки целиком). При наведении заливка
    схлопывается к кромке — сквозь неё «проступает» белый фон, кнопка белеет —
    и по контуру наружу разрастается лаймовое свечение. Текст всегда тёмный:
-   яркий лайм (#c9ff1f) как фон требует тёмного текста (белый на нём нечитаем),
+   яркий лайм (#a8cc33) как фон требует тёмного текста (белый на нём нечитаем),
    на белом фоне тёмный текст тоже контрастен. */
 .btn-lime-fill {
-  background-color: var(--color-surface);
+  background-color: var(--color-lime);
   color: var(--color-text);
   border: 2px solid var(--color-lime);
-  box-shadow: 0 0 40px 200px var(--color-lime) inset, 0 0 0 0 var(--color-lime-glow);
-  transition: box-shadow 200ms ease-in-out;
+  box-shadow: 0 0 0 0 var(--color-lime-glow);
+  transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
 }
 .btn-lime-fill:hover,
 .btn-lime-fill:focus-visible {
-  box-shadow: 0 0 12px 0 var(--color-lime) inset, 0 0 22px 6px var(--color-lime-glow);
+  background-color: var(--color-surface);
+  box-shadow: 0 0 22px 6px var(--color-lime-glow);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -119,10 +139,10 @@ body {
 @keyframes btn-breathe {
   0%,
   100% {
-    box-shadow: 0 0 40px 200px var(--color-lime) inset, 0 0 0 0 var(--color-lime-glow);
+    box-shadow: 0 0 0 0 var(--color-lime-glow);
   }
   50% {
-    box-shadow: 0 0 40px 200px var(--color-lime) inset, 0 0 20px 6px var(--color-lime-glow);
+    box-shadow: 0 0 20px 6px var(--color-lime-glow);
   }
 }
 .btn-lime-breathe {

@@ -238,7 +238,7 @@ export function PracticesSection() {
         <div
           aria-hidden
           className="pointer-events-none absolute left-1/2 top-1/2 h-[560px] w-[96%] max-w-[1530px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[-15deg]"
-          style={{ borderColor: 'rgba(201,255,31,.42)' }}
+          style={{ borderColor: 'rgba(168,204,51,.42)' }}
         />
         <div
           aria-hidden

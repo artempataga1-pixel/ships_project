@@ -60,7 +60,7 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
       className="relative min-h-svh lg:min-h-dvh overflow-hidden bg-[var(--color-bg)]"
       style={{
         background:
-          'radial-gradient(circle at 74% 30%, rgba(201,255,31,.09), transparent 26%), linear-gradient(180deg,#ffffff 0%,#fafafa 58%,#f7f7f5 100%)',
+          'radial-gradient(circle at 74% 30%, rgba(168,204,51,.09), transparent 26%), linear-gradient(180deg,#ffffff 0%,#fafafa 58%,#f7f7f5 100%)',
       }}
     >
       <ScrollTopOnLoad />
@@ -69,7 +69,7 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-[38%] h-[560px] w-[92%] max-w-[1400px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[4deg]"
-        style={{ borderColor: 'rgba(201,255,31,.34)' }}
+        style={{ borderColor: 'rgba(168,204,51,.34)' }}
       />
       <div
         aria-hidden
@@ -144,7 +144,7 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
               className="pointer-events-none absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2"
               style={{
                 background:
-                  'radial-gradient(circle, rgba(201,255,31,.28), transparent 62%)',
+                  'radial-gradient(circle, rgba(168,204,51,.28), transparent 62%)',
               }}
             />
             {/* Лайм-полоса у правого края + glow */}
