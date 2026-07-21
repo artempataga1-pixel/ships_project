@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { FloatingContactFab } from "@/components/layout/FloatingContactFab";
 import { LogoIntro } from "@/components/ui/LogoIntro";
+import { CursorFollower } from "@/components/ui/CursorFollower";
 import "./globals.css";
 
 // Единый шрифт сайта — Manrope. Google Fonts отдаёт диапазон 200–800,
@@ -52,6 +53,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col antialiased">
         <LogoIntro />
+        <CursorFollower />
         <SmoothScrollProvider>
           <Header />
           <main className="flex-1">{children}</main>

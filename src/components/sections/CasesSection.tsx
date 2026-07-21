@@ -70,7 +70,7 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
           className="pointer-events-none absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2"
           style={{
             background:
-              'radial-gradient(circle, rgba(201,255,31,.28), transparent 62%)',
+              'radial-gradient(circle, rgba(168,204,51,.28), transparent 62%)',
           }}
         />
 
@@ -137,7 +137,7 @@ export function CasesSection() {
       className="relative scroll-mt-16 bg-[var(--color-bg)]"
       style={{
         background:
-          'radial-gradient(circle at 72% 42%, rgba(201,255,31,.08), transparent 24%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
+          'radial-gradient(circle at 72% 42%, rgba(168,204,51,.08), transparent 24%), linear-gradient(180deg,#ffffff 0%,#fafafa 60%,#f7f7f5 100%)',
       }}
     >
       {/* Прилипающий заголовок: стоит по центру экрана, пока мимо едут карточки */}
@@ -153,7 +153,7 @@ export function CasesSection() {
         <div
           aria-hidden
           className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[96%] max-w-[1530px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[4deg]"
-          style={{ borderColor: 'rgba(201,255,31,.42)' }}
+          style={{ borderColor: 'rgba(168,204,51,.42)' }}
         />
         <div
           aria-hidden

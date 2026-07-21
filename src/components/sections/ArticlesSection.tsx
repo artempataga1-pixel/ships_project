@@ -200,7 +200,7 @@ export function ArticlesSection() {
         >
           <span
             className="absolute left-[-6%] top-[34%] h-[62%] w-[112%] rounded-[50%] border rotate-[-8deg]"
-            style={{ borderColor: 'rgba(201,255,31,.42)' }}
+            style={{ borderColor: 'rgba(168,204,51,.42)' }}
           />
           <span
             className="absolute left-[2%] top-[52%] h-[52%] w-[104%] rounded-[50%] border rotate-[-6deg]"

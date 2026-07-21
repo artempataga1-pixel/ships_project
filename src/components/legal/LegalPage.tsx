@@ -69,7 +69,7 @@ export function LegalPage({ doc }: { doc: LegalDocument }) {
       className="relative min-h-svh lg:min-h-dvh overflow-hidden bg-[var(--color-bg)]"
       style={{
         background:
-          'radial-gradient(circle at 74% 30%, rgba(201,255,31,.09), transparent 26%), linear-gradient(180deg,#ffffff 0%,#fafafa 58%,#f7f7f5 100%)',
+          'radial-gradient(circle at 74% 30%, rgba(168,204,51,.09), transparent 26%), linear-gradient(180deg,#ffffff 0%,#fafafa 58%,#f7f7f5 100%)',
       }}
     >
       <ScrollTopOnLoad />

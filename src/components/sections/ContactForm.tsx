@@ -176,7 +176,7 @@ export function ContactForm() {
       <div ref={thankRef} className="flex flex-col items-center justify-center gap-6 py-16 text-center">
         <div
           className="flex h-16 w-16 items-center justify-center rounded-full text-[var(--color-lime-ink)]"
-          style={{ background: 'rgba(201,255,31,.18)' }}
+          style={{ background: 'rgba(168,204,51,.18)' }}
         >
           <svg
             width="28"
