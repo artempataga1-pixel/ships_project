@@ -31,7 +31,16 @@ const FAN: FanPos[] = [
   { x: 300, y: 48, rotate: 9, z: 4, opacity: 0.94 }, //   правая
 ]
 
-// Fallback-геометрия на случай, если состав TEAM изменят (не 3 персоны).
+// Позиции веера для 2 карточек (после ухода из TEAM третьего партнёра):
+// шире, чем дал бы arcFallback (300 в offset) — при ширине карточки 460px
+// такой шаг накладывал бы карточки на ~160px, обрезая текст с именем.
+// ±260 даёт небольшой чистый зазор без наложения на текст.
+const FAN_TWO: FanPos[] = [
+  { x: -260, y: 20, rotate: -6, z: 2, opacity: 1 }, // левая
+  { x: 260, y: 20, rotate: 6, z: 2, opacity: 1 }, //  правая
+]
+
+// Fallback-геометрия на случай, если состав TEAM изменят (не 2 и не 3 персоны).
 function arcFallback(index: number, total: number): FanPos {
   const offset = index - (total - 1) / 2
   return {
@@ -44,12 +53,14 @@ function arcFallback(index: number, total: number): FanPos {
 }
 
 function fanPosition(index: number, total: number): FanPos {
-  return total === FAN.length ? FAN[index] : arcFallback(index, total)
+  if (total === FAN.length) return FAN[index]
+  if (total === FAN_TWO.length) return FAN_TWO[index]
+  return arcFallback(index, total)
 }
 
 // Только для мобильной сетки (см. ниже) — управляющий партнёр первой карточкой.
 // sort стабилен (ES2019+), остальные сохраняют исходный порядок TEAM.
-const MOBILE_TEAM_ORDER: TeamMember[] = [...TEAM].sort(
+export const MOBILE_TEAM_ORDER: TeamMember[] = [...TEAM].sort(
   (a, b) => Number(b.role === 'Управляющий партнёр') - Number(a.role === 'Управляющий партнёр'),
 )
 
@@ -75,7 +86,17 @@ function PartnerCard({ member }: { member: TeamMember }) {
 // не дублируем). Обратная сторона НЕ скроллится (см. ниже, топ-5 регалий) —
 // собственный скролл внутри карточки конфликтовал с обычным скроллом
 // страницы (палец «застревал» в карточке).
-function MobilePartnerCard({ member }: { member: TeamMember }) {
+interface MobilePartnerCardProps {
+  member: TeamMember
+  // compact — карточка внутри шага scroll-scrub (MobileScrubScene), в разы
+  // меньше, чем в обычном потоке (max-w-[280px] против max-w-[640px]) — те же
+  // clamp(...,vw,...) размеры текста/отступов, посчитанные под широкую
+  // карточку, здесь не помещаются (регалии вылезают за края панели). Компакт
+  // держит текст/зазоры фиксированно мельче вместо vw-привязки к вьюпорту.
+  compact?: boolean
+}
+
+export function MobilePartnerCard({ member, compact = false }: MobilePartnerCardProps) {
   const [flipped, setFlipped] = useState(false)
   // На мобильной обратной стороне регалии не скроллятся (карточка занимает
   // весь экран — скролл по ней конфликтовал с обычным скроллом страницы),
@@ -141,7 +162,9 @@ function MobilePartnerCard({ member }: { member: TeamMember }) {
             backface-visibility:hidden). pointer-events:none, пока не
             перевёрнута — дополнительная подстраховка от того же перехвата. */}
         <div
-          className="absolute inset-0 overflow-hidden rounded-2xl bg-[#25292c] p-[clamp(16px,4vw,32px)] ring-1 ring-white/10 shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)]"
+          className={`absolute inset-0 overflow-hidden rounded-2xl bg-[#25292c] ring-1 ring-white/10 shadow-[0_18px_44px_-14px_rgba(25,35,10,0.3)] ${
+            compact ? 'p-2' : 'p-[clamp(16px,4vw,32px)]'
+          }`}
           style={{
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
@@ -153,13 +176,29 @@ function MobilePartnerCard({ member }: { member: TeamMember }) {
             style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
           />
           {achievements.length > 0 ? (
-            <ul className="flex h-full flex-col justify-center gap-[clamp(6px,1.6vw,14px)] pl-[clamp(10px,2.4vw,20px)]">
+            <ul
+              className={
+                compact
+                  ? 'flex h-full flex-col justify-center gap-1 pl-2'
+                  : 'flex h-full flex-col justify-center gap-[clamp(6px,1.6vw,14px)] pl-[clamp(10px,2.4vw,20px)]'
+              }
+            >
               {achievements.map((item) => (
                 <li
                   key={item}
-                  className="flex gap-[0.6em] text-[clamp(10.5px,2.6vw,19px)] leading-[1.3] text-white/85"
+                  className={
+                    compact
+                      ? 'flex gap-1 text-[8.5px] leading-[1.15] text-white/85'
+                      : 'flex gap-[0.6em] text-[clamp(10.5px,2.6vw,19px)] leading-[1.3] text-white/85'
+                  }
                 >
-                  <span className="mt-[0.45em] h-[0.4em] w-[0.4em] shrink-0 rounded-full bg-[var(--color-lime)]" />
+                  <span
+                    className={
+                      compact
+                        ? 'mt-[0.4em] h-[0.35em] w-[0.35em] shrink-0 rounded-full bg-[var(--color-lime)]'
+                        : 'mt-[0.45em] h-[0.4em] w-[0.4em] shrink-0 rounded-full bg-[var(--color-lime)]'
+                    }
+                  />
                   {item}
                 </li>
               ))}

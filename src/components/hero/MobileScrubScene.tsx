@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { CompetenciesOrbitCompact } from '@/components/sections/CompetenciesOrbitCompact'
-import { PartnersFanCompact } from '@/components/sections/PartnersFanCompact'
+import { PartnersFlipCompact } from '@/components/sections/PartnersFlipCompact'
 import { HeroLayer } from './ScrollStory'
 import { useMobileScrubController, VIDEO_SRC_MOBILE } from './useMobileScrubController'
 
@@ -116,7 +116,7 @@ export function MobileScrubScene() {
           className="absolute inset-0 z-20"
           style={{ visibility: 'hidden' }}
         >
-          <PartnersFanCompact />
+          <PartnersFlipCompact />
         </div>
 
         {/* Лоадер до готовности (canplaythrough/таймаут) — тот же паттерн, что у StoryScene */}
