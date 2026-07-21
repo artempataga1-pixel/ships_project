@@ -110,7 +110,7 @@ export function CompetenciesOrbitCompact() {
               }}
               className="absolute left-1/2 top-1/2 w-[84px]"
             >
-              <div className="relative flex aspect-square items-center justify-center rounded-xl border border-[var(--color-line)] bg-gradient-to-br from-white to-[var(--color-surface-soft)] shadow-[0_16px_34px_rgba(0,0,0,0.13)]">
+              <div className="relative flex aspect-square items-center justify-center rounded-[14px] border border-[var(--color-line)] bg-gradient-to-br from-white to-[var(--color-surface-soft)] shadow-[0_16px_34px_rgba(0,0,0,0.13)]">
                 <span
                   className="pointer-events-none absolute right-[-1px] top-2 bottom-2 w-[3px] rounded-full bg-[var(--color-lime)]"
                   style={{ boxShadow: '0 0 14px var(--color-lime)' }}
