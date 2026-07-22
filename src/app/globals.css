@@ -42,6 +42,8 @@
   --animate-star-btn: star-btn calc(var(--duration) * 1s) linear infinite;
   --animate-marquee: marquee calc(var(--duration) * 1s) linear infinite;
   --animate-logo-stripe: logo-stripe-pulse 4.8s cubic-bezier(0.45, 0, 0.15, 1) infinite;
+  --animate-logo-legbase-pulse: logo-legbase-pulse 4.8s cubic-bezier(0.45, 0, 0.15, 1) infinite;
+  --animate-logo-crown-pulse: logo-crown-pulse 4.8s cubic-bezier(0.45, 0, 0.15, 1) infinite;
 }
 
 @keyframes star-btn {
@@ -77,8 +79,70 @@
   }
 }
 
+/* Двухфазное сжатие Г-элемента «ножка A + низ Ш»: клип-прямоугольник (rest —
+   открыт целиком) сначала опускает верхнюю границу вниз до угла (ножка
+   схлопывается в свой закреплённый низ), затем, уже стоя на углу, продолжает
+   двигать левую границу вправо (низ схлопывается в свой закреплённый правый
+   край) — единый путь «сверху вниз, потом слева направо», как и сама ножка A
+   с низом читаются одним контуром. Симметрично разворачивается обратно. */
+@keyframes logo-legbase-pulse {
+  0%,
+  38%,
+  66%,
+  100% {
+    x: 0px;
+    y: 10.89px;
+    width: 32.63px;
+    height: 49.44px;
+  }
+  46%,
+  58% {
+    x: 0px;
+    y: 41.33px;
+    width: 32.63px;
+    height: 19px;
+  }
+  52% {
+    x: 22.84px;
+    y: 41.33px;
+    width: 9.79px;
+    height: 19px;
+  }
+}
+
+/* Зеркальное сжатие Г-элемента «крышка П + ножка E»: низ ножки E (её
+   закреплённый верхний конец — сама крышка) поднимается вверх до угла,
+   затем правая граница крышки движется влево до её закреплённого левого
+   края — «снизу вверх, потом справа налево». */
+@keyframes logo-crown-pulse {
+  0%,
+  38%,
+  66%,
+  100% {
+    x: 38.57px;
+    y: 0px;
+    width: 19.43px;
+    height: 50.21px;
+  }
+  46%,
+  58% {
+    x: 38.57px;
+    y: 0px;
+    width: 19.43px;
+    height: 19.26px;
+  }
+  52% {
+    x: 38.57px;
+    y: 0px;
+    width: 5.83px;
+    height: 19.26px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-logo-stripe {
+  .animate-logo-stripe,
+  .animate-logo-legbase-pulse,
+  .animate-logo-crown-pulse {
     animation: none;
   }
 }
