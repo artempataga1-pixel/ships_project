@@ -68,17 +68,17 @@ export function LogoLink() {
           fill="#111"
           className="origin-bottom animate-logo-stripe [transform-box:fill-box]"
         />
-        {/* Центральная ножка «Ш»: оба края сжимаются к середине и обратно */}
+        {/* Центральная ножка «Ш»: оба края сжимаются к середине и обратно, с задержкой — волна идёт слева направо */}
         <path
           d="M13.18,50.32V10.89h6.64V50.32Z"
           fill="#111"
-          className="origin-center animate-logo-stripe [animation-delay:0.87s] [transform-box:fill-box]"
+          className="origin-center animate-logo-stripe [animation-delay:0.5s] [transform-box:fill-box]"
         />
         {/* Правая ножка «Ш»: нижний край сжимается к верхнему (закреплённому) и обратно */}
         <path
           d="M26.02,50.21V10.89h6.64V50.21Z"
           fill="#111"
-          className="origin-top animate-logo-stripe [animation-delay:1.73s] [transform-box:fill-box]"
+          className="origin-top animate-logo-stripe [animation-delay:1s] [transform-box:fill-box]"
         />
       </svg>
       <Image
