@@ -41,9 +41,9 @@
 @theme inline {
   --animate-star-btn: star-btn calc(var(--duration) * 1s) linear infinite;
   --animate-marquee: marquee calc(var(--duration) * 1s) linear infinite;
-  --animate-logo-stripe: logo-stripe-pulse 4.8s cubic-bezier(0.45, 0, 0.15, 1) infinite;
-  --animate-logo-legbase-pulse: logo-legbase-pulse 4.8s cubic-bezier(0.45, 0, 0.15, 1) infinite;
-  --animate-logo-crown-pulse: logo-crown-pulse 4.8s cubic-bezier(0.45, 0, 0.15, 1) infinite;
+  --animate-logo-stripe: logo-stripe-pulse 6.5s cubic-bezier(0.45, 0, 0.15, 1) infinite;
+  --animate-logo-legbase-pulse: logo-legbase-pulse 6.5s cubic-bezier(0.45, 0, 0.15, 1) infinite;
+  --animate-logo-crown-pulse: logo-crown-pulse 6.5s cubic-bezier(0.45, 0, 0.15, 1) infinite;
 }
 
 @keyframes star-btn {

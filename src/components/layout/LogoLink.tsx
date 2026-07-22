@@ -52,7 +52,7 @@ export function LogoLink() {
           Г-образных path и анимируются двухфазным clip-path (сначала
           сжатие вдоль вертикали до угла, потом вдоль горизонтали до
           противоположного края). B, C, D — независимые ножки, простой
-          scaleY-pulse. Волна идёт слева направо (задержки 0/0.5/1/1.5/2s). */}
+          scaleY-pulse. Волна идёт слева направо (задержки 0/0.7/1.4/2.1/2.8s). */}
       <svg
         viewBox="0 0 58.1 60.33"
         width={58}
@@ -69,7 +69,7 @@ export function LogoLink() {
           {/* Клип для крышка+E: зеркально — снизу вверх до угла, затем вдоль крышки справа налево */}
           <clipPath id="logo-clip-crown-e">
             <rect
-              className="animate-logo-crown-pulse [animation-delay:2s]"
+              className="animate-logo-crown-pulse [animation-delay:2.8s]"
               x="38.57"
               y="0"
               width="19.43"
@@ -83,19 +83,19 @@ export function LogoLink() {
         <path
           d="M13.18,50.32V10.89h6.64V50.32Z"
           fill="#111"
-          className="origin-center animate-logo-stripe [animation-delay:0.5s] [transform-box:fill-box]"
+          className="origin-center animate-logo-stripe [animation-delay:0.7s] [transform-box:fill-box]"
         />
         {/* Правая ножка «Ш»: нижний край сжимается к верхнему (закреплённому) и обратно */}
         <path
           d="M26.02,50.21V10.89h6.64V50.21Z"
           fill="#111"
-          className="origin-top animate-logo-stripe [animation-delay:1s] [transform-box:fill-box]"
+          className="origin-top animate-logo-stripe [animation-delay:1.4s] [transform-box:fill-box]"
         />
         {/* Левая ножка «П»: висит отдельно от крышки (зазор), простой pulse от верхнего края */}
         <path
           d="M38.63,50.21V10.89H45.2V50.21Z"
           fill="#111"
-          className="origin-top animate-logo-stripe [animation-delay:1.5s] [transform-box:fill-box]"
+          className="origin-top animate-logo-stripe [animation-delay:2.1s] [transform-box:fill-box]"
         />
         {/* Крышка «П» + правая ножка E: единый Г-путь (реальное касание геометрии) */}
         <path d="M38.57,0H58V50.21H51.48V6H38.57Z" fill="#111" clipPath="url(#logo-clip-crown-e)" />
