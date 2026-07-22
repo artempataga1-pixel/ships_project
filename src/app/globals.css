@@ -32,14 +32,16 @@
   --font-body: var(--font-manrope-var), sans-serif;
 }
 
-/* Блик, бегущий по контуру star-button + бегущая строка Marquee + пульсация
-   трёх полосок логотипа в шапке (LogoLink) — каждая полоска то схлопывается
-   (в свою сторону — origin задаётся классом origin-* на самом path), то
-   разворачивается обратно, со сдвигом по времени между полосками. */
+/* Блик, бегущий по контуру star-button + бегущая строка Marquee + «дыхание»
+   трёх полосок логотипа в шапке (LogoLink) — большую часть цикла полоска
+   стоит неподвижно, затем коротко и мягко поджимается (в свою сторону —
+   origin задаётся классом origin-* на самом path) и сразу разворачивается
+   обратно. Никогда не схлопывается в ноль — полный вырез читался как глюк/
+   мигание, а не как стиль. */
 @theme inline {
   --animate-star-btn: star-btn calc(var(--duration) * 1s) linear infinite;
   --animate-marquee: marquee calc(var(--duration) * 1s) linear infinite;
-  --animate-logo-stripe: logo-stripe-pulse 2.6s ease-in-out infinite;
+  --animate-logo-stripe: logo-stripe-pulse 4.8s cubic-bezier(0.45, 0, 0.15, 1) infinite;
 }
 
 @keyframes star-btn {
@@ -65,11 +67,13 @@
 
 @keyframes logo-stripe-pulse {
   0%,
+  38%,
+  66%,
   100% {
     transform: scaleY(1);
   }
-  50% {
-    transform: scaleY(0);
+  52% {
+    transform: scaleY(0.3);
   }
 }
 
