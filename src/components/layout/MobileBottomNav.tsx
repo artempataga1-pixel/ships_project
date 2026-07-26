@@ -4,34 +4,12 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useLenis } from 'lenis/react'
 import { NAV_ITEMS } from '@/constants/nav'
 import { useActiveSection } from '@/components/layout/useActiveSection'
-import { isMobileScrubActive, scrollToMobileScrubStep } from '@/components/hero/useMobileScrubController'
-import { NAV_ID_TO_STEP } from '@/components/hero/useStoryController'
+import { handleMobileNavClick } from '@/components/hero/useMobileScrubController'
 import { useFormFocus } from '@/lib/useFormFocus'
 
 // Те же величины, что в LimelightNav — лампа той же формы/свечения
 const LINK_PADDING_X = 32
 const LAMP_MIN_WIDTH = 44
-
-// Клик по about/competencies/partners, пока жив мобильный скраб-пин: в
-// scrub-режиме у этих полок нет DOM id (оверлеи внутри пина) — обычный
-// href-переход туда не попадёт, поэтому программный scrollTo к границе
-// нужного шага внутри пина (дальше видео примет нужный кадр само через
-// onUpdate контроллера). lenis передаём в scrollToMobileScrubStep по тому
-// же принципу, что и весь остальной код на Lenis (useStoryController) —
-// на нетач-устройстве с узким окном SmoothScrollProvider монтирует Lenis,
-// программный скролл идёт через её API, а не через native window.scrollTo.
-// Вне scrub-режима (десктоп/flow) — обычный переход по href.
-function onNavClick(
-  e: React.MouseEvent<HTMLAnchorElement>,
-  href: string,
-  lenis: ReturnType<typeof useLenis>,
-) {
-  if (!isMobileScrubActive()) return
-  const id = href.split('#')[1]
-  if (!id || !(id in NAV_ID_TO_STEP)) return
-  e.preventDefault()
-  scrollToMobileScrubStep(NAV_ID_TO_STEP[id], lenis)
-}
 
 // Нижнее фиксированное меню до 1024px: все 7 пунктов, горизонтальный скролл
 // с автоцентрированием активного и той же «лампой», что у десктопной LimelightNav.
@@ -118,7 +96,7 @@ export function MobileBottomNav() {
             >
               <a
                 href={item.href}
-                onClick={(e) => onNavClick(e, item.href, lenis)}
+                onClick={(e) => handleMobileNavClick(e, item.href, lenis)}
                 className={`block whitespace-nowrap rounded-full px-4 py-3 text-sm font-medium transition-colors duration-200 ${
                   i === activeIndex ? 'text-[var(--color-text)]' : 'text-[#333333]'
                 }`}

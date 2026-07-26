@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
-import { SEG_DURATION, STEP_NAV_ID, STORY_STEP_EVENT } from './useStoryController'
+import { NAV_ID_TO_STEP, SEG_DURATION, STEP_NAV_ID, STORY_STEP_EVENT } from './useStoryController'
 
 export const STEP_COUNT = 4
 export const LAST_STEP = 3
@@ -73,6 +73,23 @@ export function scrollToMobileScrubStep(step: number, lenis?: LenisLike | null) 
   } else {
     window.scrollTo({ top: y, behavior: 'smooth' })
   }
+}
+
+// Общий обработчик клика по якорю про/компетенции/партнёры для любого меню
+// (нижняя мобильная навигация, футер) — пока жив мобильный скраб-пин, у этих
+// полок нет DOM id (оверлеи внутри пина), обычный href-переход мимо: нужен
+// программный scrollTo к границе шага (см. scrollToMobileScrubStep выше).
+// Вне scrub-режима (десктоп/flow) — не перехватываем, идёт обычный переход.
+export function handleMobileNavClick(
+  e: React.MouseEvent<HTMLAnchorElement>,
+  href: string,
+  lenis?: LenisLike | null,
+) {
+  if (!isMobileScrubActive()) return
+  const id = href.split('#')[1]
+  if (!id || !(id in NAV_ID_TO_STEP)) return
+  e.preventDefault()
+  scrollToMobileScrubStep(NAV_ID_TO_STEP[id], lenis)
 }
 
 export interface MobileScrubRefs {
