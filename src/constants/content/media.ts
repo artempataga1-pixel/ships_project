@@ -6,18 +6,21 @@ export const MEDIA: MediaItem[] = [
     title: 'Тренды банкротного права 2025',
     date: '15 апр 2025',
     image: '/images/articles/stat1.jpg',
+    practiceIds: ['bankrotstvo'],
   },
   {
     publisher: 'Коммерсантъ',
     title: 'Субсидиарная ответственность: защита директора',
     date: '3 фев 2025',
     image: '/images/articles/stat2.jpg',
+    practiceIds: ['bankrotstvo'],
   },
   {
     publisher: 'Право.ru',
     title: 'Банкротство застройщиков: итоги года',
     date: '20 янв 2025',
     image: '/images/articles/stat3.jpg',
+    practiceIds: ['bankrotstvo'],
   },
   {
     publisher: 'Forbes',

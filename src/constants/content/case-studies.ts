@@ -10,6 +10,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     year: '2024',
     summary:
       'Отстояли интересы девелопера в деле о банкротстве с требованиями на 5,4 млрд ₽. Суд исключил необоснованные требования из реестра, компания сохранила ключевые активы.',
+    practiceIds: ['bankrotstvo'],
   },
   {
     slug: 'mezhdunarodnyy-arbitrazh',
@@ -30,6 +31,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     year: '2023',
     summary:
       'Защитили генерального директора IT-компании от привлечения к субсидиарной ответственности на 1,2 млрд ₽. Суд признал действия руководителя добросовестными и разумными.',
+    practiceIds: ['bankrotstvo'],
   },
   {
     slug: 'nalogovyy-spor',

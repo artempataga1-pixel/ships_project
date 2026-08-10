@@ -13,6 +13,8 @@ import {
 } from 'lucide-react'
 
 import { MEDIA_MENTIONS, PRACTICE_OPTIONS } from '@/constants/content/contacts'
+import { PRODUCTS } from '@/constants/content/products'
+import { getPracticeBySlug } from '@/lib/content'
 import './contacts-section.css'
 import { contactsContent } from './contacts-content'
 
@@ -83,6 +85,40 @@ export function ContactsSection() {
     apply()
     mq.addEventListener('change', apply)
     return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  /* Предзаполнение формы из query-параметров: со страницы практики кнопки
+     «Обсудить задачу» ведут на /?practice=<slug>&product=<slug>#contacts
+     (см. ProductsGrid и CTA страницы практики).
+
+     Читаем location.search напрямую, а не через useSearchParams: хук переводит
+     дерево в динамический рендер и требует обёртки <Suspense>, из-за чего вся
+     секция «Контакты» выпала бы из статического HTML главной. Параметры нужны
+     только после гидрации, поэтому эффекта достаточно. Переходы сюда идут
+     полной загрузкой страницы (обычные <a>), так что эффект отработает.
+
+     eslint react-hooks/set-state-in-effect отключён точечно: правило бьёт по
+     синхронному setState в теле эффекта, но здесь это ровно тот случай, ради
+     которого эффекты и нужны — разовое чтение внешнего источника (URL) при
+     монтировании. Каскада ререндеров нет: эффект без зависимостей, отрабатывает
+     один раз, и только если в адресе реально есть параметр. */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+
+    const practiceSlug = params.get('practice')
+    if (practiceSlug) {
+      const title = getPracticeBySlug(practiceSlug)?.title
+      /* Значение обязано входить в PRACTICE_OPTIONS — по этому же списку
+         валидирует сервер (api/contact/route.ts), иначе заявка уйдёт в 400. */
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (title && PRACTICE_OPTIONS.includes(title)) setPractice(title)
+    }
+
+    const productSlug = params.get('product')
+    if (productSlug && messageRef.current && !messageRef.current.value) {
+      const product = PRODUCTS.find((item) => item.slug === productSlug)
+      if (product) messageRef.current.value = `Интересует: ${product.title}`
+    }
   }, [])
 
   function clearFieldError(field: keyof FieldErrors) {

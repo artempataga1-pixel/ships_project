@@ -83,6 +83,58 @@ export interface PracticeArea {
   imageRatio: string
 }
 
+/* ── Новый контент-слой раздела «Практики» ────────────────────────────
+   Нормализованная структура «практика ↔ продукт ↔ кейс ↔ статья»: связи
+   many-to-many через массивы id, ноль дублирования текста. Спроектирована
+   так, чтобы 1-в-1 лечь на будущую headless CMS.
+   Пока сосуществует со старыми Practice/PracticeArea (их ещё читает главная);
+   старые уйдут в волне 1, тогда PracticeItem переименуется в Practice. */
+
+/* Смысловая группа внутри блока «Что мы делаем» — заголовок + пункты.
+   Пункты выводятся дословно из документа заказчика, не переписываются. */
+export interface PracticeServiceGroup {
+  title: string
+  items: string[]
+}
+
+export interface PracticeItem {
+  /* Ключ связей (productIds/practiceIds). Сейчас совпадает со slug, но
+     разведён намеренно: slug — публичный URL, его можно поменять, id — нет. */
+  id: string
+  /* URL-идентификатор для /practices/[slug] и якоря #practice-<slug>.
+     Транслит с русского: bankrotstvo, korporativnoe-pravo, … */
+  slug: string
+  /* Порядок вывода — и в коллаже на главной, и в списках. Меняется данными,
+     без правки вёрстки (прямое требование заказчика). */
+  order: number
+  /* Порядковый номер для подписи на карточке — «01», «02», … */
+  num: string
+  /* Короткий ярлык для плашки над заголовком */
+  label: string
+  title: string
+  /* «Краткое описание для карточки» — оно же лид на странице практики
+     и description в метатегах */
+  cardSummary: string
+  /* «Описание практики» — абзацы развёрнутого описания */
+  description: string[]
+  serviceGroups: PracticeServiceGroup[]
+  /* id продуктов этой практики (см. Product.id) */
+  productIds: string[]
+}
+
+/* Продукт — законченное предложение фирмы, а не пункт перечня услуг.
+   hasPage — заготовка под будущие /products/[slug]: пока у всех false,
+   страницы не создаются, карточка показывает только «Обсудить задачу». */
+export interface Product {
+  id: string
+  slug: string
+  title: string
+  /* Один продукт может относиться к нескольким практикам */
+  practiceIds: string[]
+  description?: string
+  hasPage?: boolean
+}
+
 export interface Case {
   title: string
   desc: string
@@ -98,6 +150,8 @@ export interface MediaItem {
   image: string
   /* ссылка на реальную публикацию в источнике; пока не расставлена — кнопка "Читать" неактивна */
   url?: string
+  /* id практик, к которым относится публикация (PracticeItem.id) */
+  practiceIds?: string[]
 }
 
 export interface CaseStudy {
@@ -109,6 +163,8 @@ export interface CaseStudy {
   year: string
   /* 1–2 предложения для отдельной страницы кейса */
   summary: string
+  /* id практик, к которым относится кейс (PracticeItem.id) */
+  practiceIds?: string[]
 }
 
 export interface ContactInfo {
