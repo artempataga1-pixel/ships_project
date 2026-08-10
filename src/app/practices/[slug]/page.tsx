@@ -122,7 +122,15 @@ function HeroDecor() {
   )
 }
 
-const PAGE_BACKGROUND =
+/* Вуаль поверх анимированного задника. Полупрозрачная: видео остаётся живой
+   фактурой, но длинные тексты страницы читаются с запасом по контрасту.
+   Лайм-glow и стопы — канонические, как у экранов-заголовков на главной
+   (ср. PracticesSection.tsx). */
+const BACKDROP_VEIL =
+  'radial-gradient(circle at 52% 30%, var(--color-lime-soft), transparent 34%), linear-gradient(180deg,rgba(255,255,255,.72) 0%,rgba(252,252,251,.80) 55%,rgba(251,251,250,.86) 100%)'
+
+/* Старая (одноэкранная) страница практики — фон оставлен как был. */
+const LEGACY_PAGE_BACKGROUND =
   'radial-gradient(circle at 74% 30%, rgba(168,204,51,.09), transparent 26%), linear-gradient(180deg,#ffffff 0%,#fafafa 58%,#f7f7f5 100%)'
 
 /* Заголовок раздела внутри страницы практики. Кегль крупный, сверху — мелкая
@@ -229,27 +237,31 @@ function PracticeView({ practice }: { practice: PracticeItem }) {
   const articles = getArticlesForPractice(practice.id)
 
   return (
-    <main className="relative min-h-svh bg-[var(--color-bg)]" style={{ background: PAGE_BACKGROUND }}>
+    <main className="relative min-h-svh bg-[var(--color-bg)]">
       <ScrollTopOnLoad />
+
+      {/* ── Анимированный задник страницы ──────────────────────────────────
+          Живое фоновое видео сайта, как на остальных страницах, но закреплено
+          на вьюпорте (fixed): задник стоит на месте, а текст листается поверх.
+
+          Почему не absolute, как на старой одноэкранной странице практики:
+          CaseBackground растягивает кадр на всю высоту контейнера, а эта
+          страница ~4800px — object-cover размазывал один кадр по всей длине,
+          и фон превращался в ровное серое полотно. Fixed-обёртка задаёт видео
+          размер экрана: кадр всегда в своих пропорциях и всегда в кадре.
+
+          На <1024px CaseBackground сам отдаёт постер вместо видео — на мобиле
+          задник статичный, это его штатное поведение. */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
+        <CaseBackground />
+        <div className="absolute inset-0" style={{ background: BACKDROP_VEIL }} />
+      </div>
+
+      {/* Весь контент — поверх задника */}
+      <div className="relative z-10">
 
       {/* ── 1–3. Герой: название, краткое позиционирующее описание, развёрнутое ── */}
       <section className="relative overflow-hidden">
-        {/* Фоновое видео живёт ТОЛЬКО внутри героя. На старой (одноэкранной)
-            странице практики оно висело на всей <main> — здесь страница выросла
-            до ~5000px, и растянутый на всю высоту кадр забивал текст серым
-            полотном и тянул производительность. Требование заказчика:
-            содержание приоритетнее декоративной графики. */}
-        <CaseBackground />
-        {/* Светлая вуаль поверх видео — чтобы крупный заголовок и лид читались
-            с запасом по контрасту, а кадр остался фактурой, а не картинкой. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-[1]"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(255,255,255,.82) 0%, rgba(255,255,255,.88) 55%, rgba(251,251,250,1) 100%)',
-          }}
-        />
         <HeroDecor />
 
         <div className="relative z-10 mx-auto max-w-[1120px] px-6 pb-16 pt-36 md:pb-20 md:pt-44">
@@ -399,6 +411,8 @@ function PracticeView({ practice }: { practice: PracticeItem }) {
           </a>
         </div>
       </section>
+
+      </div>
     </main>
   )
 }
@@ -418,7 +432,7 @@ function LegacyPracticeView({ item }: { item: PracticeArea }) {
   return (
     <main
       className="relative min-h-svh lg:min-h-dvh overflow-hidden bg-[var(--color-bg)]"
-      style={{ background: PAGE_BACKGROUND }}
+      style={{ background: LEGACY_PAGE_BACKGROUND }}
     >
       <ScrollTopOnLoad />
       <CaseBackground />
