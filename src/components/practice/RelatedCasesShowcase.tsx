@@ -106,12 +106,26 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
         </h3>
       </div>
 
-      {/* Под карточкой — только краткое описание. Кегль поднят с 13px до 16px:
-          в прежнем размере текст читался подписью к картинке, хотя именно он
-          объясняет, что за дело было. */}
+      {/* Под карточкой — описание. Кегль поднят с 13px до 16px: в прежнем
+          размере текст читался подписью к картинке, хотя именно он объясняет,
+          что за дело было. */}
       <p className="mt-5 px-1 text-base leading-[1.6] text-[var(--color-text)] md:text-[1.0625rem] md:leading-[1.65]">
         {item.summary}
       </p>
+
+      {/* Сумма и год. Сумма спора — самый сильный аргумент на карточке, поэтому
+          она идёт крупно и лаймом, а не служебной строкой; год рядом приглушён
+          и моноширинными цифрами, чтобы у соседних карточек он вставал в одну
+          вертикаль. Отделены тонкой линией — иначе цифры прилипали к последней
+          строке описания и читались его продолжением. */}
+      <div className="mt-4 flex items-baseline justify-between gap-4 border-t border-[var(--color-line)] px-1 pt-4">
+        <span className="font-heading text-xl font-black tracking-[-0.02em] text-[var(--color-lime-ink)] md:text-[1.4rem]">
+          {item.amount}
+        </span>
+        <span className="text-sm font-medium tabular-nums text-[var(--color-muted)]">
+          {item.year}
+        </span>
+      </div>
     </Link>
   )
 }
