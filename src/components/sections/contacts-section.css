@@ -99,7 +99,9 @@
 
 .pb-contact__lead {
   margin: 1.05cqw 0 0;
-  color: #737673;
+  /* Был #737673 — 4.15:1 на подложке секции, ниже нормы WCAG AA (4.5:1).
+     Приведён к --color-muted, общему токену вторичного текста: 4.63:1. */
+  color: var(--color-muted);
   font-size: 1.02cqw;
   font-weight: 400;
   line-height: 1.45;
@@ -400,7 +402,9 @@
 
 .pb-contact__detail small {
   margin-top: 0.3cqw;
-  color: #777a77;
+  /* Был #777a77 — 4.05:1 на подложке, ниже нормы WCAG AA. Приведён к общему
+     токену вторичного текста: 4.78:1. */
+  color: var(--color-muted);
   font-size: 0.68cqw;
   font-weight: 400;
   line-height: 1.45;
