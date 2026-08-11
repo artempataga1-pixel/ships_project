@@ -2,35 +2,38 @@
 
 import { useId, useState } from 'react'
 import type { PracticeServiceGroup } from '@/types/content'
+import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
+import { SpotlightBorder } from '@/components/ui/SpotlightBorder'
 
 /* Блок «Что мы делаем» на странице практики.
 
    Перечень услуг в отдельных практиках доходит до 23 пунктов — прямое
    требование заказчика: не выводить их одной сплошной колонкой. Решение —
-   смысловые группы в раскрывающихся ghost-панелях (тот же паттерн, что у
-   блока «Результат»: белая полупрозрачная панель, backdrop-blur, лайм-полоса),
-   внутри группы на desktop две колонки, на мобиле одна.
+   смысловые группы в аккордеоне.
 
-   Первая группа раскрыта, остальные свёрнуты — страница сразу читается,
+   Раскладка по референсу «Course Curriculum»: центрированная шапка с
+   пилюлей-бейджем, все группы внутри ОДНОЙ карточки (а не в отдельных панелях,
+   как было раньше), строки разделены тонкими линиями, у каждой справа круглая
+   кнопка-шеврон. По контуру карточки за курсором ходит лайм-свечение
+   (SpotlightBorder) — в референсе оно белое, но на светлой теме белое по
+   белому не видно, поэтому взят фирменный лайм.
+
+   Раскрыта ровно одна группа — так же, как в референсе; раньше можно было
+   раскрыть несколько сразу. Первая открыта на старте: страница сразу читается,
    но не превращается в простыню.
+
+   Пункты идут одной колонкой (раньше на desktop было две): разделители-линии
+   между строками — часть узнаваемости референса, а в две колонки они
+   превращаются в кашу из-за разной высоты соседних строк.
 
    Анимация высоты — через grid-template-rows 0fr→1fr: не требует измерения
    контента в JS и не ломается при переносах строк на узких экранах.
    Свёрнутая группа получает inert — её пункты выпадают из фокуса и из дерева
    доступности, хотя физически остаются в DOM ради анимации. */
 
-function Chevron({ open }: { open: boolean }) {
+function Chevron() {
   return (
-    <svg
-      aria-hidden
-      width="16"
-      height="16"
-      viewBox="0 0 14 14"
-      fill="none"
-      className={`shrink-0 text-[var(--color-muted)] transition-transform duration-300 ease-out motion-reduce:transition-none ${
-        open ? 'rotate-180' : ''
-      }`}
-    >
+    <svg aria-hidden width="16" height="16" viewBox="0 0 14 14" fill="none" className="shrink-0">
       <path
         d="M2 5l5 5 5-5"
         stroke="currentColor"
@@ -42,102 +45,163 @@ function Chevron({ open }: { open: boolean }) {
   )
 }
 
-export function ServicesAccordion({ groups }: { groups: PracticeServiceGroup[] }) {
-  // Первая группа раскрыта по умолчанию, остальные свёрнуты.
-  const [openIndexes, setOpenIndexes] = useState<number[]>([0])
-  const baseId = useId()
+function Check() {
+  return (
+    <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0">
+      <path
+        d="M2.5 6.3l2.4 2.4L9.5 3.8"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
 
-  const toggle = (index: number) =>
-    setOpenIndexes((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
-    )
+function ServiceGroupRow({
+  group,
+  index,
+  open,
+  onToggle,
+  baseId,
+}: {
+  group: PracticeServiceGroup
+  index: number
+  open: boolean
+  onToggle: () => void
+  baseId: string
+}) {
+  const panelId = `${baseId}-panel-${index}`
+  const buttonId = `${baseId}-button-${index}`
 
   return (
-    <div className="flex flex-col gap-4 md:gap-5">
-      {groups.map((group, index) => {
-        const open = openIndexes.includes(index)
-        const panelId = `${baseId}-panel-${index}`
-        const buttonId = `${baseId}-button-${index}`
+    <div>
+      <h3>
+        <button
+          type="button"
+          id={buttonId}
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={onToggle}
+          className="flex w-full items-center justify-between gap-4 py-6 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-lime-ink)]"
+        >
+          {/* Надстрочная метка «Направление NN» и счётчик пунктов справа сняты
+              по правке заказчика: нумерация дублировала порядок строк, а число
+              услуг в группе читалось как техническая подробность. */}
+          <span className="min-w-0">
+            <span className="block font-heading text-lg font-extrabold leading-snug tracking-[-0.01em] text-[var(--color-text)] sm:text-xl">
+              {group.title}
+            </span>
+          </span>
 
-        return (
-          <section
-            key={group.title}
-            className="relative overflow-hidden rounded-[var(--radius-lg)] border"
-            style={{
-              background: 'rgba(255,255,255,.64)',
-              borderColor: 'rgba(255,255,255,.85)',
-              backdropFilter: 'blur(8px)',
-              boxShadow: 'var(--shadow-card)',
-            }}
-          >
-            {/* Лайм-полоса слева — проявляется у раскрытой группы (паттерн из
-                панели «Результат»), у свёрнутой приглушена до тонкой метки. */}
+          <span className="flex shrink-0 items-center gap-4">
+            {/* Круглая кнопка-шеврон 36px, поворот 180° за 300ms */}
             <span
-              aria-hidden
-              className={`pointer-events-none absolute left-0 top-[12%] w-[3px] bg-[var(--color-lime)] transition-all duration-300 ease-out motion-reduce:transition-none ${
-                open ? 'h-[76%] opacity-100' : 'h-[34%] opacity-45'
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ease-out motion-reduce:transition-none ${
+                open ? 'rotate-180' : ''
               }`}
-              style={{ boxShadow: '0 0 26px var(--color-lime-glow)' }}
-            />
-
-            <h3>
-              <button
-                type="button"
-                id={buttonId}
-                aria-expanded={open}
-                aria-controls={panelId}
-                onClick={() => toggle(index)}
-                className="flex w-full items-center gap-4 px-6 py-6 text-left transition-colors duration-200 hover:bg-white/45 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--color-lime-ink)] motion-reduce:transition-none md:gap-6 md:px-9 md:py-7"
-              >
-                <span className="font-heading text-[0.7rem] font-black tabular-nums tracking-[0.12em] text-[var(--color-lime-ink)]">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <span className="flex-1 font-heading text-lg font-extrabold leading-snug tracking-[-0.01em] text-[var(--color-text)] md:text-[1.375rem]">
-                  {group.title}
-                </span>
-                <span className="shrink-0 text-sm font-semibold tabular-nums text-[var(--color-muted)]">
-                  {group.items.length}
-                </span>
-                <Chevron open={open} />
-              </button>
-            </h3>
-
-            <div
-              id={panelId}
-              role="region"
-              aria-labelledby={buttonId}
-              inert={!open}
-              className={`grid transition-[grid-template-rows] duration-[400ms] ease-out motion-reduce:transition-none ${
-                open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-              }`}
+              style={{
+                borderColor: open ? 'var(--color-lime)' : 'var(--color-line)',
+                background: open ? 'var(--color-lime-soft)' : 'transparent',
+                color: open ? 'var(--color-lime-ink)' : 'var(--color-muted)',
+              }}
             >
-              <div className="overflow-hidden">
-                {/* columns вместо grid: пункты заполняют сначала левую колонку
-                    сверху вниз, потом правую — так перечень читается как список,
-                    а не как таблица. break-inside-avoid держит пункт целиком
-                    в одной колонке. */}
-                <ul className="px-6 pb-8 md:columns-2 md:gap-x-12 md:px-9 md:pb-10">
-                  {group.items.map((item) => (
-                    <li
-                      key={item}
-                      className="relative mb-5 break-inside-avoid pl-7 text-base leading-relaxed text-[var(--color-text)] md:mb-6 md:text-[1.0625rem]"
-                    >
-                      {/* Лайм-квадратик 9×9 со свечением — тот же маркер, что
-                          у плашек категорий на странице практики. */}
-                      <i
-                        aria-hidden
-                        className="absolute left-0 top-[0.5em] block h-[9px] w-[9px] rounded-[2px] bg-[var(--color-lime)]"
-                        style={{ boxShadow: '0 0 12px var(--color-lime-glow)' }}
-                      />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </section>
-        )
-      })}
+              <Chevron />
+            </span>
+          </span>
+        </button>
+      </h3>
+
+      <div
+        id={panelId}
+        role="region"
+        aria-labelledby={buttonId}
+        inert={!open}
+        className={`grid transition-[grid-template-rows] duration-300 ease-in-out motion-reduce:transition-none ${
+          open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <ul className="pb-6">
+            {group.items.map((item) => (
+              <li
+                key={item}
+                className="flex items-start gap-3 border-t border-[var(--color-line)] py-4 text-base leading-relaxed text-[var(--color-text)]"
+              >
+                <span
+                  className="mt-[0.2em] flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[var(--color-lime-ink)]"
+                  style={{ borderColor: 'var(--color-lime)', background: 'var(--color-lime-soft)' }}
+                >
+                  <Check />
+                </span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function ServicesAccordion({ groups }: { groups: PracticeServiceGroup[] }) {
+  // Первая группа раскрыта по умолчанию; повторный клик по открытой — закрывает.
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
+  const baseId = useId()
+
+  return (
+    <div className="mx-auto max-w-[1080px]">
+      {/* ── Шапка блока ────────────────────────────────────────────────────
+          Заголовок живёт внутри компонента, а не приходит снаружи через
+          SectionTitle: в этой раскладке он центрирован и идёт в паре с
+          пилюлей-бейджем — разнесённые по разным файлам, они бы разъезжались
+          при любой правке отступов. */}
+      <div className="mb-12 flex flex-col items-center text-center">
+        <RevealOnScroll>
+          {/* Кегль пилюли поднят в полтора раза относительно референса
+              (0.75rem → 1.125rem) — в исходном размере надстрочная метка
+              терялась рядом с заголовком блока. Паддинги и точка выросли в той
+              же пропорции, иначе пилюля жмёт текст. */}
+          <span className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-[1.125rem] py-1.5 text-[1.125rem] font-medium leading-none text-[var(--color-text)]">
+            <span
+              className="h-2 w-2 rounded-full bg-[var(--color-lime)]"
+              style={{ boxShadow: '0 0 10px var(--color-lime-glow)' }}
+            />
+            Услуги
+          </span>
+        </RevealOnScroll>
+        <RevealOnScroll delay={0.1}>
+          <h2 className="font-heading text-[clamp(1.6rem,3.2vw,2.5rem)] font-black leading-[1.08] tracking-[-0.02em] text-[var(--color-text)]">
+            Что мы делаем
+          </h2>
+        </RevealOnScroll>
+      </div>
+
+      {/* Внешний радиус xl, внутренний lg — разница ровно в толщину рамки-паддинга,
+          иначе скругления смотрятся вложенными неточно. */}
+      <SpotlightBorder radius="xl" size={520} intensity={0.5} className="w-full p-2 sm:p-3">
+        <div
+          className="rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-[var(--color-surface)] px-6 sm:px-8"
+          style={{ boxShadow: 'var(--shadow-card)' }}
+        >
+          {groups.map((group, index) => (
+            <RevealOnScroll
+              key={group.title}
+              delay={0.15 * index}
+              className="border-b border-[var(--color-line)] last:border-b-0"
+            >
+              <ServiceGroupRow
+                group={group}
+                index={index}
+                baseId={baseId}
+                open={openIndex === index}
+                onToggle={() => setOpenIndex(openIndex === index ? null : index)}
+              />
+            </RevealOnScroll>
+          ))}
+        </div>
+      </SpotlightBorder>
     </div>
   )
 }

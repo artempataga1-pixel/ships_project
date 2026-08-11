@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import type { CaseStudy, MediaItem, PracticeItem, PracticeArea } from '@/types/content'
+import type { PracticeItem, PracticeArea } from '@/types/content'
 import { PRACTICE_AREAS } from '@/constants/content/practice'
 import {
   getPracticeBySlug,
@@ -15,6 +15,8 @@ import { ScrollTopOnLoad } from '@/components/ui/ScrollTopOnLoad'
 import { CaseBackground } from '@/components/ui/CaseBackground'
 import { ServicesAccordion } from '@/components/practice/ServicesAccordion'
 import { ProductsGrid } from '@/components/practice/ProductsGrid'
+import { RelatedCasesShowcase } from '@/components/practice/RelatedCasesShowcase'
+import { ArticlesInsights } from '@/components/practice/ArticlesInsights'
 
 /* ВРЕМЕННЫЙ ДУАЛИЗМ ИСТОЧНИКОВ ДАННЫХ (этап 0, пилот).
 
@@ -125,111 +127,21 @@ function HeroDecor() {
 /* Никакой вуали поверх задника: на остальных страницах сайта CaseBackground
    идёт «голым», и именно так фон выглядит фирменно — контрастные белые объёмы
    с тёплой подсветкой. Любая заливка поверх (пробовал 72% белого) убивает
-   фактуру: кадр читается как белый лист, а не как живой фон.
+   фактуру: кадр читается как белый лист, а не как живой фон. */
 
-   Читаемость длинных текстов держат сами блоки: ghost-панели
-   rgba(255,255,255,.64) + backdrop-blur под абзацами и услугами, плотные белые
-   карточки у продуктов, кейсов и публикаций. */
+/* Панель контентного блока (описание практики, CTA). Плотная белая, а не
+   полупрозрачная, как раньше: живое видео теперь стоит только за героем, и
+   ghost-панель с backdrop-blur ниже по странице ложилась на ровный
+   --color-bg — рамка почти сливалась, а размывать там было уже нечего. */
+const PANEL_STYLE = {
+  background: 'var(--color-surface)',
+  borderColor: 'var(--color-line)',
+  boxShadow: 'var(--shadow-card)',
+} as const
 
 /* Старая (одноэкранная) страница практики — фон оставлен как был. */
 const LEGACY_PAGE_BACKGROUND =
   'radial-gradient(circle at 74% 30%, rgba(168,204,51,.09), transparent 26%), linear-gradient(180deg,#ffffff 0%,#fafafa 58%,#f7f7f5 100%)'
-
-/* Заголовок раздела внутри страницы практики. Кегль крупный, сверху — мелкая
-   разрядка-eyebrow: тот же приём, что у SectionHeading на главной. */
-function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
-  return (
-    <div className="mb-10 md:mb-12">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-lime-ink)]">
-        {eyebrow}
-      </p>
-      <h2 className="mt-4 font-heading text-[clamp(1.6rem,3.2vw,2.5rem)] font-black leading-[1.08] tracking-[-0.02em] text-[var(--color-text)]">
-        {title}
-      </h2>
-    </div>
-  )
-}
-
-/* Заглушка блока, для которого контента ещё нет. Сдержанная ghost-панель без
-   кричащих бейджей — блок виден в структуре, но не притворяется наполненным. */
-function ComingSoonPanel({ title }: { title: string }) {
-  return (
-    <div
-      className="relative overflow-hidden rounded-[var(--radius-lg)] border p-8 md:p-10"
-      style={{
-        background: 'rgba(255,255,255,.5)',
-        borderColor: 'rgba(255,255,255,.85)',
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-0 top-[24%] h-[52%] w-[3px] bg-[var(--color-lime)] opacity-45"
-      />
-      <p className="font-heading text-base font-extrabold text-[var(--color-text)] md:text-lg">{title}</p>
-      <p className="mt-3 text-base leading-relaxed text-[var(--color-muted)]">
-        Материалы по этой практике готовятся.
-      </p>
-    </div>
-  )
-}
-
-function RelatedCaseCard({ item }: { item: CaseStudy }) {
-  return (
-    <Link
-      href={`/cases/${item.slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-surface)] p-7 transition-shadow duration-300 hover:shadow-[0_28px_80px_rgba(0,0,0,.08)] motion-reduce:transition-none"
-      style={{ boxShadow: 'var(--shadow-card)' }}
-    >
-      <div className="flex items-center justify-between gap-4">
-        <span className="inline-flex items-center gap-2.5 font-heading text-[0.68rem] font-black uppercase tracking-[0.12em] text-[var(--color-text)]">
-          {item.category}
-          <i
-            aria-hidden
-            className="block h-[9px] w-[9px] rounded-[2px] bg-[var(--color-lime)]"
-            style={{ boxShadow: '0 0 12px var(--color-lime-glow)' }}
-          />
-        </span>
-        <span className="text-sm font-medium text-[var(--color-muted)]">{item.year}</span>
-      </div>
-
-      <h3 className="mt-5 font-heading text-lg font-extrabold leading-snug text-[var(--color-text)]">
-        {item.title}
-      </h3>
-
-      <div className="mt-auto flex items-end justify-between gap-4 pt-7">
-        <span className="font-heading text-xl font-black text-[var(--color-text)]">{item.amount}</span>
-        <span className="text-sm font-semibold text-[var(--color-lime-ink)] transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none">
-          Смотреть →
-        </span>
-      </div>
-    </Link>
-  )
-}
-
-/* У публикаций пока нет ссылок на источник (MediaItem.url не расставлен) —
-   поэтому карточка не кликабельна. Появится url — здесь встанет <a>. */
-function RelatedArticleCard({ item }: { item: MediaItem }) {
-  return (
-    <article
-      className="relative flex gap-5 overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-surface)] p-5"
-      style={{ boxShadow: 'var(--shadow-card)' }}
-    >
-      <div className="relative hidden h-[92px] w-[92px] shrink-0 overflow-hidden rounded-[10px] sm:block">
-        <Image src={item.image} alt="" fill sizes="92px" className="object-cover" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--color-lime-ink)]">
-          {item.publisher}
-        </p>
-        <h3 className="mt-2 font-heading text-base font-extrabold leading-snug text-[var(--color-text)]">
-          {item.title}
-        </h3>
-        <p className="mt-2 text-sm text-[var(--color-muted)]">{item.date}</p>
-      </div>
-    </article>
-  )
-}
 
 /* ── НОВЫЙ ШАБЛОН (этап 0) ────────────────────────────────────────────── */
 
@@ -242,153 +154,151 @@ function PracticeView({ practice }: { practice: PracticeItem }) {
     <main className="relative min-h-svh bg-[var(--color-bg)]">
       <ScrollTopOnLoad />
 
-      {/* ── Анимированный задник страницы ──────────────────────────────────
-          Живое фоновое видео сайта, как на остальных страницах, но закреплено
-          на вьюпорте (fixed): задник стоит на месте, а текст листается поверх.
+      {/* ── 1–3. Герой: название, краткое позиционирующее описание, развёрнутое ── */}
+      {/* clip-path: inset(0) — не декор, а несущая конструкция блока. Ненулевой
+          clip-path делает секцию containing block для потомков с position:
+          fixed, поэтому задник ниже закреплён на вьюпорте (стоит на месте, а
+          текст листается поверх), но физически обрезан границами героя и ниже
+          по странице не появляется.
 
-          Почему не absolute, как на старой одноэкранной странице практики:
-          CaseBackground растягивает кадр на всю высоту контейнера, а эта
-          страница ~4800px — object-cover размазывал один кадр по всей длине,
-          и фон превращался в ровное серое полотно. Fixed-обёртка задаёт видео
-          размер экрана: кадр всегда в своих пропорциях и всегда в кадре.
+          Почему задник не absolute: CaseBackground растягивает кадр на всю
+          высоту контейнера, а страница практики ~4800px — object-cover
+          размазывал бы один кадр по всей длине, и фон превращался в ровное
+          серое полотно.
 
           На <1024px CaseBackground сам отдаёт постер вместо видео — на мобиле
           задник статичный, это его штатное поведение. */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
-        <CaseBackground />
-      </div>
-
-      {/* Весь контент — поверх задника */}
-      <div className="relative z-10">
-
-      {/* ── 1–3. Герой: название, краткое позиционирующее описание, развёрнутое ── */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden" style={{ clipPath: 'inset(0)' }}>
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+          <CaseBackground />
+        </div>
         <HeroDecor />
 
-        <div className="relative z-10 mx-auto max-w-[1120px] px-6 pb-16 pt-36 md:pb-20 md:pt-44">
-          {/* ЭТАП 0: возврат ведёт на раздел «Практики» целиком, а не на карточку.
-              Карточки главной пока живут на старых слагах (practice-bankruptcy
-              и т.д.) — якоря #practice-bankrotstvo на главной ещё нет, и переход
-              по нему просто оставлял пользователя в самом верху страницы.
-              ШАГ 1.6: когда коллаж переедет на новые слаги, вернуть
-              href={`/#practice-${practice.slug}`} — точный возврат к карточке.
+        {/* Раскладка героя — две колонки, разведённые по краям экрана.
+            Контейнер повторяет шапку сайта (max-w-[1440px] + px-8), а не
+            прежние 1120px: заголовок практики встаёт ровно под логотипом, а
+            панель с развёрнутым описанием — под кнопкой «Связаться». Меньший
+            контейнер уводил обе колонки к центру, и «левый край» переставал
+            читаться левым краем.
+            Кегли текста при переезде не менялись — только ширина колонки. */}
+        {/* Две колонки включаются с xl (1280), а не с lg (1024): на планшете в
+            альбомной ориентации 1024px колонка заголовка ужимается настолько,
+            что название практики рвётся на шесть строк, а панель встаёт узким
+            столбиком. До xl обе колонки идут друг под другом. */}
+        <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col gap-12 px-6 pb-16 pt-36 sm:px-8 md:pb-20 md:pt-44 xl:flex-row xl:items-start xl:justify-between xl:gap-14">
+          {/* ── Левая колонка: возврат, бейдж, название, краткое описание ── */}
+          <div className="xl:max-w-[53%] xl:shrink">
+            {/* ЭТАП 0: возврат ведёт на раздел «Практики» целиком, а не на карточку.
+                Карточки главной пока живут на старых слагах (practice-bankruptcy
+                и т.д.) — якоря #practice-bankrotstvo на главной ещё нет, и переход
+                по нему просто оставлял пользователя в самом верху страницы.
+                ШАГ 1.6: когда коллаж переедет на новые слаги, вернуть
+                href={`/#practice-${practice.slug}`} — точный возврат к карточке.
 
-              scroll={false} — свой скролл делает HomeAnchorScroll на главной
-              (с повторными попытками, пока раскладка не устаканится); встроенный
-              hash-scroll Next.js делает это одним ранним прыжком и гонится с ним,
-              из-за чего страница иногда оставалась в самом верху. */}
-          <Link
-            href="/#practices"
-            scroll={false}
-            className="btn-lime-fill inline-flex h-11 items-center justify-center rounded-md px-6 text-sm font-semibold"
-          >
-            ← Все практики
-          </Link>
+                scroll={false} — свой скролл делает HomeAnchorScroll на главной
+                (с повторными попытками, пока раскладка не устаканится); встроенный
+                hash-scroll Next.js делает это одним ранним прыжком и гонится с ним,
+                из-за чего страница иногда оставалась в самом верху. */}
+            <Link
+              href="/#practices"
+              scroll={false}
+              className="btn-lime-fill inline-flex h-11 items-center justify-center rounded-md px-6 text-sm font-semibold"
+            >
+              ← Все практики
+            </Link>
 
-          <div className="mt-12 flex flex-wrap items-center gap-4 md:mt-14">
-            <span className="inline-flex items-center gap-3 rounded-md border border-[var(--color-line)] bg-white px-4 py-2 font-heading text-[0.7rem] font-black uppercase tracking-[0.12em] text-[var(--color-text)]">
-              {practice.label}
-              <i
+            <div className="mt-12 flex flex-wrap items-center gap-4 md:mt-14">
+              <span className="inline-flex items-center gap-3 rounded-md border border-[var(--color-line)] bg-white px-4 py-2 font-heading text-[0.7rem] font-black uppercase tracking-[0.12em] text-[var(--color-text)]">
+                {practice.label}
+                <i
+                  aria-hidden
+                  className="block h-[9px] w-[9px] rounded-[2px] bg-[var(--color-lime)]"
+                  style={{ boxShadow: '0 0 12px var(--color-lime-glow)' }}
+                />
+              </span>
+            </div>
+
+            {/* 1. Название практики */}
+            <h1 className="mt-8 max-w-[20ch] font-heading text-[clamp(2rem,4.6vw,3.5rem)] font-black leading-[1.04] tracking-[-0.03em] text-[var(--color-text)]">
+              {practice.title}
+            </h1>
+
+            {/* 2. Краткое позиционирующее описание */}
+            <p className="mt-8 max-w-[58ch] text-lg leading-relaxed text-[var(--color-text)] md:text-xl md:leading-relaxed">
+              {practice.cardSummary}
+            </p>
+          </div>
+
+          {/* ── Правая колонка: 3. развёрнутое описание практики ──────────────
+              Раньше жило отдельной секцией под героем во всю ширину 1120px.
+              Перенесено внутрь героя и прижато к правому краю: описание и
+              название читаются одним экраном, а живой задник остаётся виден
+              в просвете между колонками. */}
+          <div className="w-full xl:w-[42%] xl:max-w-[560px] xl:shrink-0">
+            <div
+              className="relative overflow-hidden rounded-[var(--radius-xl)] border p-7 md:p-9"
+              style={PANEL_STYLE}
+            >
+              <span
                 aria-hidden
-                className="block h-[9px] w-[9px] rounded-[2px] bg-[var(--color-lime)]"
-                style={{ boxShadow: '0 0 12px var(--color-lime-glow)' }}
+                className="pointer-events-none absolute left-0 top-[12%] h-[76%] w-[3px] bg-[var(--color-lime)]"
+                style={{ boxShadow: '0 0 26px var(--color-lime-glow)' }}
               />
-            </span>
+              <div className="flex flex-col gap-5">
+                {practice.description.map((paragraph) => (
+                  <p
+                    key={paragraph}
+                    className="text-[0.95rem] leading-[1.7] text-[var(--color-text)] md:text-base md:leading-[1.72]"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            </div>
           </div>
-
-          {/* 1. Название практики */}
-          <h1 className="mt-8 max-w-[20ch] font-heading text-[clamp(2rem,4.6vw,3.5rem)] font-black leading-[1.04] tracking-[-0.03em] text-[var(--color-text)]">
-            {practice.title}
-          </h1>
-
-          {/* 2. Краткое позиционирующее описание */}
-          <p className="mt-8 max-w-[58ch] text-lg leading-relaxed text-[var(--color-text)] md:text-xl md:leading-relaxed">
-            {practice.cardSummary}
-          </p>
         </div>
-      </section>
 
-      {/* 3. Развёрнутое описание практики */}
-      <section className="relative mx-auto max-w-[1120px] px-6 pb-20 md:pb-24">
+        {/* Растворение низа героя в фон страницы: без него граница обреза
+            задника читается ровной линейкой поперёк экрана. */}
         <div
-          className="relative overflow-hidden rounded-[var(--radius-xl)] border p-8 md:p-12"
-          style={{
-            background: 'rgba(255,255,255,.64)',
-            borderColor: 'rgba(255,255,255,.85)',
-            backdropFilter: 'blur(8px)',
-            boxShadow: 'var(--shadow-card)',
-          }}
-        >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute left-0 top-[12%] h-[76%] w-[3px] bg-[var(--color-lime)]"
-            style={{ boxShadow: '0 0 26px var(--color-lime-glow)' }}
-          />
-          <div className="flex flex-col gap-6 md:gap-7">
-            {practice.description.map((paragraph) => (
-              <p
-                key={paragraph}
-                className="max-w-[70ch] text-base leading-relaxed text-[var(--color-text)] md:text-[1.0625rem] md:leading-[1.75]"
-              >
-                {paragraph}
-              </p>
-            ))}
-          </div>
-        </div>
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-28 md:h-36"
+          style={{ background: 'linear-gradient(180deg, transparent 0%, var(--color-bg) 100%)' }}
+        />
       </section>
 
-      {/* 4. Что мы делаем */}
+      {/* 4. Что мы делаем.
+          Заголовки этого и следующих блоков живут внутри самих компонентов —
+          в новых раскладках они центрированы, идут в паре с бейджем или
+          вынесены в колонку рядом с лидом, и снаружи их уже не собрать. */}
       <section className="relative mx-auto max-w-[1120px] px-6 pb-20 md:pb-28">
-        <SectionTitle eyebrow="Услуги" title="Что мы делаем" />
         <ServicesAccordion groups={practice.serviceGroups} />
       </section>
 
       {/* 5. Продукты */}
       {products.length > 0 && (
         <section className="relative mx-auto max-w-[1120px] px-6 pb-20 md:pb-28">
-          <SectionTitle eyebrow="Готовые решения" title="Продукты" />
           <ProductsGrid products={products} practiceSlug={practice.slug} />
         </section>
       )}
 
-      {/* 6. Связанные кейсы */}
-      <section className="relative mx-auto max-w-[1120px] px-6 pb-20 md:pb-28">
-        <SectionTitle eyebrow="Практика в деле" title="Связанные кейсы" />
-        {cases.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2">
-            {cases.map((item) => (
-              <RelatedCaseCard key={item.slug} item={item} />
-            ))}
-          </div>
-        ) : (
-          <ComingSoonPanel title="Кейсы по этой практике" />
-        )}
-      </section>
+      {/* 6. Связанные кейсы — единственный блок во всю ширину экрана: у него
+          собственная заливка фона, и в колонке 1120px она читалась бы
+          случайной серой плашкой посреди страницы. */}
+      <div className="relative pb-20 md:pb-28">
+        <RelatedCasesShowcase cases={cases} />
+      </div>
 
       {/* 7. Публикации и аналитика */}
       <section className="relative mx-auto max-w-[1120px] px-6 pb-20 md:pb-28">
-        <SectionTitle eyebrow="Экспертиза" title="Публикации и аналитика" />
-        {articles.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2">
-            {articles.map((item) => (
-              <RelatedArticleCard key={item.title} item={item} />
-            ))}
-          </div>
-        ) : (
-          <ComingSoonPanel title="Публикации по этой практике" />
-        )}
+        <ArticlesInsights articles={articles} />
       </section>
 
       {/* 8. Кнопка обращения */}
       <section className="relative mx-auto max-w-[1120px] px-6 pb-28 md:pb-36">
         <div
           className="relative overflow-hidden rounded-[var(--radius-xl)] border p-9 md:p-12"
-          style={{
-            background: 'rgba(255,255,255,.64)',
-            borderColor: 'rgba(255,255,255,.85)',
-            backdropFilter: 'blur(8px)',
-            boxShadow: 'var(--shadow-card)',
-          }}
+          style={PANEL_STYLE}
         >
           <span
             aria-hidden
@@ -412,8 +322,6 @@ function PracticeView({ practice }: { practice: PracticeItem }) {
           </a>
         </div>
       </section>
-
-      </div>
     </main>
   )
 }
