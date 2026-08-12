@@ -30,6 +30,30 @@ import { CardArtwork } from './CardArtwork'
 const PIXEL_COLS = 12
 const PIXEL_ROWS = 8
 
+/* Геометрия волны наведения.
+
+   CUBE_STEP — задержка между соседними диагоналями, CUBE_IN/CUBE_OUT —
+   собственная вспышка одного кубика. Их соотношение и есть ширина гребня:
+   вспышка 0,35с при шаге 0,055с держит зажжёнными примерно шесть диагоналей
+   из восемнадцати, то есть треть карточки. Когда вспышка была длиннее прохода
+   (первый заход), к середине анимации горели все 96 кубиков разом — это
+   читалось не волной, а сеткой, накрывшей карточку.
+
+   CUBE_MIN_SCALE — масштаб кубика в покое. Уменьшенный кубик «отъезжает» от
+   соседей, между лайм-контурами появляется просвет, и карточка читается как
+   разбирающаяся на части, а не как наложенная поверх сетка. */
+const CUBE_STEP = 0.055
+const CUBE_IN = 0.13
+const CUBE_OUT = 0.22
+const CUBE_MIN_SCALE = 0.55
+
+/* Время прохода гребня по диагонали и полная длительность волны.
+   Ключевое свойство: в момент WAVE_TOTAL у САМОГО последнего кубика вспышка
+   тоже закончена, то есть конечное состояние волны — все кубики погашены.
+   На этом строится защита от залипания (см. useGSAP карточки). */
+const WAVE_TRAVEL = (PIXEL_ROWS - 1 + PIXEL_COLS - 1) * CUBE_STEP
+const WAVE_TOTAL = WAVE_TRAVEL + CUBE_IN + CUBE_OUT
+
 /* Опорная карточка колоды. Слаг, а не индекс: порядок продуктов в реестре
    ещё меняется, а «Стратегия кредитора» останется той же карточкой. Если слаг
    не найден (другая практика) — колода собирается вокруг средней карточки. */
@@ -294,7 +318,9 @@ function ProductCard({
   const pixelsRef = useRef<HTMLDivElement>(null)
   const magnetsRef = useRef<HTMLDivElement>(null)
   const ctaRef = useRef<HTMLSpanElement>(null)
-  const hoverRef = useRef<gsap.core.Timeline | null>(null)
+  const waveRef = useRef<gsap.core.Tween | null>(null)
+  const resetWaveRef = useRef<(() => void) | null>(null)
+  const ctaTweenRef = useRef<gsap.core.Timeline | null>(null)
   const moveTo = useRef<{ x: (v: number) => void; y: (v: number) => void }[]>([])
 
   const magnets = MAGNETIC_SETS[index % MAGNETIC_SETS.length]
@@ -311,51 +337,98 @@ function ProductCard({
         y: gsap.quickTo(square, 'y', { duration: 0.6, ease: 'power3.out' }),
       }))
 
-      /* Скрытое состояние пикселей задаёт GSAP, а не классы Tailwind, и это
-         принципиально: Tailwind 4 пишет `scale-0` в НАТИВНОЕ CSS-свойство
-         scale, а GSAP при первой же анимации выставляет туда `scale: none` и
-         переезжает в transform. Классом заданный ноль в этот момент пропадал,
-         GSAP читал текущий масштаб как 1 и анимировал 1 → 1: шторка не
-         появлялась вовсе. Отдаём оба свойства одному хозяину. */
       const blocks = gsap.utils.toArray<HTMLElement>('[data-pixel]', pixelsRef.current)
-      gsap.set(blocks, { scale: 0, opacity: 0 })
       gsap.set(ctaRef.current, { opacity: 0, y: 10 })
 
-      /* ОДНА timeline на карточку вместо пары независимых gsap.to на вход и
-         выход — и это лечит баг «карточка замирает наполовину закрашенной».
-         Раньше при быстром проведении курсором твины входа и выхода жили
-         одновременно: у обеих свой stagger, обе тянули одни и те же 96
-         блоков, и та, что завершалась второй, оставляла часть блоков в
-         промежуточном состоянии — с неё анимация уже не снималась.
-         Timeline проигрывается вперёд и отматывается назад; в какой бы момент
-         её ни развернули, она всегда доходит до одного из двух своих концов. */
-      hoverRef.current = gsap
+      /* ── Волна, которая ПРОХОДИТ по карточке и уходит ──────────────────
+
+         Первый заход был сделан «в лоб»: по два твина на кубик, сложенные в
+         одну timeline со сдвигом по диагонали. Работало, но давало 192 твина
+         на карточку и 1344 на блок — при быстром проведении курсором по сетке
+         GSAP не успевал их прокручивать, включалось сглаживание лага, и волны
+         доигрывали СЕКУНДАМИ позже: карточка, с которой курсор давно ушёл,
+         вдруг зажигалась сама по себе.
+
+         Теперь анимация одна на карточку — тикает единственный твин по
+         числовому времени, а раскладку кубиков считает paintWave(). Дешевле
+         на три порядка по количеству объектов GSAP и, что важнее, ПО ПОСТРОЕНИЮ
+         не может залипнуть: состояние кубиков — чистая функция от времени, а
+         не результат накопленных твинов. В точке WAVE_TOTAL вспышка последнего
+         кубика уже закончена, поэтому финал всегда один — сетка погашена.
+         Откуда бы волну ни перезапустили (restart), она пересчитывает всё с
+         нуля; onComplete дорисовывает финальный кадр принудительно. */
+      const starts = blocks.map((_, blockIndex) => {
+        const row = Math.floor(blockIndex / PIXEL_COLS)
+        const col = blockIndex % PIXEL_COLS
+        return (row + col) * CUBE_STEP
+      })
+
+      const paintWave = (time: number) => {
+        for (let i = 0; i < blocks.length; i += 1) {
+          const local = time - starts[i]
+          let k = 0
+          if (local > 0 && local < CUBE_IN + CUBE_OUT) {
+            k = local < CUBE_IN ? local / CUBE_IN : 1 - (local - CUBE_IN) / CUBE_OUT
+          }
+          const style = blocks[i].style
+          style.opacity = k === 0 ? '0' : `${k}`
+          style.transform = `scale(${CUBE_MIN_SCALE + (1 - CUBE_MIN_SCALE) * k})`
+        }
+      }
+
+      paintWave(WAVE_TOTAL) // исходное состояние = финальному, сетка погашена
+      resetWaveRef.current = () => paintWave(WAVE_TOTAL)
+
+      const cursor = { time: 0 }
+      // fromTo, а не to: каждый перезапуск обязан начинаться с нуля, иначе
+      // волна пойдёт от своего прошлого конца и не нарисует ничего.
+      // immediateRender: false — твин не должен рисовать кадр при создании.
+      waveRef.current = gsap.fromTo(
+        cursor,
+        { time: 0 },
+        {
+          time: WAVE_TOTAL,
+          duration: WAVE_TOTAL,
+          ease: 'none',
+          paused: true,
+          immediateRender: false,
+          onUpdate: () => paintWave(cursor.time),
+          onComplete: () => paintWave(WAVE_TOTAL),
+        },
+      )
+
+      /* Кнопка — своя короткая timeline, отдельная от волны: волна только
+         объявляет наведение и уходит, а кнопка держится всё время, пока
+         курсор на карточке. Её тоже собираем заранее и проигрываем вперёд/
+         назад, а не создаём твин в обработчике: так анимация принадлежит
+         gsap-контексту (сама снимется при размонтировании) и не может
+         зависнуть на промежуточной прозрачности при дёрганом наведении. */
+      ctaTweenRef.current = gsap
         .timeline({ paused: true })
-        .to(blocks, {
-          scale: 1,
-          opacity: 1,
-          duration: 0.26,
-          ease: 'power2.out',
-          // Диагональная волна от левого верхнего угла.
-          stagger: (blockIndex) => {
-            const row = Math.floor(blockIndex / PIXEL_COLS)
-            const col = blockIndex % PIXEL_COLS
-            return (row + col) * 0.016
-          },
-        })
-        .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, '-=0.22')
+        .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' })
     },
     { scope: rootRef, dependencies: [withPointerEffects] },
   )
 
   const setHover = (active: boolean) => {
-    const tl = hoverRef.current
-    if (!tl) return
-    // Уход быстрее прихода: «схлопывание» шторки не должно задерживать
-    // пользователя, который уже увёл курсор.
-    tl.timeScale(active ? 1 : 1.6)
-    if (active) tl.play()
-    else tl.reverse()
+    const wave = waveRef.current
+    if (active) {
+      // Волна запускается только на входе и всегда с нуля: догонять её
+      // реверсом нечего — она и так заканчивается погашенной сеткой.
+      wave?.restart()
+    } else if (wave && !wave.isActive()) {
+      // Страховка на уход курсора: если волна уже не идёт, дорисовываем
+      // финальный кадр. Стоит один проход по сетке и закрывает случай, когда
+      // твин был убит (перемонтирование, revert контекста) до onComplete.
+      resetWaveRef.current?.()
+    }
+
+    const cta = ctaTweenRef.current
+    if (!cta) return
+    // Уход быстрее прихода — курсор уже увели, задерживать нечем.
+    cta.timeScale(active ? 1 : 1.5)
+    if (active) cta.play()
+    else cta.reverse()
   }
 
   const handleMove = (event: React.PointerEvent<HTMLAnchorElement>) => {
@@ -402,16 +475,17 @@ function ProductCard({
       {/* 1. Фирменная подложка: лайм-градиент + контурная лого-скобка */}
       <CardArtwork variant={index} />
 
-      {/* 2. Кадр-концепт. Намеренно расфокусирован и приглушён: он здесь
-             фактура, а не иллюстрация — на нём не должно быть акцента.
-             При наведении гаснет ещё сильнее, чтобы не спорить со шторкой. */}
+      {/* 2. Кадр-концепт. Слегка расфокусирован и приглушён: он здесь фактура,
+             а не иллюстрация — на нём не должно быть акцента. При наведении
+             не меняется: волна кубиков проходит и уходит, карточка должна
+             вернуться ровно к спокойному виду. */}
       <Image
         src={CARD_IMAGES[index % CARD_IMAGES.length]}
         alt=""
         aria-hidden
         fill
         sizes="(max-width: 767px) 92vw, (max-width: 1023px) 46vw, 32vw"
-        className="scale-[1.08] object-cover opacity-[0.62] blur-[3px] transition-opacity duration-500 group-hover:opacity-[0.34] motion-reduce:transition-none"
+        className="scale-[1.05] object-cover opacity-[0.62] blur-[1.5px]"
       />
 
       {/* 3. Перелив — медленная полоса света поперёк кадра. Отрицательная
@@ -450,17 +524,21 @@ function ProductCard({
         ))}
       </div>
 
-      {/* 6. Пиксельная шторка: 12×8 блоков, накрывает карточку по диагонали.
-             Светлая, а не чёрная: инверсия в почти-чёрный гасила и кадр, и
-             фирменный лайм — карточка на светлом сайте превращалась в дыру.
-             Теперь волна ОСВЕТЛЯЕТ карточку, а каждый пятый блок идёт лаймом:
-             видно, что бегут именно квадраты, но гамма остаётся фирменной. */}
+      {/* 6. Сетка кубиков 12×8, по которой прокатывается волна наведения.
+             Кубик — пустой контур, а не залитый блок: заливка (сначала
+             чёрная, потом светлая) закрашивала и кадр, и фирменный лайм —
+             карточка на секунду превращалась в другую карточку. Прозрачная
+             середина плюс лайм-шов по краю читаются ровно тем, что нужно:
+             карточка со своим фоном на мгновение разбирается на кубики.
+
+             Лайм-шов даёт inset-тень в 1px по контуру, наружная — мягкое
+             свечение. Соседние кубики перекрываются на пиксель (см. ниже), их
+             контуры совпадают, и шов остаётся одной линией, а не двойной. */}
       {withPointerEffects && (
         <div ref={pixelsRef} aria-hidden className="pointer-events-none absolute inset-0">
           {Array.from({ length: PIXEL_COLS * PIXEL_ROWS }, (_, blockIndex) => {
             const row = Math.floor(blockIndex / PIXEL_COLS)
             const col = blockIndex % PIXEL_COLS
-            const isAccent = (row * PIXEL_COLS + col) % 5 === 0
             return (
               <span
                 key={blockIndex}
@@ -471,11 +549,12 @@ function ProductCard({
                   top: `${(row * 100) / PIXEL_ROWS}%`,
                   /* +1px к каждому блоку: доли процента (8.333%, 12.5%) после
                      округления браузером не сходятся, и между рядами
-                     просвечивали светлые щели. Лишний пиксель уходит под
+                     оставались рваные щели. Лишний пиксель уходит под
                      соседний блок, крайние — под overflow-hidden карточки. */
                   width: `calc(${100 / PIXEL_COLS}% + 1px)`,
                   height: `calc(${100 / PIXEL_ROWS}% + 1px)`,
-                  background: isAccent ? 'rgba(191,220,84,.9)' : 'rgba(250,252,244,.95)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(168,204,51,.95), 0 0 10px rgba(191,220,84,.35)',
                 }}
               />
             )
@@ -483,9 +562,9 @@ function ProductCard({
         </div>
       )}
 
-      {/* 7. Подпись действия — лайм-кнопка поверх шторки. Появление ведёт
-             timeline наведения (см. выше), а не CSS-переход: иначе кнопка
-             успевала проступить раньше шторки и первые кадры висела в воздухе. */}
+      {/* 7. Подпись действия — лайм-кнопка. Живёт отдельно от волны и не
+             исчезает вместе с ней: волна лишь объявляет наведение, а кнопка
+             держится всё время, пока курсор на карточке. */}
       {withPointerEffects && (
         <span className="pointer-events-none absolute inset-x-0 top-0 bottom-[76px] z-10 flex items-center justify-center">
           <span
@@ -499,10 +578,12 @@ function ProductCard({
         </span>
       )}
 
-      {/* 8. Плашка с названием — скруглённая и отступившая от краёв карточки:
-             прижатая в угол прямоугольная плашка спорила со скруглением самой
-             карточки. Остаётся читаемой поверх шторки. */}
-      <span className="absolute bottom-4 left-4 z-20 block max-w-[86%] rounded-[14px] bg-[var(--color-surface)] px-4 py-3">
+      {/* 8. Плашка с названием — в самом левом нижнем углу карточки, без
+             отступа: отодвинутая от краёв, она висела в поле кадра отдельным
+             объектом. Скругления сохранены — снизу слева повторяет радиус
+             карточки, сверху справа своё; прямых углов, из-за которых плашку
+             и просили скруглить, не осталось. */}
+      <span className="absolute bottom-0 left-0 z-20 block max-w-[88%] rounded-br-none rounded-bl-[var(--radius-md)] rounded-tl-none rounded-tr-[16px] bg-[var(--color-surface)] px-4 py-3">
         <span className="block font-heading text-base font-extrabold leading-snug tracking-[-0.01em] text-[var(--color-text)] md:text-lg">
           {product.title}
         </span>
