@@ -356,3 +356,92 @@ body {
     transform: translate3d(0, -6px, 0);
   }
 }
+
+/* ── Переворот карточки кейса ────────────────────────────────────────────
+   Карточка «Связанных кейсов» при наведении переворачивается через ребро и
+   довинчивается по своей оси — на обороте чёрная панель с категорией, годом,
+   названием дела и кнопкой перехода, которая всплывает снизу с задержкой.
+
+   Довинчивание урезано с четверти оборота (как в референсе) до 6°: референсная
+   карточка вертикальная и почти квадратная, ей поворот на 90° ничего не ломает,
+   а наша — 16/10 и стоит в сетке. Развёрнутая на 90°, она вылезала бы за свою
+   ячейку на две сотни пикселей и наезжала на текст соседних карточек. Шесть
+   градусов плюс scale(0.94) удерживают карточку в габаритах ячейки: остаётся
+   ровно тот же жест «карту повернули в руке», без поломанной вёрстки.
+
+   Ховер-правила закрыты в @media (hover: hover): на тач-экранах :hover
+   залипает после тапа, и карточка уезжала бы в перевёрнутое состояние прямо
+   на переходе по ссылке. */
+.case-flip-scene {
+  perspective: 1400px;
+}
+
+.case-flip-inner {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 900ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.case-flip-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  /* -webkit- дубль нужен Safari: без него оборот просвечивает сквозь лицо */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.case-flip-face-back {
+  transform: rotateY(180deg);
+}
+
+/* Кнопка на обороте — всплывает снизу уже после того, как карточка довернулась
+   (задержка 380ms при повороте 900ms). Приём из референса, где кнопки ответа
+   выезжают из-под карточки. */
+.case-flip-cta {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 420ms ease-out 380ms,
+    transform 420ms cubic-bezier(0.2, 0.75, 0.25, 1) 380ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .case-flip:hover .case-flip-inner {
+    transform: rotateY(180deg) rotate(6deg) scale(0.94);
+  }
+
+  .case-flip:hover .case-flip-cta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Клавиатура: карточка — ссылка, фокус приходит на неё же, поэтому оборот
+   должен открываться и без мыши. */
+.case-flip:focus-visible .case-flip-inner {
+  transform: rotateY(180deg) rotate(6deg) scale(0.94);
+}
+
+.case-flip:focus-visible .case-flip-cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Блок стоит последним намеренно: правила ниже гасят ховер-состояния выше при
+   равной специфичности. */
+@media (prefers-reduced-motion: reduce) {
+  .case-flip-inner,
+  .case-flip-cta {
+    transition: none;
+  }
+
+  .case-flip:hover .case-flip-inner,
+  .case-flip:focus-visible .case-flip-inner {
+    transform: none;
+  }
+}

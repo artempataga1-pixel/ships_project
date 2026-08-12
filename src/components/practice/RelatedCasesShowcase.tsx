@@ -49,61 +49,97 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
   return (
     <Link
       href={`/cases/${item.slug}`}
-      className="group flex h-full flex-col focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-lime-ink)]"
+      className="case-flip group flex h-full flex-col rounded-[20px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-lime-ink)]"
     >
-      {/* Медиа-область: заблюренный кадр, поверх него — заголовок кейса.
-          Раньше здесь лежала только фирменная графика, а заголовок стоял под
-          карточкой; по правке заказчика заголовок переехал НА кадр, чтобы
-          картинка перестала быть самостоятельным акцентом и стала подложкой.
+      {/* Медиа-область: двусторонняя карточка. Лицо — заблюренный кадр с
+          заголовком поверх (заголовок переехал НА кадр по правке заказчика,
+          чтобы картинка стала подложкой, а не самостоятельным акцентом).
 
-          Наведение — свой сюжет, не тот, что у продуктов: кадр наводится на
-          резкость и подъезжает, по карточке один раз проходит косой блик,
-          заголовок приподнимается. Пиксельной волны здесь нет намеренно. */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[20px] border border-[var(--color-line)] transition-colors duration-300 group-hover:border-[var(--color-lime)] motion-reduce:transition-none">
-        <CardArtwork variant={index} />
+          Наведение — переворот через ребро на чёрный оборот: там категория,
+          год, название дела и кнопка перехода. Прежний сюжет (наводка на
+          резкость + косой блик) снят: под переворотом его всё равно не видно,
+          а лишние transition на том же элементе дёргали карточку.
 
-        <Image
-          src={CASE_IMAGES[index % CASE_IMAGES.length]}
-          alt=""
-          aria-hidden
-          fill
-          sizes="(max-width: 767px) 92vw, (max-width: 1023px) 46vw, 34vw"
-          className="scale-[1.08] object-cover opacity-95 blur-[4px] transition-[filter,transform,opacity] duration-700 ease-out group-hover:scale-[1.14] group-hover:blur-[1px] motion-reduce:transition-none"
-        />
+          z-10 на сцене — потому что довёрнутая на 6° карточка выходит за свою
+          ячейку примерно на 15px книзу и без него ныряла бы под описание. */}
+      <div className="case-flip-scene relative z-10 aspect-[16/10] w-full">
+        <div className="case-flip-inner">
+          {/* ЛИЦО */}
+          <div className="case-flip-face border border-[var(--color-line)]">
+            <CardArtwork variant={index} />
 
-        {/* Светлая вуаль — плотнее книзу: заголовок тёмный, и без неё он
-            тонул бы в светлых участках кадра. */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.5) 54%, rgba(255,255,255,.9) 100%)',
-          }}
-        />
+            <Image
+              src={CASE_IMAGES[index % CASE_IMAGES.length]}
+              alt=""
+              aria-hidden
+              fill
+              sizes="(max-width: 767px) 92vw, (max-width: 1023px) 46vw, 34vw"
+              className="scale-[1.08] object-cover opacity-95 blur-[4px]"
+            />
 
-        {/* Косой блик — проходит по карточке один раз за наведение */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-12 -translate-x-[220%] transition-transform duration-[900ms] ease-out group-hover:translate-x-[560%] motion-reduce:transition-none"
-          style={{
-            background:
-              'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.75) 45%, rgba(226,243,168,.6) 60%, rgba(255,255,255,0) 100%)',
-          }}
-        />
+            {/* Светлая вуаль — плотнее книзу: заголовок тёмный, и без неё он
+                тонул бы в светлых участках кадра. */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.5) 54%, rgba(255,255,255,.9) 100%)',
+              }}
+            />
 
-        <span className="absolute left-5 top-4 z-10 inline-flex items-center gap-2.5 rounded-md bg-[var(--color-surface)] px-3 py-1.5 font-heading text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-text)]">
-          {item.category}
-          <i
+            <span className="absolute left-5 top-4 z-10 inline-flex items-center gap-2.5 rounded-md bg-[var(--color-surface)] px-3 py-1.5 font-heading text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-text)]">
+              {item.category}
+              <i
+                aria-hidden
+                className="block h-[8px] w-[8px] rounded-[2px] bg-[var(--color-lime)]"
+                style={{ boxShadow: '0 0 12px var(--color-lime-glow)' }}
+              />
+            </span>
+
+            <h3 className="absolute inset-x-5 bottom-5 z-10 font-heading text-lg font-extrabold leading-snug tracking-[-0.01em] text-[var(--color-text)] md:text-xl">
+              {item.title}
+            </h3>
+          </div>
+
+          {/* ОБОРОТ. aria-hidden — всё, что здесь написано, уже есть на лице и
+              в тексте под карточкой; без него скринридер зачитывал бы ссылку
+              дважды. Ничего уникального сюда не кладём намеренно: на тач-
+              экранах оборота нет, и содержательный текст там был бы потерян. */}
+          <div
             aria-hidden
-            className="block h-[8px] w-[8px] rounded-[2px] bg-[var(--color-lime)]"
-            style={{ boxShadow: '0 0 12px var(--color-lime-glow)' }}
-          />
-        </span>
+            className="case-flip-face case-flip-face-back flex flex-col justify-between border border-[var(--color-lime)] bg-[var(--color-black)] p-6"
+          >
+            <span
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  'radial-gradient(122% 92% at 84% 6%, rgba(185,230,41,.22), transparent 62%)',
+              }}
+            />
 
-        <h3 className="absolute inset-x-5 bottom-5 z-10 font-heading text-lg font-extrabold leading-snug tracking-[-0.01em] text-[var(--color-text)] transition-transform duration-500 ease-out group-hover:-translate-y-1 motion-reduce:transition-none md:text-xl">
-          {item.title}
-        </h3>
+            <div className="relative flex items-center justify-between gap-4">
+              <span className="font-heading text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-lime)]">
+                {item.category}
+              </span>
+              <span className="text-xs font-medium tabular-nums text-white/55">{item.year}</span>
+            </div>
+
+            <p className="relative max-w-[22ch] font-heading text-lg font-extrabold leading-snug tracking-[-0.01em] text-white md:text-xl">
+              {item.title}
+            </p>
+
+            <span className="case-flip-cta relative inline-flex items-center gap-3 font-heading text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-lime)]">
+              Смотреть кейс
+              <i
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--color-lime)] text-sm not-italic text-[var(--color-black)]"
+                style={{ boxShadow: '0 0 18px var(--color-lime-glow)' }}
+              >
+                →
+              </i>
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Под карточкой — описание. Кегль поднят с 13px до 16px: в прежнем
