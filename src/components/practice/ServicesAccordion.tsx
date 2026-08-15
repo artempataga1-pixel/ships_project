@@ -180,13 +180,13 @@ export function ServicesAccordion({ groups }: { groups: PracticeServiceGroup[] }
           при любой правке отступов. */}
       <div className="mb-12 flex flex-col items-center text-center">
         <RevealOnScroll>
-          {/* Кегль пилюли поднят в полтора раза относительно референса
-              (0.75rem → 1.125rem) — в исходном размере надстрочная метка
-              терялась рядом с заголовком блока. Паддинги и точка выросли в той
-              же пропорции, иначе пилюля жмёт текст. */}
-          <span className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-[1.125rem] py-1.5 text-[1.125rem] font-medium leading-none text-[var(--color-text)]">
+          {/* Кегль пилюли поднят ещё раз по правке заказчика после пилота:
+              0.75rem → 1.125rem → 1.375rem. На фоне живого видео и декора
+              героя лёгкий (font-medium) текст в 18px терялся; вес поднят до
+              semibold, паддинги и точка выросли в той же пропорции. */}
+          <span className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-[1.35rem] py-2 text-[1.375rem] font-semibold leading-none text-[var(--color-text)]">
             <span
-              className="h-2 w-2 rounded-full bg-[var(--color-lime)]"
+              className="h-2.5 w-2.5 rounded-full bg-[var(--color-lime)]"
               style={{ boxShadow: '0 0 10px var(--color-lime-glow)' }}
             />
             Услуги

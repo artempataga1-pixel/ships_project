@@ -633,11 +633,11 @@ export function ProductsGrid({
         <div className="relative mx-auto max-w-3xl text-center">
           <RevealOnScroll>
             {/* Пилюля-бейдж вместо прежней тёмной плашки — тот же элемент, что
-                над заголовком «Что мы делаем», и в том же увеличенном кегле:
-                два соседних блока страницы должны читаться одной системой. */}
-            <span className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-[1.125rem] py-1.5 text-[1.125rem] font-medium leading-none text-[var(--color-text)]">
+                над заголовком «Что мы делаем», и в том же кегле: два соседних
+                блока страницы должны читаться одной системой. */}
+            <span className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-[1.35rem] py-2 text-[1.375rem] font-semibold leading-none text-[var(--color-text)]">
               <span
-                className="h-2 w-2 rounded-full bg-[var(--color-lime)]"
+                className="h-2.5 w-2.5 rounded-full bg-[var(--color-lime)]"
                 style={{ boxShadow: '0 0 10px var(--color-lime-glow)' }}
               />
               Продукты
