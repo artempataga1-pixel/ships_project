@@ -1,6 +1,10 @@
-import type { Practice, PracticeArea } from '@/types/content'
+import type { LegacyPractice, PracticeArea } from '@/types/content'
 
-export const PRACTICES: Practice[] = [
+/* PRACTICES кормит орбиту «Наши компетенции» (CompetenciesSection и
+   CompetenciesOrbitCompact), а НЕ блок практик — см. мину №3 в плане.
+   Шаг 1.5 оставил массив как есть: до шага 2.2 орбите нужен рабочий
+   источник, а там он целиком заменяется на KEY_COMPETENCIES. */
+export const PRACTICES: LegacyPractice[] = [
   {
     title: 'Банкротство',
     products: ['Банкротство физлиц', 'Банкротство юрлиц'],
@@ -34,6 +38,11 @@ export const PRACTICE_QUOTES = [
   'Мы берём дело только тогда, когда готовы довести его до результата.',
 ]
 
+/* СТАРЫЙ реестр практик — остался только под горизонтальный коллаж на главной
+   (PracticesSection). Страницы /practices/[slug] с шага 1.5 живут исключительно
+   на PRACTICE_ITEMS, а на эти шесть слагов встали 301-редиректы в next.config.ts.
+   Удаляется целиком в шаге 1.6 вместе с фото public/reference3/practice-*.webp,
+   когда карточки коллажа переедут на новый реестр. */
 export const PRACTICE_AREAS: PracticeArea[] = [
   {
     num: '01',

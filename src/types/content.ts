@@ -59,12 +59,17 @@ export interface TeamMember {
   panelSide?: 'left' | 'right'
 }
 
-export interface Practice {
+/* Карточка орбиты в разделе «Наши компетенции» (PRACTICES в practice.ts).
+   Имя Practice освобождено под основной тип практики — см. ниже.
+   Удаляется в шаге 2.2 плана: орбита переезжает на KeyCompetency. */
+export interface LegacyPractice {
   title: string
   products: string[]
 }
 
-/* Карточка практики в горизонтальном коллаже (референс landonorris.com) */
+/* Карточка практики в горизонтальном коллаже (референс landonorris.com).
+   Удаляется в шаге 1.6 вместе с PRACTICE_AREAS — до тех пор её читает
+   PracticesSection на главной. */
 export interface PracticeArea {
   /* порядковый номер для подписи над фото — «01», «02», … */
   num: string
@@ -83,12 +88,12 @@ export interface PracticeArea {
   imageRatio: string
 }
 
-/* ── Новый контент-слой раздела «Практики» ────────────────────────────
+/* ── Контент-слой раздела «Практики» ──────────────────────────────────
    Нормализованная структура «практика ↔ продукт ↔ кейс ↔ статья»: связи
    many-to-many через массивы id, ноль дублирования текста. Спроектирована
    так, чтобы 1-в-1 лечь на будущую headless CMS.
-   Пока сосуществует со старыми Practice/PracticeArea (их ещё читает главная);
-   старые уйдут в волне 1, тогда PracticeItem переименуется в Practice. */
+   Шаг 1.5: это основной и единственный источник страниц /practices/[slug];
+   старый PracticeArea остался только под коллаж на главной (уйдёт в 1.6). */
 
 /* Смысловая группа внутри блока «Что мы делаем» — заголовок + пункты.
    Пункты выводятся дословно из документа заказчика, не переписываются. */
@@ -97,7 +102,7 @@ export interface PracticeServiceGroup {
   items: string[]
 }
 
-export interface PracticeItem {
+export interface Practice {
   /* Ключ связей (productIds/practiceIds). Сейчас совпадает со slug, но
      разведён намеренно: slug — публичный URL, его можно поменять, id — нет. */
   id: string
@@ -150,7 +155,7 @@ export interface MediaItem {
   image: string
   /* ссылка на реальную публикацию в источнике; пока не расставлена — кнопка "Читать" неактивна */
   url?: string
-  /* id практик, к которым относится публикация (PracticeItem.id) */
+  /* id практик, к которым относится публикация (Practice.id) */
   practiceIds?: string[]
 }
 
@@ -163,7 +168,7 @@ export interface CaseStudy {
   year: string
   /* 1–2 предложения для отдельной страницы кейса */
   summary: string
-  /* id практик, к которым относится кейс (PracticeItem.id) */
+  /* id практик, к которым относится кейс (Practice.id) */
   practiceIds?: string[]
 }
 

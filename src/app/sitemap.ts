@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/site'
-import { PRACTICE_AREAS } from '@/constants/content/practice'
+import { getPracticesSorted } from '@/lib/content'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -12,7 +12,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ]
 
-  const practiceRoutes: MetadataRoute.Sitemap = PRACTICE_AREAS.map((practice) => ({
+  /* Пять актуальных практик из реестра PRACTICE_ITEMS. Старые слаги
+     (arbitration, bankruptcy, …) в карту сайта не попадают — на них стоят
+     301-редиректы в next.config.ts. */
+  const practiceRoutes: MetadataRoute.Sitemap = getPracticesSorted().map((practice) => ({
     url: `${SITE_URL}/practices/${practice.slug}`,
     lastModified: now,
     changeFrequency: 'monthly',

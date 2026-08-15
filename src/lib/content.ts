@@ -1,4 +1,4 @@
-import type { CaseStudy, MediaItem, PracticeItem, Product } from '@/types/content'
+import type { CaseStudy, MediaItem, Practice, Product } from '@/types/content'
 import { PRACTICE_ITEMS } from '@/constants/content/practices'
 import { PRODUCTS } from '@/constants/content/products'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
@@ -8,11 +8,11 @@ import { MEDIA } from '@/constants/content/media'
    которую вёрстка ходит за связями «практика ↔ продукт ↔ кейс ↔ статья».
    Когда контент переедет в CMS, меняется только реализация этих функций. */
 
-export function getPracticesSorted(): PracticeItem[] {
+export function getPracticesSorted(): Practice[] {
   return [...PRACTICE_ITEMS].sort((a, b) => a.order - b.order)
 }
 
-export function getPracticeBySlug(slug: string): PracticeItem | undefined {
+export function getPracticeBySlug(slug: string): Practice | undefined {
   return PRACTICE_ITEMS.find((p) => p.slug === slug)
 }
 
@@ -29,7 +29,7 @@ export function getProductsForPractice(practiceId: string): Product[] {
 
 /* Обратная связь many-to-many: один продукт может относиться к нескольким
    практикам (см. схлопывание дубликатов «Второе мнение…» в шаге 1.4). */
-export function getPracticesForProduct(productId: string): PracticeItem[] {
+export function getPracticesForProduct(productId: string): Practice[] {
   const product = PRODUCTS.find((p) => p.id === productId)
   if (!product) return []
   return getPracticesSorted().filter((practice) => product.practiceIds.includes(practice.id))
