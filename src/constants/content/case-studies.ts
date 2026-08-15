@@ -21,6 +21,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     year: '2023',
     summary:
       'Представляли доверителя в международном арбитраже по спору акционеров на 18 млн €. Дело завершилось мировым соглашением на выгодных для клиента условиях.',
+    practiceIds: ['korporativnoe-pravo'],
   },
   {
     slug: 'subsidiarnaya-otvetstvennost',
@@ -42,5 +43,6 @@ export const CASE_STUDIES: CaseStudy[] = [
     year: '2024',
     summary:
       'Оспорили доначисления по итогам выездной налоговой проверки на 780 млн ₽. Решение инспекции отменено в судебном порядке в полном объёме.',
+    practiceIds: ['sudebnye-spory'],
   },
 ]
