@@ -445,3 +445,110 @@ body {
     transform: none;
   }
 }
+
+/* ── Переворот карточки практики (коллаж на главной) ──────────────────────
+   Отдельный блок, а не расширение .case-flip*: на тех классах висят карточки
+   кейсов на всех пяти страницах практик, и правки под коллаж их бы задели.
+
+   Отличий от кейсов три: (1) переворот чистый, без довинчивания и scale —
+   карточка едет в горизонтальном пине, любой лишний масштаб на ней читается
+   как рывок; (2) состояние переворота дублировано атрибутом data-flipped —
+   им управляет тап на тач-экранах, где :hover залипает; (3) при reduced
+   motion оборот всё-таки показывается — просто мгновенной сменой граней, без
+   вращения (у кейсов оборот в этом режиме не открывается вовсе, но там весь
+   текст оборота продублирован в карточке под фото, а здесь — нет). */
+.practice-flip-scene {
+  perspective: 1500px;
+}
+
+.practice-flip-inner {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 750ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.practice-flip-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  /* -webkit- дубль нужен Safari: без него оборот просвечивает сквозь лицо */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.practice-flip-face-back {
+  transform: rotateY(180deg);
+  /* пока карточка не перевёрнута, оборот не должен ловить тапы — на iOS
+     скрытая грань иногда всё равно перехватывает касание */
+  pointer-events: none;
+}
+
+.practice-flip[data-flipped='true'] .practice-flip-inner {
+  transform: rotateY(180deg);
+}
+
+.practice-flip[data-flipped='true'] .practice-flip-face-back {
+  pointer-events: auto;
+}
+
+.practice-flip[data-flipped='true'] .practice-flip-face-front {
+  pointer-events: none;
+}
+
+/* Десктоп: переворот по наведению. Закрыто в (hover: hover) — на тач-экранах
+   :hover залипает после тапа и спорит с data-flipped. */
+@media (hover: hover) and (pointer: fine) {
+  .practice-flip:hover .practice-flip-inner,
+  .practice-flip:focus-within .practice-flip-inner {
+    transform: rotateY(180deg);
+  }
+}
+
+/* Блок стоит последним намеренно: правила ниже гасят ховер-состояния выше при
+   равной специфичности. */
+@media (prefers-reduced-motion: reduce) {
+  .practice-flip-inner {
+    transition: none;
+    transform: none !important;
+  }
+
+  /* Без вращения грани нужно показывать напрямую: back развёрнут обратно,
+     backface снова видима, переключение — по opacity. */
+  .practice-flip-face {
+    -webkit-backface-visibility: visible;
+    backface-visibility: visible;
+    transition: none;
+  }
+
+  .practice-flip-face-back {
+    transform: none;
+    opacity: 0;
+  }
+
+  .practice-flip[data-flipped='true'] .practice-flip-face-back {
+    opacity: 1;
+  }
+
+  .practice-flip[data-flipped='true'] .practice-flip-face-front {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (hover: hover) and (pointer: fine) {
+  /* pointer-events у оборота намеренно остаются none: на десктопе кликабельно
+     лицо (оно же ссылка на практику), и клик обязан доходить до него сквозь
+     видимый, но насквозь прозрачный для мыши оборот. */
+  .practice-flip:hover .practice-flip-face-back,
+  .practice-flip:focus-within .practice-flip-face-back {
+    opacity: 1;
+  }
+
+  .practice-flip:hover .practice-flip-face-front,
+  .practice-flip:focus-within .practice-flip-face-front {
+    opacity: 0;
+  }
+}

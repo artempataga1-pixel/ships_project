@@ -171,19 +171,16 @@ function PracticeView({ practice }: { practice: Practice }) {
         <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col gap-12 px-6 pb-16 pt-36 sm:px-8 md:pb-20 md:pt-44 xl:flex-row xl:items-start xl:justify-between xl:gap-14">
           {/* ── Левая колонка: возврат, бейдж, название, краткое описание ── */}
           <div className="xl:max-w-[53%] xl:shrink">
-            {/* ЭТАП 0: возврат ведёт на раздел «Практики» целиком, а не на карточку.
-                Карточки главной пока живут на старых слагах (practice-bankruptcy
-                и т.д.) — якоря #practice-bankrotstvo на главной ещё нет, и переход
-                по нему просто оставлял пользователя в самом верху страницы.
-                ШАГ 1.6: когда коллаж переедет на новые слаги, вернуть
-                href={`/#practice-${practice.slug}`} — точный возврат к карточке.
+            {/* Возврат приземляет ровно на карточку этой практики: с шага 1.6
+                коллаж на главной живёт на тех же слагах и держит якоря
+                id="practice-<slug>".
 
                 scroll={false} — свой скролл делает HomeAnchorScroll на главной
                 (с повторными попытками, пока раскладка не устаканится); встроенный
                 hash-scroll Next.js делает это одним ранним прыжком и гонится с ним,
                 из-за чего страница иногда оставалась в самом верху. */}
             <Link
-              href="/#practices"
+              href={`/#practice-${practice.slug}`}
               scroll={false}
               className="btn-lime-fill inline-flex h-11 items-center justify-center rounded-md px-6 text-sm font-semibold"
             >

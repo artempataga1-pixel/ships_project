@@ -4,9 +4,13 @@ import type { Practice } from '@/types/content'
    заказчика; правки относительно документа (ё-фикация, тире) выписаны в
    doks/pravki-tekstov.md.
 
-   С шага 1.5 это единственный источник страниц /practices/[slug] и sitemap.
-   Главная (горизонтальный коллаж) переезжает на него в шаге 1.6 — пока она
-   ещё читает старый PRACTICE_AREAS.
+   С шага 1.5 это единственный источник страниц /practices/[slug] и sitemap,
+   с шага 1.6 — и горизонтального коллажа на главной (PracticesSection).
+   Старый PRACTICE_AREAS удалён.
+
+   Фото (image/imageRatio) — стоковые кадры из public/reference3/. Привязка
+   снимка к практике наша, смысловая; заказчику вынесена на согласование
+   вместе с волной 1. practice-6.webp остался незанятым — запасной.
 
    Смысловые группы в serviceGroups — наша разбивка перечня «Что мы делаем»,
    а не деление заказчика. Названия групп идут заказчику на согласование.
@@ -78,6 +82,8 @@ export const PRACTICE_ITEMS: Practice[] = [
       'vtoroe-mnenie-po-obosoblennomu-sporu',
       'zashchita-semi-sobstvennika',
     ],
+    image: '/reference3/practice-2.webp',
+    imageRatio: '3/2',
   },
   {
     id: 'korporativnoe-pravo',
@@ -148,6 +154,8 @@ export const PRACTICE_ITEMS: Practice[] = [
       'peredacha-biznesa-naslednikam',
       'vtoroe-mnenie-po-korporativnomu-sporu',
     ],
+    image: '/reference3/practice-3.webp',
+    imageRatio: '10/13',
   },
   {
     id: 'stroitelstvo-zemlya-nedvizhimost',
@@ -222,6 +230,11 @@ export const PRACTICE_ITEMS: Practice[] = [
       'pravovoy-audit-problemnogo-proekta',
       'zashchita-investora-v-problemnom-proekte',
     ],
+    /* practice-4 (призма), а не practice-6 из плана: на шестом кадре крупно
+       нарисован знак ®, он остался от старой карточки «IP и бренды» и на
+       строительной практике читается как чужой смысл. */
+    image: '/reference3/practice-4.webp',
+    imageRatio: '4/3',
   },
   {
     id: 'sudebnye-spory',
@@ -289,6 +302,8 @@ export const PRACTICE_ITEMS: Practice[] = [
       'strategiya-vzyskaniya-i-ispolneniya-resheniya',
       'upravlenie-kompleksnym-sudebnym-proektom',
     ],
+    image: '/reference3/practice-1.webp',
+    imageRatio: '2/3',
   },
   {
     id: 'semeynoe-nasledstvennoe-pravo',
@@ -357,5 +372,7 @@ export const PRACTICE_ITEMS: Practice[] = [
       'uregulirovanie-konflikta-mezhdu-naslednikami',
       'peredacha-semeynogo-biznesa-sleduyushchemu-pokoleniyu',
     ],
+    image: '/reference3/practice-5.webp',
+    imageRatio: '9/16',
   },
 ]
