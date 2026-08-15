@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import type { MediaItem } from '@/types/content'
-import { BlurIn } from '@/components/ui/BlurIn'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { ComingSoonPanel } from './ComingSoonPanel'
 
@@ -105,27 +104,48 @@ function ArticleCard({ item, index }: { item: MediaItem; index: number }) {
 export function ArticlesInsights({ articles }: { articles: MediaItem[] }) {
   return (
     <div className="flex flex-col gap-12 md:gap-[90px]">
-      <div className="flex max-w-[517px] flex-col gap-8 md:gap-10">
-        <BlurIn>
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-lime-ink)]">
-            Экспертиза
-          </p>
-          <h2 className="font-heading text-[clamp(1.6rem,3.2vw,2.5rem)] font-black leading-[1.05] tracking-[-0.03em] text-[var(--color-text)]">
-            Публикации и аналитика
-          </h2>
-        </BlurIn>
+      {/* Появление блока переехало на сюжет branding-референса: две строки
+          шапки выходят снизу по очереди (y 20, 0.7с, вторая с задержкой 0.1с),
+          лид — с задержкой 0.4с, карточки — каскадом с шагом 0.15с начиная с
+          0.6с. Ease референса — cubic-bezier(0.22,1,0.36,1), это easeOutQuint;
+          берём штатный expo.out вместо подключения CustomEase.
 
-        {/* Лид намеренно без анимации — как в референсе: если проявляется и
-            заголовок, и подпись под ним, блок начинает мерцать по частям. */}
-        <p className="max-w-[42ch] text-base text-[var(--color-muted)] md:text-lg">
-          Комментарии юристов фирмы и разборы практики в профильных и деловых изданиях.
-        </p>
+          Прежний BlurIn на шапке снят: проявление из размытия без движения не
+          складывается с новым ритмом блока — заголовок «наводился на резкость»,
+          пока всё остальное выезжало снизу. */}
+      <div className="flex max-w-[517px] flex-col gap-8 md:gap-10">
+        <div>
+          <RevealOnScroll y={20} duration={0.7} blur={0} ease="expo.out">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-lime-ink)]">
+              Экспертиза
+            </p>
+          </RevealOnScroll>
+          <RevealOnScroll delay={0.1} y={20} duration={0.7} blur={0} ease="expo.out">
+            <h2 className="font-heading text-[clamp(1.6rem,3.2vw,2.5rem)] font-black leading-[1.05] tracking-[-0.03em] text-[var(--color-text)]">
+              Публикации и аналитика
+            </h2>
+          </RevealOnScroll>
+        </div>
+
+        <RevealOnScroll delay={0.4} y={20} duration={0.7} blur={0} ease="expo.out">
+          <p className="max-w-[42ch] text-base text-[var(--color-muted)] md:text-lg">
+            Комментарии юристов фирмы и разборы практики в профильных и деловых изданиях.
+          </p>
+        </RevealOnScroll>
       </div>
 
       {articles.length > 0 ? (
         <div className="flex flex-col items-stretch gap-5 lg:flex-row lg:items-end">
           {articles.map((item, index) => (
-            <RevealOnScroll key={item.title} delay={index * 0.2} className="flex min-w-0 flex-1">
+            <RevealOnScroll
+              key={item.title}
+              delay={0.6 + index * 0.15}
+              y={24}
+              duration={0.7}
+              blur={0}
+              ease="expo.out"
+              className="flex min-w-0 flex-1"
+            >
               {/* Парение в покое живёт на отдельной обёртке, а не на самой
                   карточке: RevealOnScroll пишет transform в свой div, hover
                   карточки — в свой, и третья анимация на любом из них просто

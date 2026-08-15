@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { gsap } from '@/lib/gsap'
+import { INTRO_DONE_EVENT } from '@/lib/introGate'
 
 export function LogoIntro() {
   const [visible, setVisible] = useState(true)
@@ -10,12 +11,18 @@ export function LogoIntro() {
   const tlRef = useRef<gsap.core.Timeline | null>(null)
   const dismissed = useRef(false)
 
+  /* Сигнал «оверлей ушёл» — по нему стартуют анимации героя (см.
+     src/lib/introGate.ts). Без него они отыгрывали под оверлеем, и на прямом
+     заходе пользователь видел уже готовый статичный текст. */
+  const announceDone = () => window.dispatchEvent(new Event(INTRO_DONE_EVENT))
+
   const dismiss = () => {
     if (dismissed.current) return
     dismissed.current = true
     tlRef.current?.progress(1)
     sessionStorage.setItem('logo-intro-played', '1')
     setVisible(false)
+    announceDone()
   }
 
   useEffect(() => {
@@ -23,6 +30,7 @@ export function LogoIntro() {
     if (sessionStorage.getItem('logo-intro-played')) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- намеренный one-shot session-gate: интро раз за сессию
       setVisible(false)
+      announceDone()
       return
     }
 
@@ -30,6 +38,7 @@ export function LogoIntro() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       sessionStorage.setItem('logo-intro-played', '1')
       setVisible(false)
+      announceDone()
       return
     }
 
@@ -83,6 +92,7 @@ export function LogoIntro() {
       onComplete: () => {
         sessionStorage.setItem('logo-intro-played', '1')
         setVisible(false)
+        announceDone()
       },
     })
 

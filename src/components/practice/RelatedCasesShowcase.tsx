@@ -2,11 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRef } from 'react'
-import { useGSAP } from '@gsap/react'
-import { gsap } from '@/lib/gsap'
 import type { CaseStudy } from '@/types/content'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
+import { Typewriter } from '@/components/ui/Typewriter'
 import { CardArtwork } from './CardArtwork'
 import { ComingSoonPanel } from './ComingSoonPanel'
 
@@ -98,7 +96,12 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
             </span>
 
             <h3 className="absolute inset-x-5 bottom-5 z-10 font-heading text-lg font-extrabold leading-snug tracking-[-0.01em] text-[var(--color-text)] md:text-xl">
-              {item.title}
+              {/* as="span" — обёртка стоит внутри заголовка, а не вокруг него:
+                  h3 позиционирован абсолютно по кадру, и лишний блочный
+                  контейнер снаружи сбил бы привязку к нижнему краю. */}
+              <Typewriter as="span" delay={0.35} speed={0.012} maxDuration={0.8}>
+                {item.title}
+              </Typewriter>
             </h3>
           </div>
 
@@ -146,7 +149,9 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
           размере текст читался подписью к картинке, хотя именно он объясняет,
           что за дело было. */}
       <p className="mt-5 px-1 text-base leading-[1.6] text-[var(--color-text)] md:text-[1.0625rem] md:leading-[1.65]">
-        {item.summary}
+        <Typewriter as="span" delay={0.5} speed={0.012} maxDuration={1.1}>
+          {item.summary}
+        </Typewriter>
       </p>
 
       {/* Сумма и год. Сумма спора — самый сильный аргумент на карточке, поэтому
@@ -167,27 +172,6 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
 }
 
 export function RelatedCasesShowcase({ cases }: { cases: CaseStudy[] }) {
-  const headingRef = useRef<HTMLHeadingElement>(null)
-  const words = 'Связанные кейсы'.split(' ')
-
-  useGSAP(
-    () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-
-      gsap.set('[data-word]', { opacity: 0, y: 28 })
-      gsap.to('[data-word]', {
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
-        delay: 0.1,
-        stagger: 0.1,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: headingRef.current, start: 'top 85%', once: true },
-      })
-    },
-    { scope: headingRef },
-  )
-
   return (
     /* Линии сверху и снизу — не декор: --color-surface-soft отличается от
        --color-bg на пару процентов яркости, и без границ блок не читался как
@@ -198,32 +182,41 @@ export function RelatedCasesShowcase({ cases }: { cases: CaseStudy[] }) {
         {/* Счётчик-метка «06 / 08» снята по правке заказчика: нумерация
             разделов из референса на нашей странице ничего не навигировала —
             переходов по номерам нет, и подпись читалась случайной. */}
+        {/* Заголовок и лид печатаются посимвольно — так же, как заголовок и
+            подзаголовок в референсе services-секции (Typewriter, шаг 0.012с,
+            подпись с задержкой 0.1с относительно заголовка). Прежний пословный
+            выезд снят: пословный стаггер теперь работает в герое, а здесь
+            печать связывает блок с остальным текстом страницы. */}
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:gap-12">
-          <h2
-            ref={headingRef}
-            className="flex max-w-[320px] shrink-0 flex-wrap gap-x-[0.25em] font-heading text-[clamp(26px,3vw,42px)] font-black uppercase leading-[1.05] tracking-[-0.01em] text-[var(--color-text)] md:w-[32%]"
-          >
-            {words.map((word) => (
-              <span key={word} data-word className="inline-block">
-                {word}
-              </span>
-            ))}
-          </h2>
+          <Typewriter speed={0.012} maxDuration={0.9} className="shrink-0 md:w-[32%]">
+            <h2 className="max-w-[320px] font-heading text-[clamp(26px,3vw,42px)] font-black uppercase leading-[1.05] tracking-[-0.01em] text-[var(--color-text)]">
+              Связанные кейсы
+            </h2>
+          </Typewriter>
 
           <div className="flex-1 pt-2">
-            <RevealOnScroll delay={0.25}>
+            <Typewriter delay={0.1} speed={0.012} maxDuration={1.2}>
               <p className="max-w-[46ch] text-sm leading-[1.65] text-[var(--color-muted)]">
                 Разбор реальных дел практики: что было на входе, какую позицию мы заняли и чем
                 закончилось.
               </p>
-            </RevealOnScroll>
+            </Typewriter>
           </div>
         </div>
 
         {cases.length > 0 ? (
+          /* Карточки выходят снизу как колонки в референсе: y 20, 0.6с,
+             easeOut, общая задержка 0.1с — без каскада между карточками, он в
+             референсе тоже одинаковый; разнообразие даёт печать текста внутри. */
           <div className={`grid items-stretch gap-5 ${gridColumnsClass(cases.length)}`}>
             {cases.map((item, index) => (
-              <RevealOnScroll key={item.slug} delay={0.4 + index * 0.15} className="h-full">
+              <RevealOnScroll
+                key={item.slug}
+                delay={0.1}
+                y={20}
+                duration={0.6}
+                className="h-full"
+              >
                 <CaseCard item={item} index={index} />
               </RevealOnScroll>
             ))}

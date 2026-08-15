@@ -13,6 +13,10 @@ import {
 } from '@/lib/content'
 import { ScrollTopOnLoad } from '@/components/ui/ScrollTopOnLoad'
 import { CaseBackground } from '@/components/ui/CaseBackground'
+import { WordReveal } from '@/components/ui/WordReveal'
+import { Typewriter } from '@/components/ui/Typewriter'
+import { BlurText } from '@/components/ui/BlurText'
+import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { ServicesAccordion } from '@/components/practice/ServicesAccordion'
 import { ProductsGrid } from '@/components/practice/ProductsGrid'
 import { RelatedCasesShowcase } from '@/components/practice/RelatedCasesShowcase'
@@ -218,10 +222,18 @@ function PracticeView({ practice }: { practice: PracticeItem }) {
               </span>
             </div>
 
-            {/* 1. Название практики */}
-            <h1 className="mt-8 max-w-[20ch] font-heading text-[clamp(2rem,4.6vw,3.5rem)] font-black leading-[1.04] tracking-[-0.03em] text-[var(--color-text)]">
-              {practice.title}
-            </h1>
+            {/* 1. Название практики.
+                Пословный выезд из-под маски (WordReveal) — перенос анимации
+                wordReveal из референса героя: слова выталкиваются снизу с
+                лёгким размытием, шаг 0.1с. */}
+            {/* waitForIntro — герой стоит под оверлеем лого-интро (~3с при
+                прямом заходе на страницу); без ожидания вся анимация проходила
+                бы за закрытым занавесом. */}
+            <WordReveal delay={0.3} waitForIntro>
+              <h1 className="mt-8 max-w-[20ch] font-heading text-[clamp(2rem,4.6vw,3.5rem)] font-black leading-[1.04] tracking-[-0.03em] text-[var(--color-text)]">
+                {practice.title}
+              </h1>
+            </WordReveal>
 
             {/* 2. Краткое позиционирующее описание */}
             <p className="mt-8 max-w-[58ch] text-lg leading-relaxed text-[var(--color-text)] md:text-xl md:leading-relaxed">
@@ -244,16 +256,24 @@ function PracticeView({ practice }: { practice: PracticeItem }) {
                 className="pointer-events-none absolute left-0 top-[12%] h-[76%] w-[3px] bg-[var(--color-lime)]"
                 style={{ boxShadow: '0 0 26px var(--color-lime-glow)' }}
               />
-              <div className="flex flex-col gap-5">
-                {practice.description.map((paragraph) => (
-                  <p
-                    key={paragraph}
-                    className="text-[0.95rem] leading-[1.7] text-[var(--color-text)] md:text-base md:leading-[1.72]"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+              {/* Развёрнутое описание печатается посимвольно (Typewriter из
+                  референса карусели отзывов). Один Typewriter на все абзацы, а
+                  не на каждый: иначе три текста стартовали бы одновременно и
+                  печатались бы наперегонки. Общая длительность ограничена
+                  двумя секундами — при жёстком шаге 0.012с описание в 900
+                  знаков доезжало бы одиннадцать. */}
+              <Typewriter delay={0.35} speed={0.012} maxDuration={2} waitForIntro>
+                <div className="flex flex-col gap-5">
+                  {practice.description.map((paragraph) => (
+                    <p
+                      key={paragraph}
+                      className="text-[0.95rem] leading-[1.7] text-[var(--color-text)] md:text-base md:leading-[1.72]"
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </Typewriter>
             </div>
           </div>
         </div>
@@ -305,21 +325,34 @@ function PracticeView({ practice }: { practice: PracticeItem }) {
             className="pointer-events-none absolute right-0 top-[14%] h-[72%] w-[4px] bg-[var(--color-lime)]"
             style={{ boxShadow: '0 0 30px var(--color-lime-glow)' }}
           />
-          <h2 className="max-w-[24ch] font-heading text-[clamp(1.5rem,3vw,2.25rem)] font-black leading-[1.1] tracking-[-0.02em] text-[var(--color-text)]">
-            Обсудим вашу задачу
-          </h2>
-          <p className="mt-5 max-w-[58ch] text-base leading-relaxed text-[var(--color-muted)] md:text-lg">
-            Опишите ситуацию — оценим риски и предложим порядок действий.
-          </p>
+          {/* Появление блока — перенос hero-сюжета из референса: заголовок
+              проступает пословно через две ступени размытия (BlurText), под ним
+              подпись и кнопка выходят тем же приёмом blur(10px)+y, но целиком и
+              с нарастающей задержкой. Задержки сжаты против референса (там
+              0.8/1.1с от загрузки страницы): здесь отсчёт идёт от момента,
+              когда блок вошёл во вьюпорт, и секундная пауза читалась бы
+              зависанием. */}
+          <BlurText delay={0.1}>
+            <h2 className="max-w-[24ch] font-heading text-[clamp(1.5rem,3vw,2.25rem)] font-black leading-[1.1] tracking-[-0.02em] text-[var(--color-text)]">
+              Обсудим вашу задачу
+            </h2>
+          </BlurText>
+          <RevealOnScroll delay={0.45} y={20} duration={0.7} blur={10}>
+            <p className="mt-5 max-w-[58ch] text-base leading-relaxed text-[var(--color-muted)] md:text-lg">
+              Опишите ситуацию — оценим риски и предложим порядок действий.
+            </p>
+          </RevealOnScroll>
           {/* Обычный <a>, не next/link: нужна полная загрузка главной, чтобы
               отработала ветка «переход с якорем» в HomeAnchorScroll и чтобы
               ContactsSection прочитал ?practice= при монтировании. */}
-          <a
-            href={`/?practice=${practice.slug}#contacts`}
-            className="btn-lime-fill btn-lime-breathe mt-9 inline-flex h-12 items-center justify-center rounded-md px-7 text-sm font-semibold"
-          >
-            Обсудить задачу
-          </a>
+          <RevealOnScroll delay={0.65} y={20} duration={0.7} blur={10}>
+            <a
+              href={`/?practice=${practice.slug}#contacts`}
+              className="btn-lime-fill btn-lime-breathe mt-9 inline-flex h-12 items-center justify-center rounded-md px-7 text-sm font-semibold"
+            >
+              Обсудить задачу
+            </a>
+          </RevealOnScroll>
         </div>
       </section>
     </main>

@@ -4,6 +4,7 @@ import { useId, useState } from 'react'
 import type { PracticeServiceGroup } from '@/types/content'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { SpotlightBorder } from '@/components/ui/SpotlightBorder'
+import { Typewriter } from '@/components/ui/Typewriter'
 
 /* Блок «Что мы делаем» на странице практики.
 
@@ -122,20 +123,40 @@ function ServiceGroupRow({
           open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
         }`}
       >
+        {/* Раскрытие: строки не просто появляются вместе с высотой панели, а
+            печатаются одна за другой (Typewriter, шаг между строками 0.06с).
+            Печать держится в полусекунде — список из двух десятков пунктов не
+            должен заставлять ждать. Чек-буллет подъезжает CSS-переходом с той
+            же лесенкой задержек: он не текст, и SplitText его не касается. */}
         <div className="overflow-hidden">
           <ul className="pb-6">
-            {group.items.map((item) => (
+            {group.items.map((item, itemIndex) => (
               <li
                 key={item}
                 className="flex items-start gap-3 border-t border-[var(--color-line)] py-4 text-base leading-relaxed text-[var(--color-text)]"
               >
                 <span
-                  className="mt-[0.2em] flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[var(--color-lime-ink)]"
-                  style={{ borderColor: 'var(--color-lime)', background: 'var(--color-lime-soft)' }}
+                  className={`mt-[0.2em] flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[var(--color-lime-ink)] transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none ${
+                    open ? 'scale-100 opacity-100' : 'scale-75 opacity-0'
+                  }`}
+                  style={{
+                    borderColor: 'var(--color-lime)',
+                    background: 'var(--color-lime-soft)',
+                    transitionDelay: `${itemIndex * 60}ms`,
+                  }}
                 >
                   <Check />
                 </span>
-                {item}
+                <Typewriter
+                  as="span"
+                  active={open}
+                  delay={0.08 + itemIndex * 0.06}
+                  speed={0.008}
+                  maxDuration={0.45}
+                  className="min-w-0"
+                >
+                  {item}
+                </Typewriter>
               </li>
             ))}
           </ul>
