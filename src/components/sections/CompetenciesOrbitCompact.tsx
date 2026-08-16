@@ -6,122 +6,124 @@ import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { KEY_COMPETENCIES } from '@/constants/content/key-competencies'
 
-/* Компактная мобильная орбита для MobileScrubScene (континуальный скраб,
-   <1280px) — тот же приём облёта карточек по эллипсу, что у десктопной
-   CompetenciesSection, но: без mouse-parallax/hover-физики (на тач их
-   естественно не будет — код для них просто не нужен) и без scroll-triggered
-   fade-in (появлением рулит оверлей MobileScrubScene).
+/* Компактный блок компетенций для MobileScrubScene (континуальный скраб, <1280px).
 
-   В отличие от десктопа заголовок НЕ по центру орбиты — на узком экране
-   карточки за полный оборот проходят через любую высоту (включая линию
-   заголовка), а горизонтального просвета по бокам от текста на 360-430px
-   ширины физически нет. Поэтому заголовок и орбита — раздельные блоки друг
-   под другом, орбита крутится в своей собственной фиксированной по высоте
-   зоне, где заголовку взяться неоткуда. */
+   Здесь была эллиптическая орбита — зеркало десктопной. На 10 карточках она
+   перестала работать чисто арифметически: сцена 360×240 даёт внешний эллипс
+   rx≈120, а любому второму ярусу остаётся зазор ~53px при карточке 84px, то есть
+   карточки неизбежно наезжают друг на друга и текст рвётся. Уместить 10 штук
+   одним витком тоже нельзя: периметр эллипса ~660px против ~840px, которые
+   требуют карточки.
 
-const ORBIT_DURATION = 30
-const CARD_TILT = 5
-const STAGE_HEIGHT = 240
+   Поэтому на узких экранах вместо облёта — две встречные горизонтальные ленты
+   по 5 компетенций: верхняя едет влево, нижняя вправо. Движение осталось (блок
+   не превращается в статичный список), плашки прямоугольные, поэтому названия
+   читаются целиком без ужимания кегля. Десктопная орбита (CompetenciesSection)
+   при этом не трогается — там своя геометрия и места хватает.
 
-function orbitPoint(angleDeg: number, radius: { x: number; y: number }) {
-  const rad = (angleDeg * Math.PI) / 180
-  return { x: Math.cos(rad) * radius.x, y: Math.sin(rad) * radius.y }
-}
+   Имя компонента и id заголовка сохранены намеренно: `competencies` захардкожен
+   в useStoryController/HomeAnchorScroll, переименование ломает навигацию. */
+
+// Скорости лент чуть разные — встречное движение не читается как одно полотно
+const ROW_DURATION = [38, 44]
+// Ленты дублируются ровно вдвое, поэтому петля бесшовна на xPercent ±50
+const LOOP_SHIFT = 50
+
+const ROWS = [KEY_COMPETENCIES.slice(0, 5), KEY_COMPETENCIES.slice(5)]
 
 export function CompetenciesOrbitCompact() {
   const stageRef = useRef<HTMLDivElement>(null)
-  const orbitRef = useRef<HTMLDivElement>(null)
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+  const rowsRef = useRef<(HTMLDivElement | null)[]>([])
 
   useGSAP(
     () => {
-      const cards = cardsRef.current.filter((c): c is HTMLDivElement => c !== null)
-      const stage = stageRef.current
-      if (!cards.length || !stage) return
+      const rows = rowsRef.current.filter((r): r is HTMLDivElement => r !== null)
+      if (!rows.length) return
 
-      const computeRadius = () => {
-        const cardHalf = (cardsRef.current[0]?.clientWidth ?? 84) / 2
-        return {
-          x: Math.max(70, stage.clientWidth / 2 - cardHalf - 8),
-          y: Math.max(56, stage.clientHeight / 2 - cardHalf - 6),
-        }
-      }
-      let radius = computeRadius()
-      const onResize = () => {
-        radius = computeRadius()
-      }
-      window.addEventListener('resize', onResize)
+      const mm = gsap.matchMedia()
 
-      gsap.set(orbitRef.current, { opacity: 1 })
-
-      const tweens = cards.map((card, i) => {
-        const startAngle = (360 / KEY_COMPETENCIES.length) * i - 90
-        const state = { angle: startAngle }
-        const tilt = i % 2 === 0 ? CARD_TILT : -CARD_TILT
-        gsap.set(card, {
-          xPercent: -50,
-          yPercent: -50,
-          ...orbitPoint(startAngle, radius),
-          rotation: tilt,
-        })
-        const setX = gsap.quickSetter(card, 'x', 'px')
-        const setY = gsap.quickSetter(card, 'y', 'px')
-        return gsap.to(state, {
-          angle: startAngle + 360,
-          duration: ORBIT_DURATION,
-          ease: 'none',
-          repeat: -1,
-          onUpdate: () => {
-            const p = orbitPoint(state.angle, radius)
-            setX(p.x)
-            setY(p.y)
-          },
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        rows.forEach((row, i) => {
+          // Верхняя лента едет влево (0 → -50), нижняя вправо (-50 → 0)
+          const goesLeft = i % 2 === 0
+          gsap.fromTo(
+            row,
+            { xPercent: goesLeft ? 0 : -LOOP_SHIFT },
+            {
+              xPercent: goesLeft ? -LOOP_SHIFT : 0,
+              duration: ROW_DURATION[i] ?? ROW_DURATION[0],
+              ease: 'none',
+              repeat: -1,
+            },
+          )
         })
       })
 
-      return () => {
-        window.removeEventListener('resize', onResize)
-        tweens.forEach((t) => t.kill())
-      }
+      // reduced-motion до этого компонента не доходит (ScrollStory уводит в
+      // FlowFallback), но если медиа-условие когда-нибудь поменяют — ленты
+      // просто встанут на месте, а не поедут
+      mm.add('(prefers-reduced-motion: reduce)', () => {
+        rows.forEach((row) => gsap.set(row, { xPercent: 0 }))
+      })
     },
     { scope: stageRef, dependencies: [] },
   )
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden px-6">
-      <SectionHeading
-        id="competencies-heading-compact"
-        title="Ключевые компетенции"
-        subtitle="Конкретные задачи, которые мы ведём чаще всего"
-        className="text-center"
-      />
+    <div className="relative flex h-full w-full flex-col items-center justify-center gap-6 overflow-hidden">
+      <div className="px-6">
+        <SectionHeading
+          id="competencies-heading-compact"
+          title="Ключевые компетенции"
+          subtitle="Конкретные задачи, которые мы ведём чаще всего"
+          className="text-center"
+        />
+      </div>
 
-      <div
-        ref={stageRef}
-        className="relative w-full max-w-[360px]"
-        style={{ height: STAGE_HEIGHT }}
-      >
-        <div ref={orbitRef} className="absolute inset-0" style={{ opacity: 0 }}>
-          {KEY_COMPETENCIES.map((competency, i) => (
+      <div ref={stageRef} className="flex w-full flex-col gap-3">
+        {ROWS.map((row, rowIndex) => (
+          <div
+            key={rowIndex}
+            className="relative w-full overflow-hidden"
+            /* Края лент растворяются, иначе плашки обрубаются по границе экрана */
+            style={{
+              maskImage:
+                'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+              WebkitMaskImage:
+                'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+            }}
+          >
             <div
-              key={competency.id}
               ref={(el) => {
-                cardsRef.current[i] = el
+                rowsRef.current[rowIndex] = el
               }}
-              className="absolute left-1/2 top-1/2 w-[84px]"
+              data-competency-row
+              className="flex w-max gap-3"
             >
-              <div className="relative flex aspect-square items-center justify-center rounded-[14px] border border-[var(--color-line)] bg-gradient-to-br from-white to-[var(--color-surface-soft)] shadow-[0_16px_34px_rgba(0,0,0,0.13)]">
-                <span
-                  className="pointer-events-none absolute right-[-1px] top-2 bottom-2 w-[3px] rounded-full bg-[var(--color-lime)]"
-                  style={{ boxShadow: '0 0 14px var(--color-lime)' }}
-                />
-                <p className="px-2 text-center text-[9.5px] font-semibold leading-[1.15] text-[var(--color-text)]">
-                  {competency.title}
-                </p>
-              </div>
+              {/* Контент продублирован ровно вдвое — на этом держится бесшовность */}
+              {[...row, ...row].map((competency, i) => (
+                <div
+                  key={`${competency.id}-${i}`}
+                  data-competency-plate
+                  className="
+                    relative flex h-[62px] w-[176px] shrink-0 items-center
+                    rounded-[14px] border border-[var(--color-line)]
+                    bg-gradient-to-br from-white to-[var(--color-surface-soft)]
+                    pl-4 pr-5 shadow-[0_16px_34px_rgba(0,0,0,0.13)]
+                  "
+                >
+                  <span
+                    className="pointer-events-none absolute right-[-1px] top-3 bottom-3 w-[3px] rounded-full bg-[var(--color-lime)]"
+                    style={{ boxShadow: '0 0 14px var(--color-lime)' }}
+                  />
+                  <p className="text-[12px] font-semibold leading-[1.2] text-[var(--color-text)]">
+                    {competency.title}
+                  </p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   )

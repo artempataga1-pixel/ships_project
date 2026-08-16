@@ -6,20 +6,45 @@ import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { KEY_COMPETENCIES } from '@/constants/content/key-competencies'
 
-/* Референс — reference 2/com.mp4: заголовок неподвижен в центре, а вокруг него
-   по эллиптической орбите бесконечно облетают карточки. У них три яруса дуги —
-   у нас карточек меньше, поэтому один виток. Скорость облёта вдвое медленнее
-   референса — там мельтешило гораздо быстрее.
+/* Референс — запись экрана nudot.com.tw, блок «THE SECTORS»
+   (исходник: C:\Users\Admin\Videos\Captures\com.mp4, в репозиторий не входит —
+   раньше лежал как `reference 2/com.mp4`, оттуда его убрали): заголовок неподвижен
+   в центре, а вокруг него бесконечно облетают карточки. Там три вложенных кольца,
+   крутящихся с разной угловой скоростью, — расслоение и создаёт глубину.
+
+   Буквально повторить это у нас нельзя, и дело в пропорциях. В референсе карточка
+   ~6% ширины сцены (это картинки без текста, их ~35), у нас — почти 19%, потому что
+   внутри длинное название компетенции. Плюс сцена ограничена высотой окна:
+   ry = высота/2 − полукарточка − просвет, на ноуте 1280×800 это ~200px. Чтобы два
+   кольца не сталкивались на «полюсах» (сверху и снизу), разница радиусов должна
+   превышать высоту карточки — тогда внутреннему кольцу остаётся ry < 25px, и оно
+   проходит сквозь заголовок. Разные скорости добавляют вторую проблему: фазы колец
+   рано или поздно совпадают, и внутренняя карточка встаёт ровно под внешнюю.
+
+   Поэтому ярусность сделана «зубцами» на одном витке: соседние карточки чередуют
+   радиус (R и R×INNER_RATIO) и масштаб — читается как два яруса с глубиной, но
+   угловая скорость общая, так что столкновений не бывает по построению. Живость
+   даёт медленное «дыхание» радиуса у каждой карточки со своей фазой.
+   Скорость облёта вдвое медленнее референса — там мельтешило гораздо быстрее.
 
    Радиус орбиты считается от реальных размеров сцены и вьюпорта (а не фиксированным
    пикселем): по X — от ширины сцены, по Y — ещё и от высоты окна, чтобы на низких
    экранах (ноуты, маки) карточки не резались краями. Размер карточки задан через
-   vw с потолком 250px (эталон 2560×1440), половина берётся из DOM на каждый resize. */
+   vw с потолком 176px (эталон 2560×1440), половина берётся из DOM на каждый resize. */
 
 const RADIUS_MIN = 300
 const RADIUS_MAX = 620
 const ORBIT_DURATION = 42
 const CARD_TILT = 6
+// Зубец: нечётные карточки идут ближе к центру и чуть мельче — второй ярус.
+// 0.78, а не 0.85: при меньшем разносе соседи по углу сходятся до касания, когда
+// «дыхание» разводит их радиусы в противофазе (замерено — нахлёст ~12px)
+const INNER_RATIO = 0.78
+const INNER_SCALE = 0.88
+// «Дыхание» радиуса: ±1.5% с индивидуальной фазой, чтобы виток не читался жёстким
+// кольцом. Больше нельзя: на 1920×1080 соседние зубцы начинают задевать скобками
+const BREATH_AMOUNT = 0.015
+const BREATH_DURATION = 9
 // Просвет сверху/снизу: шапка сайта + угловые скобки карточки
 const VERTICAL_CLEAR = 120
 // Реакция на движение мыши
@@ -40,6 +65,15 @@ function orbitPoint(angleDeg: number, radius: { x: number; y: number }) {
     x: Math.cos(rad) * radius.x,
     y: Math.sin(rad) * radius.y,
   }
+}
+
+function scaleRadius(radius: { x: number; y: number }, k: number) {
+  return { x: radius.x * k, y: radius.y * k }
+}
+
+/** Чётные карточки идут по внешнему зубцу, нечётные — по внутреннему */
+function tierRatio(isInner: boolean) {
+  return isInner ? INNER_RATIO : 1
 }
 
 interface CompetenciesSectionProps {
@@ -96,14 +130,18 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
 
         cards.forEach((card, i) => {
           const startAngle = (360 / KEY_COMPETENCIES.length) * i - 90
-          const state = { angle: startAngle }
+          const isInner = i % 2 === 1
+          // breath — множитель радиуса, гуляет вокруг 1 со своей фазой у каждой карточки
+          const state = { angle: startAngle, breath: 1 }
           const tilt = i % 2 === 0 ? CARD_TILT : -CARD_TILT
+          const ring = (breath: number) => scaleRadius(radiusRef.current, tierRatio(isInner) * breath)
 
           gsap.set(card, {
             xPercent: -50,
             yPercent: -50,
-            ...orbitPoint(startAngle, radiusRef.current),
+            ...orbitPoint(startAngle, ring(1)),
             rotation: tilt,
+            scale: isInner ? INNER_SCALE : 1,
           })
 
           // quickSetter вместо gsap.set: onUpdate дёргается каждый кадр, а set
@@ -118,11 +156,26 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
               ease: 'none',
               repeat: -1,
               onUpdate: () => {
-                const p = orbitPoint(state.angle, radiusRef.current)
+                const p = orbitPoint(state.angle, ring(state.breath))
                 setX(p.x)
                 setY(p.y)
               },
             }),
+          )
+
+          // Дыхание живёт отдельным твином: под hover орбита почти замирает, а лёгкое
+          // плавание карточек остаётся — сцена не выглядит выключенной
+          gsap.fromTo(
+            state,
+            { breath: 1 - BREATH_AMOUNT },
+            {
+              breath: 1 + BREATH_AMOUNT,
+              duration: BREATH_DURATION,
+              ease: 'sine.inOut',
+              yoyo: true,
+              repeat: -1,
+              delay: (i / KEY_COMPETENCIES.length) * BREATH_DURATION,
+            },
           )
         })
 
@@ -207,11 +260,15 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
         gsap.set(orbitRef.current, { opacity: 1 })
         cards.forEach((card, i) => {
           const startAngle = (360 / KEY_COMPETENCIES.length) * i - 90
+          const isInner = i % 2 === 1
+          // Оба зубца стоят на своих радиусах — статичная раскладка повторяет
+          // геометрию движущейся орбиты, просто без анимации
           gsap.set(card, {
             xPercent: -50,
             yPercent: -50,
-            ...orbitPoint(startAngle, radiusRef.current),
+            ...orbitPoint(startAngle, scaleRadius(radiusRef.current, tierRatio(isInner))),
             rotation: 0,
+            scale: isInner ? INNER_SCALE : 1,
           })
         })
       })
@@ -291,11 +348,14 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                 ref={(el) => {
                   cardsRef.current[i] = el
                 }}
-                className="absolute left-1/2 top-1/2 w-[min(11vw,250px)]"
+                data-competency-card
+                /* На низких экранах (ноуты 1366×768) орбита сплющивается по
+                   вертикали, и соседние зубцы сходятся — там карточка мельче */
+                className="absolute left-1/2 top-1/2 w-[clamp(112px,8.4vw,176px)] [@media(max-height:820px)]:w-[clamp(96px,7.2vw,150px)]"
               >
                 <div
                   className="
-                    relative aspect-square rounded-[18px] border border-[var(--color-line)]
+                    relative aspect-square rounded-[16px] border border-[var(--color-line)]
                     bg-gradient-to-br from-white to-[var(--color-surface-soft)]
                     flex flex-col items-center justify-center
                     shadow-[0_30px_70px_rgba(0,0,0,0.13),inset_0_1px_0_rgba(255,255,255,0.95)]
@@ -303,7 +363,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                 >
                   {/* Угловая рамка-скобка (line-frame) — видна только по углам */}
                   <span
-                    className="pointer-events-none absolute -inset-[min(0.8594vw,22px)] rounded-[27px] border-[1.5px] border-black/[0.38] opacity-70"
+                    className="pointer-events-none absolute -inset-[min(0.5vw,12px)] rounded-[22px] border-[1.5px] border-black/[0.38] opacity-70"
                     style={{
                       clipPath:
                         'polygon(0 0,28% 0,28% 7%,72% 7%,72% 0,100% 0,100% 28%,93% 28%,93% 72%,100% 72%,100% 100%,72% 100%,72% 93%,28% 93%,28% 100%,0 100%,0 72%,7% 72%,7% 28%,0 28%)',
@@ -311,10 +371,10 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                   />
                   {/* Лайм-полоса у правого края */}
                   <span
-                    className="pointer-events-none absolute right-[-2px] top-[min(1.09375vw,1.75rem)] bottom-[min(1.09375vw,1.75rem)] w-1 rounded-full bg-[var(--color-lime)]"
+                    className="pointer-events-none absolute right-[-2px] top-[min(0.8vw,1.25rem)] bottom-[min(0.8vw,1.25rem)] w-1 rounded-full bg-[var(--color-lime)]"
                     style={{ boxShadow: '0 0 24px var(--color-lime)' }}
                   />
-                  <p className="px-3 text-center text-[clamp(13px,1.05vw,19px)] font-semibold leading-[1.15] text-[var(--color-text)]">
+                  <p className="px-[0.7em] text-center text-[clamp(11.5px,0.78vw,15px)] font-semibold leading-[1.2] text-[var(--color-text)]">
                     {competency.title}
                   </p>
                 </div>
