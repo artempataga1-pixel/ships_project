@@ -85,6 +85,11 @@ export interface StoryRefs {
 export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active }: StoryRefs) {
   const lenis = useLenis()
 
+  // videoRefs/overlayRefs приходят аргументами хука, поэтому React Compiler не
+  // признаёт их за refs и считает мутацией пропсов обычную работу с DOM-узлами
+  // (play/pause/currentTime). Мутируются только сами элементы, не .current —
+  // поведение корректное, правило глушим точечно.
+  // eslint-disable-next-line react-hooks/immutability
   useEffect(() => {
     if (!active) return
     const wrapper = wrapperRef.current
@@ -450,6 +455,7 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       st.step = step
       const seg = Math.max(step - 1, 0)
       activateVideo(seg)
+      // eslint-disable-next-line react-hooks/immutability
       const v = videos[seg]
       if (v) {
         v.pause()

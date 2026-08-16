@@ -198,6 +198,9 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
             здесь не нужен — story-режим есть только на главной (см. отчёт
             исследования компонента Header). .btn-lime-breathe добавляет
             пульсацию свечения в покое поверх .btn-lime-fill. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- нужен
+            полноценный переход на «/», а не клиентская навигация: HomeAnchorScroll
+            отрабатывает якорь только на свежей загрузке главной */}
         <a
           href="/#contacts"
           className="btn-lime-fill btn-lime-breathe mt-8 inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
