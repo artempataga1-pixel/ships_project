@@ -51,8 +51,9 @@ interface LenisLike {
 // скраба: обычный scrollTo к границе нужной полки внутри пина — дальше
 // видео примет нужный кадр само через onUpdate (не мгновенный прыжок кадра,
 // как десктопный STORY_GOTO_EVENT). На тач-устройствах SmoothScrollProvider
-// не монтирует Lenis (useIsTouch) — там native window.scrollTo достаточен.
-// Но MOBILE_SCRUB_MEDIA завязан только на ширину, не на touch: на нетач-
+// не монтирует Lenis (useIsTouch) — там нужен свой твин (scrubTweenScrollTo
+// ниже): нативный smooth-скролл внутри пина не работает.
+// А MOBILE_SCRUB_MEDIA завязан только на ширину, не на touch: на нетач-
 // устройстве с узким окном Lenis смонтирован и на каждом RAF-тике откатывает
 // scrollY назад к своей внутренней позиции — native scrollTo без lenis.scrollTo
 // в этом случае немедленно перебивается (та же причина, по которой
@@ -71,8 +72,48 @@ export function scrollToMobileScrubStep(step: number, lenis?: LenisLike | null) 
   if (lenis) {
     lenis.scrollTo(y)
   } else {
-    window.scrollTo({ top: y, behavior: 'smooth' })
+    scrubTweenScrollTo(y)
   }
+}
+
+// Плавный скролл для тач-устройств, где Lenis не смонтирован.
+//
+// Ключевой момент: в `globals.css` у `html` стоит `scroll-behavior: smooth`,
+// поэтому ЛЮБОЙ программный скролл — включая `window.scrollTo(0, y)` и даже
+// штатный `ScrollTrigger.scroll()` — браузер выполняет плавно. А плавная
+// прокрутка внутри активного scrub-пина захлёбывается: замер показывал 3px
+// из нужных 4420, и повторные попытки её не спасали. Лечится только явным
+// `behavior: 'instant'`, который перебивает CSS (тот же приём, что в
+// [project_yuriki_ios_scroll_fix] для WebKit).
+//
+// Отсюда конструкция: плавность даём сами — серией мгновенных прыжков по rAF.
+// Живой ввод (палец/колесо) анимацию прерывает, чтобы не драться с пользователем.
+function scrubTweenScrollTo(to: number, duration = 600) {
+  const from = window.scrollY
+  const dist = to - from
+  if (Math.abs(dist) < 1) return
+  const start = performance.now()
+  let cancelled = false
+  const cancel = () => {
+    cancelled = true
+  }
+  window.addEventListener('touchstart', cancel, { passive: true, once: true })
+  window.addEventListener('wheel', cancel, { passive: true, once: true })
+
+  const tick = (now: number) => {
+    if (cancelled) return
+    const t = Math.min((now - start) / duration, 1)
+    // easeOutCubic — быстрый старт, мягкая посадка на полку
+    const eased = 1 - Math.pow(1 - t, 3)
+    window.scrollTo({ top: from + dist * eased, behavior: 'instant' })
+    if (t < 1) {
+      requestAnimationFrame(tick)
+    } else {
+      window.removeEventListener('touchstart', cancel)
+      window.removeEventListener('wheel', cancel)
+    }
+  }
+  requestAnimationFrame(tick)
 }
 
 // Общий обработчик клика по якорю про/компетенции/партнёры для любого меню
@@ -174,6 +215,14 @@ export function useMobileScrubController({ wrapperRef, videoRefs, overlayRefs, a
       scrub: 0.15,
       anticipatePin: 1,
       invalidateOnRefresh: true,
+      // Этот пин стоит первым на странице и своим спейсером (~4400px) двигает
+      // всё, что ниже. На 1024–1279px одновременно с ним жив пин коллажа практик
+      // (min-width: 1024px): без явного приоритета коллаж успевал посчитать
+      // start/end до того, как спейсер раздвинет разметку, и пинился на ~4200px
+      // раньше своих карточек — они наезжали поверх блока «О нас». Чем выше
+      // приоритет, тем раньше ScrollTrigger рефрешит триггер; порядок сверху
+      // вниз по странице: hero(3) → практики(2) → статьи(1).
+      refreshPriority: 3,
       onUpdate: (self) => {
         const total = boundaries[boundaries.length - 1]
         const scrollTime = self.progress * total

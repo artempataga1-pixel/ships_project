@@ -132,6 +132,9 @@ export function ArticlesSection() {
             scrub: 1,
             anticipatePin: 1,
             invalidateOnRefresh: true,
+            // Последний пин по порядку страницы — см. коммент в
+            // useMobileScrubController.ts
+            refreshPriority: 1,
           },
         })
 

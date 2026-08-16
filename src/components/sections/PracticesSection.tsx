@@ -325,6 +325,9 @@ export function PracticesSection() {
             scrub: 1,
             anticipatePin: 1,
             invalidateOnRefresh: true,
+            // Ниже hero-скраба (refreshPriority 3), выше «Статей» (1) —
+            // см. коммент в useMobileScrubController.ts
+            refreshPriority: 2,
           },
         })
 
