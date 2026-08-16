@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
-import { PRACTICES } from '@/constants/content/practice'
+import { KEY_COMPETENCIES } from '@/constants/content/key-competencies'
 
 /* Компактная мобильная орбита для MobileScrubScene (континуальный скраб,
    <1280px) — тот же приём облёта карточек по эллипсу, что у десктопной
@@ -55,7 +55,7 @@ export function CompetenciesOrbitCompact() {
       gsap.set(orbitRef.current, { opacity: 1 })
 
       const tweens = cards.map((card, i) => {
-        const startAngle = (360 / PRACTICES.length) * i - 90
+        const startAngle = (360 / KEY_COMPETENCIES.length) * i - 90
         const state = { angle: startAngle }
         const tilt = i % 2 === 0 ? CARD_TILT : -CARD_TILT
         gsap.set(card, {
@@ -91,8 +91,8 @@ export function CompetenciesOrbitCompact() {
     <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden px-6">
       <SectionHeading
         id="competencies-heading-compact"
-        title="Наши компетенции"
-        subtitle="Профессионалы с многолетним опытом"
+        title="Ключевые компетенции"
+        subtitle="Конкретные задачи, которые мы ведём чаще всего"
         className="text-center"
       />
 
@@ -102,9 +102,9 @@ export function CompetenciesOrbitCompact() {
         style={{ height: STAGE_HEIGHT }}
       >
         <div ref={orbitRef} className="absolute inset-0" style={{ opacity: 0 }}>
-          {PRACTICES.map((practice, i) => (
+          {KEY_COMPETENCIES.map((competency, i) => (
             <div
-              key={practice.title}
+              key={competency.id}
               ref={(el) => {
                 cardsRef.current[i] = el
               }}
@@ -116,7 +116,7 @@ export function CompetenciesOrbitCompact() {
                   style={{ boxShadow: '0 0 14px var(--color-lime)' }}
                 />
                 <p className="px-2 text-center text-[9.5px] font-semibold leading-[1.15] text-[var(--color-text)]">
-                  {practice.title}
+                  {competency.title}
                 </p>
               </div>
             </div>

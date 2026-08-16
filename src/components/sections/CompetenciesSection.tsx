@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
-import { PRACTICES } from '@/constants/content/practice'
+import { KEY_COMPETENCIES } from '@/constants/content/key-competencies'
 
 /* Референс — reference 2/com.mp4: заголовок неподвижен в центре, а вокруг него
    по эллиптической орбите бесконечно облетают карточки. У них три яруса дуги —
@@ -95,7 +95,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
         const orbitTweens: gsap.core.Tween[] = []
 
         cards.forEach((card, i) => {
-          const startAngle = (360 / PRACTICES.length) * i - 90
+          const startAngle = (360 / KEY_COMPETENCIES.length) * i - 90
           const state = { angle: startAngle }
           const tilt = i % 2 === 0 ? CARD_TILT : -CARD_TILT
 
@@ -206,7 +206,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
       mm.add('(prefers-reduced-motion: reduce)', () => {
         gsap.set(orbitRef.current, { opacity: 1 })
         cards.forEach((card, i) => {
-          const startAngle = (360 / PRACTICES.length) * i - 90
+          const startAngle = (360 / KEY_COMPETENCIES.length) * i - 90
           gsap.set(card, {
             xPercent: -50,
             yPercent: -50,
@@ -255,8 +255,8 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
           <div className="flex items-center justify-center xl:pointer-events-none xl:absolute xl:inset-0 xl:z-10">
             <SectionHeading
               id="competencies-heading"
-              title="Наши компетенции"
-              subtitle="Профессионалы с многолетним опытом в ключевых отраслях права"
+              title="Ключевые компетенции"
+              subtitle="Практики — направления нашей специализации. Ключевые компетенции — конкретные задачи, которые мы ведём чаще всего"
               className="scroll-mt-16 text-center lg:max-w-2xl"
             />
           </div>
@@ -285,9 +285,9 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
               />
             ))}
 
-            {PRACTICES.map((practice, i) => (
+            {KEY_COMPETENCIES.map((competency, i) => (
               <div
-                key={practice.title}
+                key={competency.id}
                 ref={(el) => {
                   cardsRef.current[i] = el
                 }}
@@ -315,7 +315,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                     style={{ boxShadow: '0 0 24px var(--color-lime)' }}
                   />
                   <p className="px-3 text-center text-[clamp(13px,1.05vw,19px)] font-semibold leading-[1.15] text-[var(--color-text)]">
-                    {practice.title}
+                    {competency.title}
                   </p>
                 </div>
               </div>
@@ -326,9 +326,9 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
         {/* Телефон (<640px) — исходная раскладка: прямоугольные карточки,
             текст слева, без изменений */}
         <div className="mt-16 grid grid-cols-1 gap-4 sm:hidden">
-          {PRACTICES.map((practice) => (
+          {KEY_COMPETENCIES.map((competency) => (
             <div
-              key={practice.title}
+              key={competency.id}
               className="
                 relative p-6 rounded-[18px] border border-[var(--color-line)]
                 bg-gradient-to-br from-white to-[var(--color-surface-soft)]
@@ -340,7 +340,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                 style={{ boxShadow: '0 0 24px var(--color-lime)' }}
               />
               <h3 className="font-heading text-lg font-semibold leading-snug text-[var(--color-text)]">
-                {practice.title}
+                {competency.title}
               </h3>
             </div>
           ))}
@@ -350,8 +350,8 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
             орбите (рамка-скобка по углам, лайм-полоса, текст по центру), но
             статичные, без анимации, в простой сетке на 2 колонки */}
         <div className="mt-16 hidden sm:grid grid-cols-2 gap-6 xl:hidden">
-          {PRACTICES.map((practice) => (
-            <div key={practice.title} className="relative mx-auto aspect-square w-full max-w-[320px]">
+          {KEY_COMPETENCIES.map((competency) => (
+            <div key={competency.id} className="relative mx-auto aspect-square w-full max-w-[320px]">
               <div
                 className="
                   relative flex h-full w-full flex-col items-center justify-center
@@ -374,7 +374,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
                   style={{ boxShadow: '0 0 24px var(--color-lime)' }}
                 />
                 <p className="px-5 text-center text-[clamp(20px,5vw,26px)] font-semibold leading-tight text-[var(--color-text)]">
-                  {practice.title}
+                  {competency.title}
                 </p>
               </div>
             </div>

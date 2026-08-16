@@ -59,14 +59,6 @@ export interface TeamMember {
   panelSide?: 'left' | 'right'
 }
 
-/* Карточка орбиты в разделе «Наши компетенции» (PRACTICES в practice.ts).
-   Имя Practice освобождено под основной тип практики — см. ниже.
-   Удаляется в шаге 2.2 плана: орбита переезжает на KeyCompetency. */
-export interface LegacyPractice {
-  title: string
-  products: string[]
-}
-
 /* ── Контент-слой раздела «Практики» ──────────────────────────────────
    Нормализованная структура «практика ↔ продукт ↔ кейс ↔ статья»: связи
    many-to-many через массивы id, ноль дублирования текста. Спроектирована
@@ -135,6 +127,19 @@ export interface AdjacentExpertise {
   id: string
   title: string
   description: string
+}
+
+/* Ключевая компетенция — карточка орбиты раздела #competencies (шаг 2.2).
+   Это НЕ отрасль права и не практика, а конкретная характерная задача,
+   которую фирма ведёт регулярно — часто на стыке нескольких практик.
+   practiceIds — связь на будущее (в каких практиках задача возникает);
+   вёрсткой пока не используется, но держит раздел в одной модели данных
+   с практиками и продуктами. */
+export interface KeyCompetency {
+  id: string
+  title: string
+  /* id практик, в рамках которых сопровождается задача (Practice.id) */
+  practiceIds?: string[]
 }
 
 export interface Case {

@@ -5,7 +5,7 @@ import type { NavItem } from '@/types/content'
 // с внутренних страниц (например /cases/…) браузер уводит на главную к секции
 export const NAV_ITEMS: NavItem[] = [
   { label: 'О нас', href: '/#about' },
-  { label: 'Наши компетенции', href: '/#competencies' },
+  { label: 'Ключевые компетенции', href: '/#competencies' },
   { label: 'Партнёры', href: '/#partners' },
   { label: 'Практики', href: '/#practices' },
   { label: 'Статьи', href: '/#articles' },
