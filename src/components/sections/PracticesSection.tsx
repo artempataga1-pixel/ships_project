@@ -7,6 +7,7 @@ import { useGSAP } from '@gsap/react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { PRACTICE_QUOTES, PRACTICES_SLOGAN } from '@/constants/content/practice'
 import { PRACTICE_ITEMS } from '@/constants/content/practices'
+import { AdjacentExpertiseSection } from '@/components/sections/AdjacentExpertiseSection'
 import type { Practice } from '@/types/content'
 
 /* Референс — dizain5.jpg + 03_practices_intro (заголовочный экран). Сначала
@@ -475,6 +476,12 @@ export function PracticesSection() {
           <div className="hidden w-[10vw] shrink-0 lg:block" aria-hidden="true" />
         </div>
       </div>
+
+      {/* Второй уровень раздела: направления, по которым фирма берёт отдельные
+          поручения. Стоит после пин-обёртки, а не внутри неё — блок должен
+          появляться, когда коллаж уже отпустил пин и страница поехала дальше
+          обычным потоком. */}
+      <AdjacentExpertiseSection />
     </section>
   )
 }
