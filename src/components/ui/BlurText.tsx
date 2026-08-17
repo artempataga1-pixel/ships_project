@@ -12,8 +12,11 @@ import { gsap, SplitText } from '@/lib/gsap'
    деталь, из-за которой эффект читается «дыханием», а не обычным fade-in;
    в GSAP это ложится на keyframes одним твином.
 
-   Разбивку делает SplitText — он же отдаёт a11y (aria-label на контейнере,
-   aria-hidden на словах) и после проигрывания разворачивается обратно.
+   Разбивку делает SplitText; автоматический aria-label/aria-hidden (режим
+   'auto') отключён — контейнер обычно generic div без роли, где aria-label
+   невалиден по ARIA-спеке (см. WordReveal.tsx, шаг 2.4). Текст не прячется,
+   поэтому скринридер читает его как обычно. После проигрывания split
+   разворачивается обратно.
 
    Размытие живёт только на широких экранах: анимировать filter на мобильном
    GPU дорого (общая политика проекта, см. RevealOnScroll). */
@@ -37,7 +40,7 @@ export function BlurText({
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
       const withBlur = !window.matchMedia('(max-width: 1023px)').matches
-      const split = new SplitText(el, { type: 'words' })
+      const split = new SplitText(el, { type: 'words', aria: 'none' })
       if (!split.words.length) {
         split.revert()
         return

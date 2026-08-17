@@ -9,11 +9,14 @@ import { whenIntroDone } from '@/lib/introGate'
    (там framer-motion: staggerChildren по буквам, каждая opacity 0 → 1).
 
    У нас разбивку делает SplitText: он рекурсивно обходит текстовые узлы, сам
-   ставит слову display:inline-block (буквы не рвутся переносом строки) и с
-   версии 3.13 сам вешает aria-label на контейнер и aria-hidden на осколки —
-   скринридер читает исходный текст, а не «П-р-о-Б-а-н-к-р-о-т-с-т-в-о».
-   После проигрывания split.revert() возвращает исходный DOM: сотни span-ов
-   нужны только на время анимации.
+   ставит слову display:inline-block (буквы не рвутся переносом строки).
+   Автоматический aria-label/aria-hidden (режим 'auto' с версии 3.13)
+   отключён явно — контейнер обычно обычный div/span без роли, а на
+   generic-элементах aria-label невалиден по ARIA-спеке (нашлось в шаге 2.4
+   через Lighthouse agentic-browsing). Без него скринридер и так читает
+   исходный текст: split не удаляет и не прячет символы, просто оборачивает
+   их в span. После проигрывания split.revert() возвращает исходный DOM:
+   сотни span-ов нужны только на время анимации.
 
    maxDuration — наша добавка к референсу. Там печатается цитата в 200 знаков,
    у нас — описание практики в 900: при жёстком stagger 0.012 текст доезжал бы
@@ -63,7 +66,10 @@ export function Typewriter({
       // (панель над ним всё равно схлопнута по высоте).
       if (manual && !active) return
 
-      const split = new SplitText(el, { type: 'words,chars' })
+      // aria: 'none' — см. подробное обоснование в WordReveal.tsx (шаг 2.4):
+      // el может быть обычным span/div без роли, а на generic-элементах
+      // aria-label из режима 'auto' невалиден по ARIA-спеке.
+      const split = new SplitText(el, { type: 'words,chars', aria: 'none' })
       const chars = split.chars
       if (!chars.length) {
         split.revert()

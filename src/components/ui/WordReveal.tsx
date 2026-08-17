@@ -42,7 +42,15 @@ export function WordReveal({
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
       const withBlur = !window.matchMedia('(max-width: 1023px)').matches
-      const split = new SplitText(el, { type: 'words', mask: 'words' })
+      // aria: 'none' — по умолчанию SplitText вешает aria-label на el (режим
+      // 'auto'). el здесь — обычный <div> без роли ("generic"), а по ARIA-спеке
+      // aria-label запрещён на generic-элементах (axe: "aria-label attribute
+      // cannot be used on a generic div" — ловится Lighthouse
+      // agentic-browsing/agent-accessibility-tree, найдено в шаге 2.4). Без
+      // aria текст всё равно читается корректно: split не трогает сам текст,
+      // только оборачивает слова в inline-block, скринридер проходит по нему
+      // как обычно.
+      const split = new SplitText(el, { type: 'words', mask: 'words', aria: 'none' })
       if (!split.words.length) {
         split.revert()
         return
