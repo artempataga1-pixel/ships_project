@@ -119,25 +119,20 @@ function PracticeCard({
         className="object-cover"
       />
 
-      {/* Затемнение раздельное — низ под заголовок, верх под ярлык, середина
-          кадра остаётся чистой (сплошная вуаль по всей карточке превращала
-          фото в тёмное пятно). Нижняя ступень 0.82–0.92 alpha держит контраст
-          белого текста с запасом даже на самом светлом из пяти кадров:
-          на белом (255) итог 255·0.18 ≈ 46 → 13:1. Посчитано скриптом
-          tmp/check-practice-contrast.mjs, а не на глаз. */}
+      {/* Правка 18.08.2026: чёрные вуали сняты, лицо строится по образцу карточек
+          «Связанных кейсов» на странице практики: текст идёт тёмным по светлой
+          вуали. Блюр кадра из того референса НЕ берём — по правке заказчика
+          фотография направления остаётся резкой. Плотность вуали к низу растёт
+          до 0.9: там лежит название практики. Проверено по всем пяти кадрам
+          (ffmpeg, средняя яркость нижней четверти): самый тёмный участок —
+          198/255 у practice-4, под вуалью 249 → контраст с --color-text ≈ 18:1,
+          то есть запас есть даже без вуали. */}
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.82) 20%, rgba(0,0,0,.34) 46%, rgba(0,0,0,0) 66%)',
-        }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[26%]"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,.34) 0%, rgba(0,0,0,0) 100%)',
+            'linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.5) 54%, rgba(255,255,255,.9) 100%)',
         }}
       />
 
@@ -148,19 +143,24 @@ function PracticeCard({
         style={{ boxShadow: '0 0 22px var(--color-lime-glow)' }}
       />
 
-      {/* Ярлык — теперь внутри кадра, как «QATAR, 2024» в референсе. Своя
-          подложка, а не расчёт на градиент: 11px белым по светлому верху всех
-          пяти кадров контраст 4.5:1 не давали, а темнить верх карточки до
-          нужной плотности значило похоронить само фото. */}
-      <span className="absolute left-[clamp(14px,1.1vw,22px)] top-[clamp(12px,1vw,20px)] rounded-full bg-black/60 px-2.5 py-1 text-[11px] tracking-[0.25em] uppercase text-white backdrop-blur-sm">
+      {/* Ярлык — своя плотная подложка, а не расчёт на вуаль: на светлом верху
+          кадра (вуаль там всего 0.12) никакой текст сам по себе контраст не
+          держит. Схема как у «Связанных кейсов» — белая плашка, тёмный текст,
+          лайм-квадратик; форма осталась прежней пилюлей. */}
+      <span className="absolute left-[clamp(14px,1.1vw,22px)] top-[clamp(12px,1vw,20px)] inline-flex items-center gap-2.5 rounded-full bg-[var(--color-surface)] px-3 py-1.5 font-heading text-[11px] font-black uppercase tracking-[0.14em] text-[var(--color-text)]">
         {item.num} / {item.label}
+        <i
+          aria-hidden
+          className="block h-[8px] w-[8px] shrink-0 rounded-[2px] bg-[var(--color-lime)]"
+          style={{ boxShadow: '0 0 12px var(--color-lime-glow)' }}
+        />
       </span>
 
       {/* Название практики — поверх фотографии, главное изменение шага 1.6.
           На тач-экранах справа внизу стоит подсказка о перевороте, поэтому
           заголовку там отводится место под неё. */}
       <span
-        className={`absolute bottom-[clamp(14px,1.1vw,22px)] left-[clamp(14px,1.1vw,22px)] block font-heading font-extrabold leading-[1.12] text-white text-[clamp(1.0625rem,1.35vw,1.75rem)] ${
+        className={`absolute bottom-[clamp(14px,1.1vw,22px)] left-[clamp(14px,1.1vw,22px)] block font-heading font-extrabold leading-[1.12] tracking-[-0.01em] text-[var(--color-text)] text-[clamp(1.0625rem,1.35vw,1.75rem)] ${
           isTouch ? 'right-[104px]' : 'right-[clamp(14px,1.1vw,22px)]'
         }`}
       >
@@ -171,7 +171,7 @@ function PracticeCard({
           тапе. Стоит в нижнем углу, а не в верхнем: наверху длинные ярлыки
           («02 / КОРПОРАТИВНОЕ ПРАВО») налезали на неё на 390px. */}
       {isTouch && !tapFlipped && (
-        <span className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1.5 text-[11px] font-medium text-white backdrop-blur-sm">
+        <span className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-[var(--color-surface)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--color-text)]">
           <FlipHintIcon />
           Нажмите
         </span>

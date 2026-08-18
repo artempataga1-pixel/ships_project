@@ -5,7 +5,12 @@ import { useEffect, useState } from 'react'
 const DESKTOP_MEDIA = '(min-width: 1024px)'
 
 /* --- Фоновое видео кейса: бесшовный пинг-понг (16с — вперёд + реверс,
-       склеено ffmpeg, оттого loop без рывка). Тихое, автоплей. --- */
+       склеено ffmpeg, оттого loop без рывка). Тихое, автоплей.
+
+       Постер — СВОЙ кадр этого видео (poster_wall.jpg), а не общий
+       poster_start.jpg: тот был первым кадром story1.mp4, то есть кадром героя
+       ГЛАВНОЙ. Пока case-bg-loop.mp4 (2.7МБ) долетал, страница практики на долю
+       секунды показывала чужую картинку — глазу заметно. --- */
 export function CaseBackground() {
   // SSR-safe: по умолчанию постер (без JS ни байта видео не грузится).
   // На маунте апгрейдим до видео, если экран ≥1024px. Следим за ресайзом/
@@ -25,7 +30,7 @@ export function CaseBackground() {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0 h-full w-full bg-cover bg-center"
-        style={{ backgroundImage: 'url(/video/poster_start.jpg)' }}
+        style={{ backgroundImage: 'url(/video/poster_wall.jpg)' }}
       />
     )
   }
@@ -39,7 +44,7 @@ export function CaseBackground() {
       loop
       playsInline
       preload="auto"
-      poster="/video/poster_start.jpg"
+      poster="/video/poster_wall.jpg"
     >
       <source src="/video/case-bg-loop.mp4" type="video/mp4" />
     </video>

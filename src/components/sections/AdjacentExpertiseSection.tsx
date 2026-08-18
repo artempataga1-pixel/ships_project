@@ -14,7 +14,8 @@ import {
    Прямое требование заказчика: «визуально отличаться от пяти основных практик
    и быть очевидно вторым уровнем — компактнее, спокойнее». Отсюда все отличия
    от карточек коллажа, и они намеренные:
-   — нет фотографии, нет переворота, нет параллакса и hover-механики;
+   — нет фотографии, нет переворота, нет параллакса; из hover-механики только
+     лайм-подсветка рамки (правка 18.08.2026) — переворота и зума здесь нет;
    — карточка не ссылка: отдельных страниц у этих направлений нет и не будет
      на этом этапе, поэтому и кликать не на что;
    — фон --color-surface-soft вместо белого и никакой тени: карточка читается
@@ -28,11 +29,16 @@ import {
 
 function ExpertiseCard({ title, description }: { title: string; description: string }) {
   return (
-    <article className="flex h-full flex-col rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-surface-soft)] p-6 sm:p-7">
+    /* Наведение — лайм-рамка с мягким свечением и подъёмом на 2px (правка
+       заказчика). Держим эффект тише основных карточек практик: там переворот
+       и параллакс, здесь только смена цвета границы. hover: в Tailwind v4 уже
+       обёрнут в @media (hover:hover), поэтому на тач-экранах подсветка не
+       залипает после тапа. motion-reduce гасит сдвиг, свечение остаётся. */
+    <article className="group flex h-full flex-col rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-surface-soft)] p-6 transition-[border-color,box-shadow,translate] duration-[220ms] ease-out hover:-translate-y-0.5 hover:border-[var(--color-lime)] hover:shadow-[0_0_24px_var(--color-lime-glow)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:p-7">
       {/* Приглушённая лайм-графика: короткая черта без glow. Свечение здесь
           спорило бы с акцентами основных карточек — а блок обязан читаться
           тише них. */}
-      <span aria-hidden className="mb-5 block h-[2px] w-7 bg-[var(--color-lime)]" />
+      <span aria-hidden className="mb-5 block h-[2px] w-7 bg-[var(--color-lime)] transition-[width] duration-[220ms] ease-out group-hover:w-12 motion-reduce:transition-none" />
 
       <h4 className="font-heading text-[1.125rem] font-bold leading-snug tracking-[-0.01em] text-[var(--color-text)]">
         {title}

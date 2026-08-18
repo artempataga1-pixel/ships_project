@@ -6,9 +6,10 @@ import { gsap } from '@/lib/gsap'
 
 // ── Модель стори ────────────────────────────────────────────────────────────
 // 4 шага-«полки» покоя: 0 Hero · 1 О нас · 2 Компетенции · 3 Партнёры.
-// Между полками — 3 видео-сегмента (story1/2/3). Тик скролла вперёд проигрывает
-// сегмент обычным play(), тик назад — гонит currentTime в обратную сторону через
-// requestAnimationFrame (HTML5-видео не умеет надёжный playbackRate<0).
+// Между полками — 3 видео-сегмента (story1/2/3). Тик скролла гонит currentTime
+// сегмента через requestAnimationFrame — вперёд и назад одинаково. Нативный
+// play() с playbackRate стоял только на движении вперёд и фризил на маках
+// (1080p × 2.7 ≈ 64 fps декода), поэтому механизм оставлен один — скраб.
 export const STEP_COUNT = 4
 export const LAST_STEP = 3
 // id для подсветки навбара (Hero без пункта меню → null)
@@ -23,8 +24,8 @@ const TOUCH_THRESHOLD = 40 // мин. смещение пальца, px
 const COOLDOWN_MS = 420 // пауза после шага — гасит инерцию тачпада
 const REACTIVATE_Y = 2 // порог scrollY для реактивации стори при возврате вверх
 
-// Темп проигрыша: любой сегмент нормируется по времени через playbackRate,
-// само видео не режется. Обычный тик — полный сегмент за NORMAL_SECONDS.
+// Темп проигрыша: любой сегмент нормируется скоростью скраба
+// (rate = длительность сегмента / целевые секунды), само видео не режется. Обычный тик — полный сегмент за NORMAL_SECONDS.
 // «Escape для нетерпеливых»: если во время проигрыша пользователь крутит ещё —
 // не обрываем анимацию прыжком в конец (выглядело рвано), а плавно ускоряем
 // проигрыш до темпа «весь сегмент за FAST_SECONDS» — остаток долетает быстро,
@@ -180,9 +181,12 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     }
 
     // ── Переходы ────────────────────────────────────────────────────────────
-    // Вперёд: сегмент seg (= текущий шаг) играет 0 → конец нативным play().
-    // playbackRate нормирует темп: полный сегмент = NORMAL_SECONDS, при скипе
-    // (накопили SPEEDUP_DELTA_THRESHOLD) — плавно ускоряемся до FAST_SECONDS.
+    // Вперёд: сегмент seg (= текущий шаг) гоним 0 → конец тем же rAF-скрабом,
+    // что и назад. Раньше здесь был нативный play() с playbackRate =
+    // segDuration/NORMAL_SECONDS (≈2.7): декодеру приходилось выдавать 1080p
+    // на ~64 fps, и на маках это фризило — при этом реверс, идущий скрабом,
+    // оставался плавным. Один механизм в обе стороны убирает и расхождение
+    // ощущений: вперёд и назад теперь буквально одна и та же математика.
     const playForward = (seg: number) => {
       const v = videos[seg]
       if (!v) return
@@ -191,18 +195,19 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       hideAll()
       activateVideo(seg)
       v.pause()
+      const dur = segDuration(seg)
+      // Хвост 0.05с — тот же, что у реверса: точный последний кадр браузеры
+      // отдают неохотно, а полка всё равно показывается по afterSeek.
+      const endTime = dur - 0.05
       try {
         v.currentTime = 0
       } catch {}
-      v.playbackRate = segDuration(seg) / NORMAL_SECONDS
-      // Завершение сегмента: showOnly полки seg+1. jump=true — форс-домотка
-      // кадра в конец (блокировка автоплея / переход из меню), иначе видео уже
-      // там. Reveal ждёт реального кадра — иначе при jump текст новой полки
-      // покажется раньше, чем видео доедет до нужного места.
-      const finish = (jump: boolean) => {
-        v.removeEventListener('ended', onEnd)
-        v.pause()
-        const reveal = () => {
+      // Завершение сегмента: showOnly полки seg+1. Reveal — только после
+      // реального кадра в конце, иначе текст новой полки покажется раньше,
+      // чем видео туда доедет (заметно при форс-финише из меню).
+      const finish = () => {
+        cancelAnimationFrame(st.raf)
+        afterSeek(v, endTime, () => {
           st.step = seg + 1
           showOnly(st.step)
           emitStep(st.step)
@@ -210,23 +215,28 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
           st.busy = false
           st.forceFinish = null
           st.speedUp = null
-        }
-        if (jump) {
-          afterSeek(v, segDuration(seg) - 0.05, reveal)
-        } else {
-          reveal()
-        }
+        })
       }
-      const onEnd = () => finish(false)
-      st.forceFinish = () => finish(true)
+      st.forceFinish = finish
+      let rate = dur / NORMAL_SECONDS
       st.speedUp = () => {
-        v.playbackRate = segDuration(seg) / FAST_SECONDS
+        rate = dur / FAST_SECONDS
       }
-      v.addEventListener('ended', onEnd)
-      v.play().catch(() => {
-        // Если браузер заблокировал автоплей — просто прыгаем в конец сегмента
-        finish(true)
-      })
+      let last = performance.now()
+      const frame = (now: number) => {
+        const dt = (now - last) / 1000
+        last = now
+        const t = v.currentTime + dt * rate
+        if (t >= endTime) {
+          finish()
+          return
+        }
+        try {
+          v.currentTime = t
+        } catch {}
+        st.raf = requestAnimationFrame(frame)
+      }
+      st.raf = requestAnimationFrame(frame)
     }
 
     // Назад: сегмент fromStep-1 гоним от конца к 0 через rAF в том же темпе,

@@ -168,7 +168,7 @@ function PracticeView({ practice }: { practice: Practice }) {
             альбомной ориентации 1024px колонка заголовка ужимается настолько,
             что название практики рвётся на шесть строк, а панель встаёт узким
             столбиком. До xl обе колонки идут друг под другом. */}
-        <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col gap-12 px-6 pb-16 pt-36 sm:px-8 md:pb-20 md:pt-44 xl:flex-row xl:items-start xl:justify-between xl:gap-14">
+        <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col gap-12 px-6 pb-16 pt-24 sm:px-8 md:pb-20 md:pt-24 xl:flex-row xl:items-start xl:justify-between xl:gap-14">
           {/* ── Левая колонка: возврат, бейдж, название, краткое описание ── */}
           <div className="xl:max-w-[53%] xl:shrink">
             {/* Возврат приземляет ровно на карточку этой практики: с шага 1.6
