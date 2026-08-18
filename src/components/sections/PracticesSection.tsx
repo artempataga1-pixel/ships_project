@@ -137,12 +137,13 @@ function PracticeCard({
         style={{ boxShadow: '0 0 22px var(--color-lime-glow)' }}
       />
 
-      {/* Ярлык — своя плотная подложка, а не расчёт на вуаль: на светлом верху
-          кадра (вуаль там всего 0.12) никакой текст сам по себе контраст не
-          держит. Схема как у «Связанных кейсов» — белая плашка, тёмный текст,
-          лайм-квадратик; форма осталась прежней пилюлей. */}
+      {/* Ярлык — своя плотная подложка: поверх кадра заливки нет, и 11px текста
+          сам по себе на светлом верху фотографии контраст не удержит. Схема как
+          у «Связанных кейсов» — белая плашка, тёмный текст, лайм-квадратик;
+          форма осталась прежней пилюлей. Порядковый номер (01 / …) снят по
+          правке заказчика: карточки идут подряд, нумерация ничего не добавляла. */}
       <span className="absolute left-[clamp(14px,1.1vw,22px)] top-[clamp(12px,1vw,20px)] inline-flex items-center gap-2.5 rounded-full bg-[var(--color-surface)] px-3 py-1.5 font-heading text-[11px] font-black uppercase tracking-[0.14em] text-[var(--color-text)]">
-        {item.num} / {item.label}
+        {item.label}
         <i
           aria-hidden
           className="block h-[8px] w-[8px] shrink-0 rounded-[2px] bg-[var(--color-lime)]"
@@ -176,7 +177,7 @@ function PracticeCard({
   const back = (
     <>
       <span className="text-[11px] tracking-[0.25em] uppercase text-[var(--color-lime)]">
-        {item.num} / {item.label}
+        {item.label}
       </span>
       {/* my-auto — текст встаёт по центру между ярлыком и ссылкой: у широких
           карточек (3/2) описание короче высоты панели, и прижатый к верху абзац
