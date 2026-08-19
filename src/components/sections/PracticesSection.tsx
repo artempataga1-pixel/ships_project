@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { ReturnAnchorLink } from '@/components/ui/ReturnAnchorLink'
 import { useGSAP } from '@gsap/react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { PRACTICE_QUOTES, PRACTICES_SLOGAN } from '@/constants/content/practice'
@@ -100,6 +100,10 @@ function PracticeCard({
 }) {
   const [flipped, setFlipped] = useState(false)
   const href = `/practices/${item.slug}`
+  // Якорь этой же карточки на главной: им подписывается запись истории
+  // перед уходом, чтобы браузерный «Назад» вернул туда же, куда и кнопка
+  // «Все практики» на самой странице (см. ReturnAnchorLink).
+  const returnHash = `#practice-${item.slug}`
 
   // Состояние тапа учитывается только в тач-режиме: на десктопе переворотом
   // управляет CSS (:hover/:focus-within). Так карточка не останется залипшей на
@@ -187,14 +191,15 @@ function PracticeCard({
         {item.cardSummary}
       </p>
       {isTouch ? (
-        <Link
+        <ReturnAnchorLink
           href={href}
+          returnHash={returnHash}
           onClick={(e) => e.stopPropagation()}
           className="inline-flex items-center gap-1 self-start text-sm font-semibold text-[var(--color-lime)]"
         >
           Узнать подробнее
           <span aria-hidden>→</span>
-        </Link>
+        </ReturnAnchorLink>
       ) : (
         /* На десктопе ссылка — вся карточка (лицевая грань), поэтому здесь
            только надпись: второй фокусируемый элемент на ту же практику
@@ -243,13 +248,14 @@ function PracticeCard({
                 {face}
               </button>
             ) : (
-              <Link
+              <ReturnAnchorLink
                 href={href}
+                returnHash={returnHash}
                 aria-label={`Практика «${item.title}» — узнать подробнее`}
                 className={faceClassName}
               >
                 {face}
-              </Link>
+              </ReturnAnchorLink>
             )}
 
             <div

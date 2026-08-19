@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { ReturnAnchorLink } from '@/components/ui/ReturnAnchorLink'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
 import type { CaseStudy } from '@/types/content'
 
@@ -47,9 +47,13 @@ function LogoOutline({ className }: { className?: string }) {
 
 function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
   return (
-    <Link
+    /* returnHash — тот же якорь, что и у кнопки «Все кейсы» на странице кейса:
+       подписывает запись истории главной, чтобы браузерный «Назад» приземлял
+       на эту карточку, а не на герой (см. ReturnAnchorLink). */
+    <ReturnAnchorLink
       id={`case-${item.slug}`}
       href={`/cases/${item.slug}`}
+      returnHash={`#case-${item.slug}`}
       aria-label={`Кейс «${item.title}» — подробнее`}
       className={`group block scroll-mt-[30dvh] ${ALIGN_CLASSES[align]}`}
     >
@@ -126,7 +130,7 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
           </span>
         </div>
       </div>
-    </Link>
+    </ReturnAnchorLink>
   )
 }
 
