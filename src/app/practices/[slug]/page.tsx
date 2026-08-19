@@ -318,16 +318,19 @@ function PracticeView({ practice }: { practice: Practice }) {
               Опишите ситуацию — оценим риски и предложим порядок действий.
             </p>
           </RevealOnScroll>
-          {/* Обычный <a>, не next/link: нужна полная загрузка главной, чтобы
-              отработала ветка «переход с якорем» в HomeAnchorScroll и чтобы
-              ContactsSection прочитал ?practice= при монтировании. */}
+          {/* Ведём на отдельную страницу /contacts, а не на /?practice=…#contacts.
+              Прежний адрес означал полную загрузку главной: 9 511 КБ трафика
+              (9 423 КБ — ролики сторибука), интро, пересборка пинов и только
+              потом доводка скролла на 14 438 px вниз — ради формы на пять полей.
+              next/link, а не <a>: страница лёгкая, клиентский переход мгновенный.
+              Направление предзаполняется на сервере (см. app/contacts/page.tsx). */}
           <RevealOnScroll delay={0.65} y={20} duration={0.7} blur={10}>
-            <a
-              href={`/?practice=${practice.slug}#contacts`}
+            <Link
+              href={`/contacts?practice=${practice.slug}`}
               className="btn-lime-fill btn-lime-breathe mt-9 inline-flex h-12 items-center justify-center rounded-md px-7 text-sm font-semibold"
             >
               Обсудить задачу
-            </a>
+            </Link>
           </RevealOnScroll>
         </div>
       </section>

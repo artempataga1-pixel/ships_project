@@ -9,6 +9,7 @@ import {
   STORY_GOTO_EVENT,
 } from '@/components/hero/useStoryController'
 import { useActiveSection } from '@/components/layout/useActiveSection'
+import { useContactsHref } from '@/lib/useContactsHref'
 
 // Горизонтальный padding ссылки (px-4 с двух сторон) — лампа накрывает сам текст пункта
 const LINK_PADDING_X = 32
@@ -17,8 +18,11 @@ const LAMP_MIN_WIDTH = 44
 
 export function LimelightNav({ items }: { items: NavItem[] }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  // Активная секция определяется скроллом: какая из секций пересекает середину экрана
+  // Активная секция определяется скроллом: какая из секций пересекает середину экрана.
+  // items отдаём нетронутыми — хук ищет секции по id из href.
   const activeIndex = useActiveSection(items)
+  // Вне главной «Контакты» ведут на отдельную страницу, а не на якорь главной
+  const contactsHref = useContactsHref()
   const [lamp, setLamp] = useState<{ x: number; width: number } | null>(null)
   // Первый замер рисуем без transition — иначе лампа «переезжает» из нуля при загрузке
   const [isReady, setIsReady] = useState(false)
@@ -98,9 +102,11 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
             onMouseEnter={() => setHoveredIndex(i)}
           >
             {/* Обычный <a>, не next/link — клик по якорю перехватывает Lenis
-                (anchors в SmoothScrollProvider) и плавно скроллит к секции */}
+                (anchors в SmoothScrollProvider) и плавно скроллит к секции.
+                «Контакты» вне главной подменяются на /contacts: якорь означал бы
+                полную загрузку главной со сторибуком ради формы. */}
             <a
-              href={item.href}
+              href={item.href === '/#contacts' ? contactsHref : item.href}
               onClick={(e) => handleClick(e, item)}
               className={`block rounded-full px-4 py-1.5 text-[15px] font-medium transition-colors duration-200 ${
                 i === targetIndex

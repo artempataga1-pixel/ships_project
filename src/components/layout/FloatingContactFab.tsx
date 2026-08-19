@@ -5,6 +5,7 @@ import { Phone } from 'lucide-react'
 import { NAV_ITEMS } from '@/constants/nav'
 import { useActiveSection } from '@/components/layout/useActiveSection'
 import { useFormFocus } from '@/lib/useFormFocus'
+import { useContactsHref } from '@/lib/useContactsHref'
 
 const CONTACTS_INDEX = NAV_ITEMS.findIndex((item) => item.href.endsWith('#contacts'))
 
@@ -13,15 +14,19 @@ const CONTACTS_INDEX = NAV_ITEMS.findIndex((item) => item.href.endsWith('#contac
 // поверх формы связи бессмысленна), во время ввода в поле формы (клавиатура)
 // и на самом хероблоке — там для той же цели уже есть кнопка «Обсудить задачу».
 export function FloatingContactFab() {
+  // NAV_ITEMS отдаём в useActiveSection нетронутым — он ищет секции по id
   const activeIndex = useActiveSection(NAV_ITEMS)
   const isFormFocused = useFormFocus()
   const isOnHero = useIsOnHero()
+  const contactsHref = useContactsHref()
   const isHidden = isFormFocused || activeIndex === CONTACTS_INDEX || isOnHero
 
   return (
-    // eslint-disable-next-line @next/next/no-html-link-for-pages -- намеренно нативный <a>: на главной клик перехватывает Lenis/нативный скролл к #contacts, Link здесь не нужен
+    /* Намеренно нативный <a>, а не next/link: на главной клик по якорю
+       перехватывает Lenis/нативный скролл к #contacts. Вне главной href —
+       «/contacts», и обычный переход туда стоит недорого: страница лёгкая. */
     <a
-      href="/#contacts"
+      href={contactsHref}
       aria-label="Связаться с нами"
       aria-hidden={isHidden}
       tabIndex={isHidden ? -1 : undefined}

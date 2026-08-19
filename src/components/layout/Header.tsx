@@ -4,8 +4,11 @@ import { NAV_ITEMS } from '@/constants/nav'
 import { LimelightNav } from '@/components/layout/LimelightNav'
 import { LogoLink } from '@/components/layout/LogoLink'
 import { handleStoryAwareAnchorClick } from '@/components/hero/useStoryController'
+import { useContactsHref } from '@/lib/useContactsHref'
 
 export function Header() {
+  // На главной — якорь к блоку, с внутренних страниц — /contacts (см. хук)
+  const contactsHref = useContactsHref()
   // z-[90] — ниже оверлея LogoIntro (z-[100]), если интро вернут
   return (
     // Чёрная плашка — только мобилка/планшет (<xl): без неё логотип сливается
@@ -27,15 +30,16 @@ export function Header() {
           <LimelightNav items={NAV_ITEMS} />
         </nav>
 
-        {/* CTA — обычный <a>: на главной клик перехватывает Lenis (плавный скролл),
-            с внутренних страниц «/#contacts» уводит на главную к секции.
+        {/* CTA — обычный <a>: на главной клик перехватывает Lenis (плавный скролл
+            к блоку), с внутренних страниц ведёт на отдельную страницу /contacts,
+            чтобы не тянуть главную со сторибуком ради формы.
             onClick — мягкий выход из стори (см. handleStoryAwareAnchorClick),
-            иначе голый клик мимо контроллера намертво стопит Lenis.
+            иначе голый клик мимо контроллера намертво стопит Lenis. Вне главной
+            обработчик сам выходит в no-op (стори там не активна).
             Эффект .btn-lime-fill: залита лаймом → при наведении белеет + лайм-glow.
             До 1280px (xl) — плавающая кнопка FloatingContactFab, эта прячется */}
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- намеренно нативный <a>: на главной клик перехватывает Lenis (плавный скролл к #contacts), Link здесь не нужен */}
         <a
-          href="/#contacts"
+          href={contactsHref}
           onClick={(e) => handleStoryAwareAnchorClick(e, 'contacts')}
           className="btn-lime-fill btn-outline-thin shrink-0 hidden xl:inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
         >

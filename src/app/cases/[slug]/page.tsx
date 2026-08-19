@@ -193,20 +193,18 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
           </p>
         </div>
 
-        {/* CTA под рамкой результата — обычный <a>, не next/link: переход на
-            главную с якорем на блок контактов. handleStoryAwareAnchorClick
-            здесь не нужен — story-режим есть только на главной (см. отчёт
-            исследования компонента Header). .btn-lime-breathe добавляет
-            пульсацию свечения в покое поверх .btn-lime-fill. */}
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- нужен
-            полноценный переход на «/», а не клиентская навигация: HomeAnchorScroll
-            отрабатывает якорь только на свежей загрузке главной */}
-        <a
-          href="/#contacts"
+        {/* CTA под рамкой результата — ведёт на отдельную страницу /contacts.
+            Раньше был якорь «/#contacts», то есть полная загрузка главной со
+            сторибуком (9.5 МБ трафика) ради формы на пять полей.
+            next/link: страница лёгкая, клиентский переход мгновенный.
+            .btn-lime-breathe добавляет пульсацию свечения в покое поверх
+            .btn-lime-fill. */}
+        <Link
+          href="/contacts"
           className="btn-lime-fill btn-lime-breathe mt-8 inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
         >
           Оставить заявку
-        </a>
+        </Link>
       </div>
     </main>
   )

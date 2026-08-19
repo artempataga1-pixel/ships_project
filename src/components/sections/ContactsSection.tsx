@@ -60,11 +60,22 @@ type FieldErrors = {
   consent?: boolean
 }
 
+export interface ContactsSectionProps {
+  /* Предзаполнение с сервера — используется отдельной страницей /contacts,
+     которая резолвит ?practice=/?product= в рендере (src/app/contacts/page.tsx).
+     Когда пропсы переданы, клиентское чтение URL отключается: значение уже
+     пришло в первом HTML, мигания пустой формы нет. На главной пропсов нет —
+     там работает прежняя ветка с эффектом. */
+  initialPractice?: string
+  initialMessage?: string
+}
+
 /* Секция «Контакты» — блок из contact-section-package, перенесённый в React.
    Фон (люди, интерьер, стеклянная панель, подиум) — public/contact-assets/
    contact-background-2.webp, заголовки/форма/иконки/панели — кодом. Заявка
-   уходит в тот же /api/contact (Telegram-уведомления), что и раньше. */
-export function ContactsSection() {
+   уходит в тот же /api/contact (Telegram-уведомления), что и раньше — роут
+   глобальный, работает одинаково с главной и с отдельной страницы. */
+export function ContactsSection({ initialPractice, initialMessage }: ContactsSectionProps = {}) {
   const formRef = useRef<HTMLFormElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
   const phoneRef = useRef<HTMLInputElement>(null)
@@ -72,7 +83,7 @@ export function ContactsSection() {
   const consentRef = useRef<HTMLInputElement>(null)
 
   const [phone, setPhone] = useState('+7')
-  const [practice, setPractice] = useState('')
+  const [practice, setPractice] = useState(initialPractice ?? '')
   const [consent, setConsent] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
@@ -103,6 +114,9 @@ export function ContactsSection() {
      монтировании. Каскада ререндеров нет: эффект без зависимостей, отрабатывает
      один раз, и только если в адресе реально есть параметр. */
   useEffect(() => {
+    /* Предзаполнение пришло пропсами (страница /contacts) — URL читать незачем. */
+    if (initialPractice !== undefined || initialMessage !== undefined) return
+
     const params = new URLSearchParams(window.location.search)
 
     const practiceSlug = params.get('practice')
@@ -119,7 +133,7 @@ export function ContactsSection() {
       const product = PRODUCTS.find((item) => item.slug === productSlug)
       if (product) messageRef.current.value = `Интересует: ${product.title}`
     }
-  }, [])
+  }, [initialPractice, initialMessage])
 
   function clearFieldError(field: keyof FieldErrors) {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: false } : prev))
@@ -166,6 +180,10 @@ export function ContactsSection() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
       form.reset()
+      /* form.reset() возвращает textarea к defaultValue, а на /contacts там
+         лежит подставленный продукт («Интересует: …») — после успешной
+         отправки он всплыл бы обратно в пустой на вид форме. Чистим явно. */
+      if (messageRef.current) messageRef.current.value = ''
       setPhone('+7')
       setPractice('')
       setConsent(false)
@@ -273,6 +291,7 @@ export function ContactsSection() {
               rows={4}
               maxLength={2000}
               placeholder="Опишите вашу задачу"
+              defaultValue={initialMessage}
               required
               aria-invalid={errors.message ? 'true' : undefined}
               onChange={() => clearFieldError('message')}

@@ -2,8 +2,9 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useGSAP } from '@gsap/react'
-import { gsap } from '@/lib/gsap'
+import { gsap, ScrollTrigger } from '@/lib/gsap'
 import type { Product } from '@/types/content'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { CardArtwork } from './CardArtwork'
@@ -23,9 +24,10 @@ import { CardArtwork } from './CardArtwork'
    в расфокусе (концепт, кадры позже заменяются) и медленный перелив света
    (.card-sheen в globals.css). Стоковых фотографий у продуктов нет и не будет.
 
-   Вся карточка — ссылка на форму главной с проброшенной темой:
-   /?product=<slug>&practice=<slug>#contacts — ContactsSection читает эти
-   параметры и предзаполняет «Направление» и «Сообщение». */
+   Вся карточка — ссылка на отдельную страницу контактов с проброшенной темой:
+   /contacts?product=<slug>&practice=<slug> — страница резолвит параметры на
+   сервере и предзаполняет «Направление» и «Сообщение». Раньше вело на якорь
+   главной, что означало полную её загрузку со сторибуком (9.5 МБ). */
 
 const PIXEL_COLS = 12
 const PIXEL_ROWS = 8
@@ -53,6 +55,17 @@ const CUBE_MIN_SCALE = 0.55
    На этом строится защита от залипания (см. useGSAP карточки). */
 const WAVE_TRAVEL = (PIXEL_ROWS - 1 + PIXEL_COLS - 1) * CUBE_STEP
 const WAVE_TOTAL = WAVE_TRAVEL + CUBE_IN + CUBE_OUT
+
+/* Через сколько после ухода курсора снимать сетку кубиков с DOM.
+
+   Сетка — 96 узлов на карточку, и на семи карточках это 672 элемента, у
+   каждого двойной box-shadow. Держать их в разметке постоянно стоило
+   ощутимо: замер прохода скролла через блок продуктов на прод-билде —
+   0.78с main-thread с сеткой против 0.53с без неё. Нужны они ровно тогда,
+   когда по карточке идёт волна, поэтому монтируем по наведению и снимаем,
+   когда волна ГАРАНТИРОВАННО доиграла: WAVE_TOTAL плюс запас на кадр.
+   Снять раньше — оборвать волну на середине. */
+const GRID_DISARM_MS = WAVE_TOTAL * 1000 + 120
 
 /* Опорная карточка колоды. Слаг, а не индекс: порядок продуктов в реестре
    ещё меняется, а «Стратегия кредитора» останется той же карточкой. Если слаг
@@ -128,7 +141,17 @@ function ArrowUpRight({ className }: { className?: string }) {
    Два движения на квадрат, и они намеренно разнесены по двум вложенным
    элементам: параллакс от прогресса скролла живёт на обёртке, покачивание —
    на внутреннем span. Обе анимации двигают y, и на одном элементе вторая
-   просто перебила бы первую. */
+   просто перебила бы первую.
+
+   Параллакс собран в ОДНУ timeline с одним ScrollTrigger, а не в восемь
+   отдельных твинов с восемью триггерами на один и тот же элемент, как было
+   сначала. Триггеры одинаковые (тот же trigger, start, end, scrub) — восемь
+   копий считали одно и то же восемь раз. Замер прохода скролла через блок:
+   1127 пересчётов стиля против 632 после схлопывания.
+
+   Покачивание останавливается, когда блок ушёл из вьюпорта: восемь
+   бесконечных твинов крутились всё время жизни страницы, хотя видны только
+   на своём экране. */
 function FloatingSquares({ sectionRef }: { sectionRef: React.RefObject<HTMLDivElement | null> }) {
   const rootRef = useRef<HTMLDivElement>(null)
 
@@ -139,20 +162,21 @@ function FloatingSquares({ sectionRef }: { sectionRef: React.RefObject<HTMLDivEl
       const wraps = gsap.utils.toArray<HTMLElement>('[data-float-wrap]', rootRef.current)
       const bobs = gsap.utils.toArray<HTMLElement>('[data-float-bob]', rootRef.current)
 
+      const parallax = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1,
+        },
+      })
       wraps.forEach((wrap, index) => {
-        gsap.to(wrap, {
-          y: -(80 + index * 30),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1,
-          },
-        })
+        // position '0' — все твины стартуют одновременно, как и было при
+        // восьми независимых триггерах; разной остаётся только амплитуда.
+        parallax.to(wrap, { y: -(80 + index * 30), ease: 'none', duration: 1 }, 0)
       })
 
-      bobs.forEach((bob, index) => {
+      const bobTweens = bobs.map((bob, index) =>
         gsap.to(bob, {
           y: -10,
           duration: 1.5 + index * 0.2,
@@ -160,7 +184,19 @@ function FloatingSquares({ sectionRef }: { sectionRef: React.RefObject<HTMLDivEl
           repeat: -1,
           yoyo: true,
           ease: 'sine.inOut',
-        })
+        }),
+      )
+
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top bottom',
+        end: 'bottom top',
+        onToggle: ({ isActive }) => {
+          for (const tween of bobTweens) {
+            if (isActive) tween.resume()
+            else tween.pause()
+          }
+        },
       })
     },
     { scope: rootRef },
@@ -323,6 +359,14 @@ function ProductCard({
   const ctaTweenRef = useRef<gsap.core.Timeline | null>(null)
   const moveTo = useRef<{ x: (v: number) => void; y: (v: number) => void }[]>([])
 
+  /* Сетка кубиков живёт в DOM только пока карточка под курсором/фокусом
+     (см. GRID_DISARM_MS). hoverRef дублирует наведение рефом: состояние
+     монтирования приезжает асинхронно, а эффекту нужно знать «курсор ещё
+     здесь?» в момент своего запуска. */
+  const [gridArmed, setGridArmed] = useState(false)
+  const hoverRef = useRef(false)
+  const disarmTimer = useRef<number | null>(null)
+
   const magnets = MAGNETIC_SETS[index % MAGNETIC_SETS.length]
 
   useGSAP(
@@ -337,26 +381,51 @@ function ProductCard({
         y: gsap.quickTo(square, 'y', { duration: 0.6, ease: 'power3.out' }),
       }))
 
-      const blocks = gsap.utils.toArray<HTMLElement>('[data-pixel]', pixelsRef.current)
       gsap.set(ctaRef.current, { opacity: 0, y: 10 })
 
-      /* ── Волна, которая ПРОХОДИТ по карточке и уходит ──────────────────
+      /* Кнопка — своя короткая timeline, отдельная от волны: волна только
+         объявляет наведение и уходит, а кнопка держится всё время, пока
+         курсор на карточке. Её тоже собираем заранее и проигрываем вперёд/
+         назад, а не создаём твин в обработчике: так анимация принадлежит
+         gsap-контексту (сама снимется при размонтировании) и не может
+         зависнуть на промежуточной прозрачности при дёрганом наведении. */
+      ctaTweenRef.current = gsap
+        .timeline({ paused: true })
+        .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' })
+    },
+    { scope: rootRef, dependencies: [withPointerEffects] },
+  )
 
-         Первый заход был сделан «в лоб»: по два твина на кубик, сложенные в
-         одну timeline со сдвигом по диагонали. Работало, но давало 192 твина
-         на карточку и 1344 на блок — при быстром проведении курсором по сетке
-         GSAP не успевал их прокручивать, включалось сглаживание лага, и волны
-         доигрывали СЕКУНДАМИ позже: карточка, с которой курсор давно ушёл,
-         вдруг зажигалась сама по себе.
+  /* ── Волна, которая ПРОХОДИТ по карточке и уходит ────────────────────────
 
-         Теперь анимация одна на карточку — тикает единственный твин по
-         числовому времени, а раскладку кубиков считает paintWave(). Дешевле
-         на три порядка по количеству объектов GSAP и, что важнее, ПО ПОСТРОЕНИЮ
-         не может залипнуть: состояние кубиков — чистая функция от времени, а
-         не результат накопленных твинов. В точке WAVE_TOTAL вспышка последнего
-         кубика уже закончена, поэтому финал всегда один — сетка погашена.
-         Откуда бы волну ни перезапустили (restart), она пересчитывает всё с
-         нуля; onComplete дорисовывает финальный кадр принудительно. */
+     Первый заход был сделан «в лоб»: по два твина на кубик, сложенные в одну
+     timeline со сдвигом по диагонали. Работало, но давало 192 твина на
+     карточку и 1344 на блок — при быстром проведении курсором по сетке GSAP не
+     успевал их прокручивать, включалось сглаживание лага, и волны доигрывали
+     СЕКУНДАМИ позже: карточка, с которой курсор давно ушёл, вдруг зажигалась
+     сама по себе.
+
+     Теперь анимация одна на карточку — тикает единственный твин по числовому
+     времени, а раскладку кубиков считает paintWave(). Дешевле на три порядка
+     по количеству объектов GSAP и, что важнее, ПО ПОСТРОЕНИЮ не может
+     залипнуть: состояние кубиков — чистая функция от времени, а не результат
+     накопленных твинов. В точке WAVE_TOTAL вспышка последнего кубика уже
+     закончена, поэтому финал всегда один — сетка погашена. Откуда бы волну ни
+     перезапустили (restart), она пересчитывает всё с нуля; onComplete
+     дорисовывает финальный кадр принудительно.
+
+     Эффект отделён от «магнитного» выше и пересобирается по gridArmed: сама
+     сетка теперь появляется в DOM только под курсором, значит и твин по ней
+     строить можно лишь после её монтирования. Запуск волны живёт здесь же —
+     наведение случается ДО того, как сетка окажется в разметке, и стартовать
+     из обработчика было бы не по чему. */
+  useGSAP(
+    () => {
+      if (!withPointerEffects || !gridArmed) return
+
+      const blocks = gsap.utils.toArray<HTMLElement>('[data-pixel]', pixelsRef.current)
+      if (blocks.length === 0) return
+
       const starts = blocks.map((_, blockIndex) => {
         const row = Math.floor(blockIndex / PIXEL_COLS)
         const col = blockIndex % PIXEL_COLS
@@ -383,7 +452,7 @@ function ProductCard({
       // fromTo, а не to: каждый перезапуск обязан начинаться с нуля, иначе
       // волна пойдёт от своего прошлого конца и не нарисует ничего.
       // immediateRender: false — твин не должен рисовать кадр при создании.
-      waveRef.current = gsap.fromTo(
+      const wave = gsap.fromTo(
         cursor,
         { time: 0 },
         {
@@ -396,31 +465,55 @@ function ProductCard({
           onComplete: () => paintWave(WAVE_TOTAL),
         },
       )
+      waveRef.current = wave
 
-      /* Кнопка — своя короткая timeline, отдельная от волны: волна только
-         объявляет наведение и уходит, а кнопка держится всё время, пока
-         курсор на карточке. Её тоже собираем заранее и проигрываем вперёд/
-         назад, а не создаём твин в обработчике: так анимация принадлежит
-         gsap-контексту (сама снимется при размонтировании) и не может
-         зависнуть на промежуточной прозрачности при дёрганом наведении. */
-      ctaTweenRef.current = gsap
-        .timeline({ paused: true })
-        .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' })
+      // Сетку смонтировали ради наведения — гоним волну сразу, если курсор
+      // за время монтирования никуда не делся.
+      if (hoverRef.current) wave.restart()
+
+      return () => {
+        waveRef.current = null
+        resetWaveRef.current = null
+      }
     },
-    { scope: rootRef, dependencies: [withPointerEffects] },
+    { scope: rootRef, dependencies: [withPointerEffects, gridArmed] },
   )
 
+  // Таймер снятия сетки не должен пережить карточку
+  useEffect(() => {
+    return () => {
+      if (disarmTimer.current) window.clearTimeout(disarmTimer.current)
+    }
+  }, [])
+
   const setHover = (active: boolean) => {
-    const wave = waveRef.current
-    if (active) {
-      // Волна запускается только на входе и всегда с нуля: догонять её
-      // реверсом нечего — она и так заканчивается погашенной сеткой.
-      wave?.restart()
-    } else if (wave && !wave.isActive()) {
-      // Страховка на уход курсора: если волна уже не идёт, дорисовываем
-      // финальный кадр. Стоит один проход по сетке и закрывает случай, когда
-      // твин был убит (перемонтирование, revert контекста) до onComplete.
-      resetWaveRef.current?.()
+    hoverRef.current = active
+
+    if (withPointerEffects) {
+      if (disarmTimer.current) {
+        window.clearTimeout(disarmTimer.current)
+        disarmTimer.current = null
+      }
+
+      if (active) {
+        // Сетки ещё нет — монтируем, волну запустит эффект выше. Есть —
+        // гоним сразу. Волна всегда с нуля: догонять её реверсом нечего,
+        // она и так заканчивается погашенной сеткой.
+        if (gridArmed) waveRef.current?.restart()
+        else setGridArmed(true)
+      } else {
+        const wave = waveRef.current
+        // Страховка на уход курсора: если волна уже не идёт, дорисовываем
+        // финальный кадр. Стоит один проход по сетке и закрывает случай,
+        // когда твин был убит (revert контекста) до onComplete.
+        if (wave && !wave.isActive()) resetWaveRef.current?.()
+
+        // Снимаем сетку с DOM, когда волна заведомо доиграла
+        disarmTimer.current = window.setTimeout(() => {
+          disarmTimer.current = null
+          if (!hoverRef.current) setGridArmed(false)
+        }, GRID_DISARM_MS)
+      }
     }
 
     const cta = ctaTweenRef.current
@@ -455,7 +548,7 @@ function ProductCard({
         rootRef.current = node
         cardRef(node)
       }}
-      href={`/?product=${product.slug}&practice=${practiceSlug}#contacts`}
+      href={`/contacts?product=${product.slug}&practice=${practiceSlug}`}
       onPointerEnter={() => setHover(true)}
       onPointerLeave={() => {
         setHover(false)
@@ -490,11 +583,16 @@ function ProductCard({
 
       {/* 3. Перелив — медленная полоса света поперёк кадра. Отрицательная
              задержка разводит соседние карточки по фазе, чтобы блик не шёл
-             по всей сетке строем (см. .card-sheen в globals.css). */}
+             по всей сетке строем (см. .card-sheen в globals.css).
+
+             Задержка идёт CSS-переменной, а не animationDelay: сама анимация
+             живёт на псевдоэлементе ::before (там она едет через transform и
+             композитится), а инлайновый animation-delay на родителе до него
+             не достаёт. */}
       <span
         aria-hidden
         className="card-sheen pointer-events-none absolute inset-0"
-        style={{ animationDelay: `${-index * 2.3}s` }}
+        style={{ '--sheen-delay': `${-index * 2.3}s` } as CSSProperties}
       />
 
       {/* 4. Осветление низа — плашка с названием должна читаться при любом кадре */}
@@ -534,7 +632,7 @@ function ProductCard({
              Лайм-шов даёт inset-тень в 1px по контуру, наружная — мягкое
              свечение. Соседние кубики перекрываются на пиксель (см. ниже), их
              контуры совпадают, и шов остаётся одной линией, а не двойной. */}
-      {withPointerEffects && (
+      {withPointerEffects && gridArmed && (
         <div ref={pixelsRef} aria-hidden className="pointer-events-none absolute inset-0">
           {Array.from({ length: PIXEL_COLS * PIXEL_ROWS }, (_, blockIndex) => {
             const row = Math.floor(blockIndex / PIXEL_COLS)
@@ -555,6 +653,10 @@ function ProductCard({
                   height: `calc(${100 / PIXEL_ROWS}% + 1px)`,
                   boxShadow:
                     'inset 0 0 0 1px rgba(168,204,51,.95), 0 0 10px rgba(191,220,84,.35)',
+                  /* Погашено с первого кадра: сетка монтируется в момент
+                     наведения, и без этого браузер успел бы показать все 96
+                     контуров разом до того, как paintWave их погасит. */
+                  opacity: 0,
                 }}
               />
             )

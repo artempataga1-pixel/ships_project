@@ -6,6 +6,7 @@ import { NAV_ITEMS } from '@/constants/nav'
 import { useActiveSection } from '@/components/layout/useActiveSection'
 import { handleMobileNavClick } from '@/components/hero/useMobileScrubController'
 import { useFormFocus } from '@/lib/useFormFocus'
+import { useContactsHref } from '@/lib/useContactsHref'
 
 // Те же величины, что в LimelightNav — лампа той же формы/свечения
 const LINK_PADDING_X = 32
@@ -16,8 +17,11 @@ const LAMP_MIN_WIDTH = 44
 // Десктопный story-контроллер (isStoryActive) на мобиле не монтируется — для
 // practices/articles/cases/contacts клики по <a> идут обычным переходом/якорем.
 export function MobileBottomNav() {
+  // NAV_ITEMS отдаём в useActiveSection нетронутым — он ищет секции по id из
+  // href; подменённый «/contacts» без решётки сломал бы подсветку пункта.
   const activeIndex = useActiveSection(NAV_ITEMS)
   const lenis = useLenis()
+  const contactsHref = useContactsHref()
   // Во время ввода в поле формы iOS-клавиатура двигает fixed-элементы —
   // прячем меню, чтобы оно не наезжало на поля/кнопку отправки
   const isFormFocused = useFormFocus()
@@ -94,8 +98,11 @@ export function MobileBottomNav() {
                 itemRefs.current[i] = el
               }}
             >
+              {/* «Контакты» вне главной ведут на отдельную страницу, остальные
+                  пункты — прежними якорями главной. handleMobileNavClick на
+                  адресе без решётки сам выходит в no-op. */}
               <a
-                href={item.href}
+                href={item.href === '/#contacts' ? contactsHref : item.href}
                 onClick={(e) => handleMobileNavClick(e, item.href, lenis)}
                 className={`block whitespace-nowrap rounded-full px-4 py-3 text-sm font-medium transition-colors duration-200 ${
                   i === activeIndex ? 'text-[var(--color-text)]' : 'text-[#333333]'
