@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Демонстрация блока «Контакты»">
+  <title>Блок «Контакты» — демонстрация</title>
+  <link rel="stylesheet" href="css/contact-section.css">
+  <style>
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: #f4f3f1; }
+  </style>
+</head>
+<body>
+  <!-- Содержимое contact-section.html вставлено сюда для запуска демо двойным кликом. -->
+  <div id="contact-demo"></div>
+
+  <script>
+    fetch("contact-section.html")
+      .then(function (response) { return response.text(); })
+      .then(function (html) {
+        document.querySelector("#contact-demo").innerHTML = html;
+        var script = document.createElement("script");
+        script.src = "js/contact-section.js";
+        document.body.appendChild(script);
+      })
+      .catch(function () {
+        document.querySelector("#contact-demo").innerHTML =
+          '<p style="padding:24px;font:16px Arial">Запустите папку через локальный сервер: <code>python3 -m http.server 8080</code></p>';
+      });
+  </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!--
+  Автономный блок «Контакты».
+  Подключите css/contact-section.css и js/contact-section.js один раз на странице.
+  Существующие header/navigation сайта сюда не входят.
+-->
+<section class="pb-contact" id="contacts" aria-labelledby="pb-contact-title">
+  <div class="pb-contact__stage">
+    <svg class="pb-contact__icon-defs" aria-hidden="true">
+      <symbol id="pb-icon-user" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="3.25"/>
+        <path d="M5.75 20v-1.5A6.25 6.25 0 0 1 12 12.25a6.25 6.25 0 0 1 6.25 6.25V20"/>
+      </symbol>
+      <symbol id="pb-icon-phone" viewBox="0 0 24 24">
+        <path d="M7.4 3.75 9.65 8l-2.1 1.75a15.8 15.8 0 0 0 6.7 6.7l1.75-2.1 4.25 2.25-.75 3.15c-.2.85-1 1.42-1.87 1.35C9.9 20.5 3.5 14.1 2.9 6.37c-.07-.87.5-1.67 1.35-1.87l3.15-.75Z"/>
+      </symbol>
+      <symbol id="pb-icon-mail" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2"/>
+        <path d="m4.5 7 7.5 6 7.5-6"/>
+      </symbol>
+      <symbol id="pb-icon-telegram" viewBox="0 0 24 24">
+        <path d="m21 3-7.6 18-4.3-6.4L3 10.7 21 3Z"/>
+        <path d="m9.1 14.6 4.1-3.6"/>
+      </symbol>
+      <symbol id="pb-icon-pin" viewBox="0 0 24 24">
+        <path d="M19 10c0 5.25-7 11-7 11S5 15.25 5 10a7 7 0 1 1 14 0Z"/>
+        <circle cx="12" cy="10" r="2.25"/>
+      </symbol>
+      <symbol id="pb-icon-message" viewBox="0 0 24 24">
+        <rect x="4" y="3" width="16" height="18" rx="1.5"/>
+        <path d="M8 7h8M8 11h8M8 15h5"/>
+      </symbol>
+      <symbol id="pb-icon-lock" viewBox="0 0 24 24">
+        <rect x="5" y="10" width="14" height="11" rx="2"/>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+      </symbol>
+      <symbol id="pb-icon-shield" viewBox="0 0 24 24">
+        <path d="M12 3 5 6v5c0 4.6 2.9 8.2 7 10 4.1-1.8 7-5.4 7-10V6l-7-3Z"/>
+        <path d="m9 12 2 2 4-5"/>
+      </symbol>
+      <symbol id="pb-icon-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8"/>
+        <path d="M12 7v5l3 2"/>
+      </symbol>
+      <symbol id="pb-icon-target" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8"/>
+        <circle cx="12" cy="12" r="4"/>
+        <path d="m12 12 7-7M16 5h3v3"/>
+      </symbol>
+      <symbol id="pb-icon-trophy" viewBox="0 0 24 24">
+        <path d="M8 4h8v4a4 4 0 0 1-8 0V4ZM10 14h4M12 12v6M8 20h8"/>
+        <path d="M8 6H4v1a4 4 0 0 0 4 4M16 6h4v1a4 4 0 0 1-4 4"/>
+      </symbol>
+      <symbol id="pb-icon-arrow" viewBox="0 0 24 24">
+        <path d="M4 12h15M14 7l5 5-5 5"/>
+      </symbol>
+    </svg>
+
+    <header class="pb-contact__intro">
+      <p class="pb-contact__eyebrow">КОНТАКТЫ</p>
+      <h2 class="pb-contact__title" id="pb-contact-title">
+        Обсудим вашу задачу<br>и найдём решение
+      </h2>
+      <p class="pb-contact__lead">
+        Оставьте заявку — мы свяжемся с вами<br>и предложим оптимальный путь
+      </p>
+    </header>
+
+    <!--
+      data-endpoint="" — сюда Claude Code должен подставить URL обработчика формы.
+      Пока endpoint пуст, JS работает в демонстрационном режиме и генерирует
+      событие contact-form:submit с данными формы.
+    -->
+    <form class="pb-contact__form" id="pb-contact-form" data-endpoint="" novalidate>
+      <div class="pb-contact__field">
+        <svg aria-hidden="true"><use href="#pb-icon-user"/></svg>
+        <label class="pb-contact__sr-only" for="pb-name">Ваше имя</label>
+        <input id="pb-name" name="name" type="text" autocomplete="name" placeholder="Ваше имя" required>
+      </div>
+
+      <div class="pb-contact__field">
+        <svg aria-hidden="true"><use href="#pb-icon-phone"/></svg>
+        <label class="pb-contact__sr-only" for="pb-phone">Телефон</label>
+        <input id="pb-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Телефон" required>
+      </div>
+
+      <div class="pb-contact__field">
+        <svg aria-hidden="true"><use href="#pb-icon-mail"/></svg>
+        <label class="pb-contact__sr-only" for="pb-email">E-mail</label>
+        <input id="pb-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="E-mail" required>
+      </div>
+
+      <div class="pb-contact__field pb-contact__field--message">
+        <svg aria-hidden="true"><use href="#pb-icon-message"/></svg>
+        <label class="pb-contact__sr-only" for="pb-message">Опишите вашу задачу</label>
+        <textarea id="pb-message" name="message" rows="4" placeholder="Опишите вашу задачу" required></textarea>
+      </div>
+
+      <!-- Антиспам-поле: посетитель его не видит. -->
+      <label class="pb-contact__honey" aria-hidden="true">
+        Не заполняйте это поле
+        <input name="website" type="text" tabindex="-1" autocomplete="off">
+      </label>
+
+      <button class="pb-contact__submit" type="submit">
+        <span>ОТПРАВИТЬ ЗАЯВКУ</span>
+        <svg aria-hidden="true"><use href="#pb-icon-arrow"/></svg>
+      </button>
+
+      <p class="pb-contact__privacy">
+        <svg aria-hidden="true"><use href="#pb-icon-lock"/></svg>
+        <span>Мы гарантируем конфиденциальность<br>ваших данных</span>
+      </p>
+      <p class="pb-contact__status" role="status" aria-live="polite"></p>
+    </form>
+
+    <address class="pb-contact__details" aria-label="Контактная информация">
+      <div class="pb-contact__detail">
+        <span class="pb-contact__detail-icon"><svg aria-hidden="true"><use href="#pb-icon-phone"/></svg></span>
+        <span>
+          <a href="tel:+74951202080">+7 (495) 120-20-80</a>
+          <small>Пн — Пт: 09:00 – 19:00</small>
+        </span>
+      </div>
+      <div class="pb-contact__detail">
+        <span class="pb-contact__detail-icon"><svg aria-hidden="true"><use href="#pb-icon-mail"/></svg></span>
+        <span>
+          <a href="mailto:info@probankrotstvo.ru">info@probankrotstvo.ru</a>
+          <small>Ответим в течение часа</small>
+        </span>
+      </div>
+      <div class="pb-contact__detail">
+        <span class="pb-contact__detail-icon"><svg aria-hidden="true"><use href="#pb-icon-telegram"/></svg></span>
+        <span>
+          <a href="https://t.me/probankrotstvo_law" target="_blank" rel="noopener">@probankrotstvo_law</a>
+          <small>Telegram для связи</small>
+        </span>
+      </div>
+      <div class="pb-contact__detail">
+        <span class="pb-contact__detail-icon"><svg aria-hidden="true"><use href="#pb-icon-pin"/></svg></span>
+        <span>
+          <strong>г. Москва, Пресненская наб., 12</strong>
+          <small>Башня «Федерация», офис 40 этаж</small>
+          <a class="pb-contact__map-link" href="https://yandex.ru/maps/?text=Москва%2C%20Пресненская%20набережная%2C%2012" target="_blank" rel="noopener">Смотреть на карте</a>
+        </span>
+      </div>
+    </address>
+
+    <aside class="pb-contact__benefits" aria-label="Преимущества">
+      <div class="pb-contact__benefit">
+        <span class="pb-contact__benefit-icon"><svg aria-hidden="true"><use href="#pb-icon-shield"/></svg></span>
+        <span><strong>Конфиденциальность</strong><small>Гарантируем защиту<br>вашей информации</small></span>
+      </div>
+      <div class="pb-contact__benefit">
+        <span class="pb-contact__benefit-icon"><svg aria-hidden="true"><use href="#pb-icon-clock"/></svg></span>
+        <span><strong>Быстрый отклик</strong><small>Свяжемся в течение<br>15 минут</small></span>
+      </div>
+      <div class="pb-contact__benefit">
+        <span class="pb-contact__benefit-icon"><svg aria-hidden="true"><use href="#pb-icon-target"/></svg></span>
+        <span><strong>Индивидуальный подход</strong><small>Решение под вашу<br>ситуацию</small></span>
+      </div>
+      <div class="pb-contact__benefit">
+        <span class="pb-contact__benefit-icon"><svg aria-hidden="true"><use href="#pb-icon-trophy"/></svg></span>
+        <span><strong>Опыт и результат</strong><small>Более 7 лет практики<br>и сотни побед</small></span>
+      </div>
+    </aside>
+
+    <section class="pb-contact__trust" aria-labelledby="pb-trust-title">
+      <h3 id="pb-trust-title">Нам доверяют</h3>
+      <div class="pb-contact__trust-logos" aria-label="Логотипы клиентов">
+        <!--
+          Добавляйте сюда свои логотипы, например:
+          <img src="/images/clients/company.svg" alt="Название компании">
+          Исходные компании с референса намеренно не добавлены.
+        -->
+      </div>
+    </section>
+  </div>
+</section>
