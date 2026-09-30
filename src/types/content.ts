@@ -10,25 +10,14 @@ export interface Stat {
 }
 
 export interface HeroContent {
-  /* «Право» — первая строка заголовка */
+  /* «Шумская и партнёры» — название фирмы, жирная строка над заголовком */
+  brand: string
+  /* «Превращаем» — первая строка заголовка */
   titleLine1: string
-  /* «создаёт порядок.» — вторая строка */
+  /* «сложное в ясное» — вторая строка */
   titleLine2: string
-  /* «Мы — решения.» — третья строка, приглушённо-серая */
-  titleMuted: string
-  /* подзаголовок под заголовком */
+  /* «Видим больше, чем отдельный спор» — подстрочник под заголовком */
   subtitle: string
-  /* текст круглой лайм-кнопки */
-  ctaLabel: string
-  /* нижняя строка-слоган (uppercase) */
-  bottomLine: string
-}
-
-/* Счётчик Hero (10+ / 150+ / 30+). Значение — уже готовая строка с суффиксом,
-   без анимации-счёта: это отдельные данные, не путать со Stat/STATS. */
-export interface HeroStat {
-  value: string
-  label: string
 }
 
 export interface AboutContent {

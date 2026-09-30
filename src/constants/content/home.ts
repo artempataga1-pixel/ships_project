@@ -1,27 +1,18 @@
 import type {
   Stat,
   HeroContent,
-  HeroStat,
   AboutContent,
   ValueItem,
 } from '@/types/content'
 
+/* Первый экран — ТЗ 27.09.2026, раздел 1: только эти три фразы, без CTA и
+   дополнительного текста (любой добавочный элемент — сначала на согласование). */
 export const HERO: HeroContent = {
-  titleLine1: 'Право',
-  titleLine2: 'создаёт порядок.',
-  titleMuted: 'Мы — решения.',
-  subtitle: 'Юридическая поддержка бизнеса и частных клиентов',
-  ctaLabel: 'Обсудить задачу',
-  bottomLine: 'Право движет бизнес вперёд',
+  brand: 'Шумская и партнёры',
+  titleLine1: 'Превращаем',
+  titleLine2: 'сложное в ясное',
+  subtitle: 'Видим больше, чем отдельный спор',
 }
-
-/* Актуальные счётчики Hero (подтверждено пользователем). Не путать со STATS
-   ниже (17 лет/340 дел/…) — те признаны неактуальными и больше не рендерятся. */
-export const HERO_STATS: HeroStat[] = [
-  { value: '10+', label: 'лет на рынке' },
-  { value: '150+', label: 'успешных дел' },
-  { value: '30+', label: 'отраслей' },
-]
 
 export const ABOUT: AboutContent = {
   heading: 'О компании',

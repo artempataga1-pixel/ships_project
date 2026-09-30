@@ -9,7 +9,7 @@ import { AboutSection } from '@/components/sections/AboutSection'
 import { CompetenciesSection } from '@/components/sections/CompetenciesSection'
 import { PartnersSection } from '@/components/sections/PartnersSection'
 import { MobileScrubScene } from './MobileScrubScene'
-import { handleStoryAwareAnchorClick, useStoryController } from './useStoryController'
+import { useStoryController } from './useStoryController'
 
 // Story-режим только на десктопе без reduced-motion — scroll-jacking с
 // перехватом ввода на телефоне капризен, там вместо него continuous
@@ -28,7 +28,7 @@ const MOBILE_SCRUB_MEDIA = '(max-width: 1279.98px) and (prefers-reduced-motion: 
 // Источники видео-сегментов. Индекс = сегмент между шагами N и N+1.
 const VIDEO_SRC = ['/video/story1.mp4', '/video/story2.mp4', '/video/story3.mp4']
 
-// ── Контент героя: заголовок / подзаголовок / CTA / счётчики / нижняя строка.
+// ── Контент героя: название фирмы / заголовок / подстрочник.
 // Общий и для story-оверлея, и для flow-hero (постер-режим на мобилке).
 // Адаптив ≥xl (1280px, синхронизировано с Header.tsx/STORY_MEDIA — до этого
 // порога десктопной раскладки просто нет): все размеры пропорциональны ширине
@@ -37,90 +37,30 @@ const VIDEO_SRC = ['/video/story1.mp4', '/video/story2.mp4', '/video/story3.mp4'
 // выше — упираются в потолок. Порог был lg (1024px) — на 1024–1279 vw-формулы
 // давали текст МЕЛЬЧЕ мобильного clamp() (пустое место в hero на iPad landscape).
 export function HeroLayer() {
-  // Второе слово заголовка и разбивка подзаголовка выносятся на отдельные
-  // строки только на мобилке/планшете (xl:hidden <br/>) — на десктопе тот же текст
-  // остаётся в исходных строках. Точки разбивки подзаголовка подобраны так,
-  // чтобы текст не наезжал на лаймовую полосу плиты на фоновом фото/видео.
-  const [titleWord2, titleWord3] = HERO.titleLine2.split(' ')
-  const subtitleWords = HERO.subtitle.split(' ')
-
+  // Первый экран по ТЗ 27.09.2026 — минимализм: название фирмы, заголовок
+  // в две строки и подстрочник. Никаких CTA/счётчиков/слоганов (заказчик просит
+  // не добавлять самовольно). Анимацию сборки «слово → фраза → подстрочник»
+  // делает отдельная задача — здесь остаётся общий fade-стаггер (data-hero-fade).
   return (
     <div className="relative h-full min-h-[720px] w-full px-8 xl:px-[min(2.1875vw,3.5rem)]">
-      {/* Левая колонка: заголовок, подзаголовок, CTA — крупный кегль (×2). */}
-      <div className="relative z-10 max-w-[70rem] pt-[clamp(80px,10vh,130px)] xl:max-w-[min(43.75vw,70rem)] xl:pt-[min(5.0781vw,130px)]">
+      <div className="relative z-10 max-w-[70rem] pt-[clamp(96px,13vh,150px)] xl:max-w-[min(50vw,80rem)] xl:pt-[min(9vw,230px)]">
+        <p
+          data-hero-fade
+          className="mb-[clamp(1rem,2.5vh,1.75rem)] text-[clamp(1rem,3.2vw,1.5rem)] font-semibold tracking-[-0.01em] text-[var(--color-text)] xl:mb-[min(1.5625vw,2.5rem)] xl:text-[clamp(1.125rem,1.40625vw,2.25rem)]"
+        >
+          {HERO.brand}
+        </p>
+
         <h1 className="font-heading font-medium leading-[1.03] tracking-[-0.055em] text-[clamp(2rem,8vw,9rem)] xl:text-[min(5.625vw,9rem)]">
-          <span data-hero-fade className="block">{HERO.titleLine1}</span>
-          <span data-hero-fade className="block">
-            {titleWord2}
-            <br className="xl:hidden" />
-            <span className="hidden xl:inline"> </span>
-            {titleWord3}
-          </span>
-          <span data-hero-fade className="block text-black/25 text-[0.78em] sm:text-[0.64em] xl:text-[1em]">
-            {HERO.titleMuted}
-          </span>
+          <span data-hero-fade className="block">{HERO.titleLine1}</span>{' '}
+          <span data-hero-fade className="block">{HERO.titleLine2}</span>
         </h1>
 
         <p
           data-hero-fade
-          className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[40rem] text-[clamp(1rem,3.2vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)] sm:max-w-[27rem] sm:text-[clamp(0.95rem,2.6vw,1.6rem)] xl:mt-[min(1.5625vw,2.5rem)] xl:max-w-[min(25vw,40rem)] xl:text-[clamp(1.125rem,1.40625vw,2.25rem)]"
+          className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[12rem] text-[clamp(1rem,3.2vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)] sm:max-w-[27rem] sm:text-[clamp(0.95rem,2.6vw,1.6rem)] xl:mt-[min(1.5625vw,2.5rem)] xl:max-w-[min(35vw,50rem)] xl:text-[clamp(1.125rem,1.40625vw,2.25rem)]"
         >
-          {/* Телефон (<640): 3 строки, как было */}
-          <span className="sm:hidden">
-            {subtitleWords.slice(0, 2).join(' ')}
-            <br />
-            {subtitleWords.slice(2, 5).join(' ')}
-            <br />
-            {subtitleWords[5]}
-          </span>
-          {/* Планшет (640–1279): 2 строки, чтобы не наезжать на лаймовую плиту */}
-          <span className="hidden sm:inline xl:hidden">
-            {subtitleWords.slice(0, 3).join(' ')}
-            <br />
-            {subtitleWords.slice(3).join(' ')}
-          </span>
-          {/* Десктоп: одна строка */}
-          <span className="hidden xl:inline">{HERO.subtitle}</span>
-        </p>
-
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-        <a
-          href="/#contacts"
-          onClick={(e) => handleStoryAwareAnchorClick(e, 'contacts')}
-          data-hero-fade
-          className="group mt-[clamp(4.5rem,13vh,6rem)] inline-flex flex-col items-center gap-4 xl:mt-[min(3.75vw,6rem)] xl:flex-row xl:gap-[min(1.25vw,2rem)]"
-        >
-          <span
-            aria-hidden="true"
-            className="btn-lime-fill btn-outline-thin grid h-[50px] w-[50px] place-items-center rounded-full text-[15px] text-[var(--color-black)] max-[380px]:h-[42px] max-[380px]:w-[42px] max-[380px]:text-[15px] sm:h-28 sm:w-28 sm:text-4xl xl:h-[clamp(80px,7vw,176px)] xl:w-[clamp(80px,7vw,176px)] xl:text-[clamp(29px,2.4vw,62px)]"
-          >
-            {/* SVG вместо текстового «→» — юникодный глиф смещён по метрикам
-                шрифта и не встаёт ровно в центр круга, SVG с viewBox центруется
-                геометрически точно. Размер 1em — следует за text-xl/clamp выше. */}
-            <svg
-              width="1em"
-              height="1em"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </span>
-          <span className="text-[15px] font-semibold text-[var(--color-text)] max-[380px]:text-[13.5px] sm:text-[2.125rem] xl:text-[clamp(1.875rem,1.875vw,3rem)]">
-            {HERO.ctaLabel}
-          </span>
-        </a>
-      </div>
-
-      {/* Нижняя строка: слоган — только десктоп (на мобилке убрана по просьбе заказчика) */}
-      <div className="absolute inset-x-8 bottom-7 hidden h-[70px] items-center border-t border-[var(--color-line)] xl:flex xl:inset-x-[min(2.1875vw,3.5rem)] xl:bottom-[min(1.09375vw,1.75rem)] xl:h-[min(2.7344vw,70px)]">
-        <p className="flex items-center gap-3.5 text-xs font-extrabold uppercase tracking-[0.46em] text-[#3c3c3c]">
-          <i className="h-2.5 w-2.5 rounded-[2px] bg-[var(--color-lime)]" />
-          {HERO.bottomLine}
+          {HERO.subtitle}
         </p>
       </div>
     </div>
@@ -270,7 +210,7 @@ function StoryScene() {
 function FlowFallback() {
   const heroRef = useRef<HTMLElement>(null)
 
-  // Стаггер-появление заголовка/подзаголовка/CTA (data-hero-fade в HeroLayer).
+  // Стаггер-появление названия/заголовка/подстрочника (data-hero-fade в HeroLayer).
   // Только когда motion разрешён — на reduce элементы остаются в исходном
   // (видимом) состоянии, gsap.set внутри ветки вообще не выполняется.
   useGSAP(
