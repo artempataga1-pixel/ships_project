@@ -69,7 +69,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 'partnerskaya-sessiya-sobstvennikov-biznesa',
     slug: 'partnerskaya-sessiya-sobstvennikov-biznesa',
-    title: 'Партнёрская сессия собственников бизнеса',
+    title: 'Корпоративная сессия владельцев бизнеса',
     practiceIds: ['korporativnoe-pravo'],
     hasPage: false,
   },
