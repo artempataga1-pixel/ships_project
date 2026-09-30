@@ -89,7 +89,7 @@ export function MobileScrubScene() {
           }}
           className="absolute inset-0 z-20"
         >
-          <HeroLayer />
+          <HeroLayer ready={ready} />
         </div>
         <div
           ref={(el) => {

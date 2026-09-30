@@ -303,6 +303,36 @@ body {
   }
 }
 
+/* Шторка «сложное в ясное» при сборке первого экрана (useHeroAssembly):
+   маска с мягкой кромкой (12% ширины строки), --wipe двигает GSAP от 0% до
+   115% (кромка целиком уходит за правый край). Класс снимается по окончании. */
+.hero-wipe {
+  --wipe: 0%;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--wipe) - 12%), transparent var(--wipe));
+  mask-image: linear-gradient(90deg, #000 calc(var(--wipe) - 12%), transparent var(--wipe));
+  /* Отрицательный трекинг заголовка выносит кромку последней буквы за бокс,
+     маска её резала бы и при снятии класса она «щёлкала». Запас справа,
+     компенсированный отрицательным margin, — раскладка не сдвигается. */
+  padding-right: 0.12em;
+  margin-right: -0.12em;
+}
+/* До гидрации (SSR-разметка) текст героя уже собран — без этого правила при
+   повторном визите он мигал бы собранным, пропадал и собирался заново.
+   data-hero-pending снимает useHeroAssembly, как только выставит своё исходное
+   состояние (или решит не анимировать). Страховка: если JS так и не отработал,
+   через 12 с текст проявляется сам. На reduced-motion не прячем вовсе. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-copy[data-hero-pending] :is([data-hero-word], [data-hero-wipe], [data-hero-tail]) {
+    visibility: hidden;
+    animation: hero-failsafe 0s linear 12s forwards;
+  }
+}
+@keyframes hero-failsafe {
+  to {
+    visibility: visible;
+  }
+}
+
 /* Скроллер нижнего меню (MobileBottomNav) — горизонтальный скролл пунктов
    без видимого скроллбара */
 .no-scrollbar {

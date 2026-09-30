@@ -2,14 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { useGSAP } from '@gsap/react'
-import { gsap, ScrollTrigger } from '@/lib/gsap'
+import { ScrollTrigger } from '@/lib/gsap'
 import { HERO } from '@/constants/content/home'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { CompetenciesSection } from '@/components/sections/CompetenciesSection'
 import { PartnersSection } from '@/components/sections/PartnersSection'
 import { MobileScrubScene } from './MobileScrubScene'
 import { useStoryController } from './useStoryController'
+import { useHeroAssembly } from './useHeroAssembly'
 
 // Story-режим только на десктопе без reduced-motion — scroll-jacking с
 // перехватом ввода на телефоне капризен, там вместо него continuous
@@ -36,38 +36,47 @@ const VIDEO_SRC = ['/video/story1.mp4', '/video/story2.mp4', '/video/story3.mp4'
 // На 2560px значения совпадают с эталоном пиксель-в-пиксель, ниже — масштабируются,
 // выше — упираются в потолок. Порог был lg (1024px) — на 1024–1279 vw-формулы
 // давали текст МЕЛЬЧЕ мобильного clamp() (пустое место в hero на iPad landscape).
-export function HeroLayer() {
+export function HeroLayer({ ready = true }: { ready?: boolean }) {
   // Первый экран по ТЗ 27.09.2026 — минимализм: название фирмы, заголовок
   // и подстрочник. Никаких CTA/счётчиков/слоганов (заказчик просит не добавлять
-  // самовольно). Анимацию сборки «слово → фраза → подстрочник» делает отдельная
-  // задача — здесь остаётся общий fade-стаггер (data-hero-fade).
+  // самовольно). Сборка «Превращаем по центру → сложное в ясное → подстрочник»
+  // — useHeroAssembly (стартует, когда ready: лоадер сцены снят).
   // Кегль и ширина считаются от границы плиты на фоне (см. .hero-copy в
   // globals.css) — текст растёт, пока не упрётся в плиту, и не заходит на неё.
-  // Ниже xl вторая строка ломается после первого слова (3 строки), с xl — 2.
+  // Ниже xl вторая строка ломается после первого слова (3 строки), с xl — 2;
+  // каждая визуальная строка — свой inline-block под шторку.
+  const rootRef = useRef<HTMLDivElement>(null)
+  useHeroAssembly(rootRef, ready)
   const [line2First, ...line2Rest] = HERO.titleLine2.split(' ')
 
   return (
-    <div className="hero-copy relative flex h-full w-full items-center px-8 pb-24 pt-20 xl:px-[min(2.1875vw,3.5rem)] xl:pb-16 xl:pt-24">
+    <div
+      ref={rootRef}
+      data-hero-pending=""
+      className="hero-copy relative flex h-full w-full items-center px-8 pb-24 pt-20 xl:px-[min(2.1875vw,3.5rem)] xl:pb-16 xl:pt-24"
+    >
       <div className="relative z-10">
         <p
-          data-hero-fade
+          data-hero-tail
           className="hero-brand mb-[0.9em] font-semibold tracking-[-0.01em] text-[var(--color-text)]"
         >
           {HERO.brand}
         </p>
 
         <h1 className="hero-title font-heading font-medium leading-[1.03] tracking-[-0.055em]">
-          <span data-hero-fade className="block">{HERO.titleLine1}</span>{' '}
-          <span data-hero-fade className="block">
-            {line2First}
+          <span className="block">
+            <span data-hero-word className="inline-block">{HERO.titleLine1}</span>
+          </span>{' '}
+          <span className="block">
+            <span data-hero-wipe className="inline-block">{line2First}</span>
             <br className="xl:hidden" />
             {' '}
-            {line2Rest.join(' ')}
+            <span data-hero-wipe className="inline-block">{line2Rest.join(' ')}</span>
           </span>
         </h1>
 
         <p
-          data-hero-fade
+          data-hero-tail
           className="hero-sub mt-[1.1em] font-medium leading-relaxed text-[var(--color-muted)]"
         >
           {HERO.subtitle}
@@ -167,7 +176,7 @@ function StoryScene() {
           }}
           className="absolute inset-0 z-20"
         >
-          <HeroLayer />
+          <HeroLayer ready={loaded} />
         </div>
         <div
           ref={(el) => {
@@ -218,36 +227,12 @@ function StoryScene() {
 // FLOW: мобилка / reduced-motion — обычный поток, видео = постер-hero.
 // ══════════════════════════════════════════════════════════════════════════
 function FlowFallback() {
-  const heroRef = useRef<HTMLElement>(null)
-
-  // Стаггер-появление названия/заголовка/подстрочника (data-hero-fade в HeroLayer).
-  // Только когда motion разрешён — на reduce элементы остаются в исходном
-  // (видимом) состоянии, gsap.set внутри ветки вообще не выполняется.
-  useGSAP(
-    () => {
-      const items = gsap.utils.toArray<HTMLElement>('[data-hero-fade]', heroRef.current)
-      if (!items.length) return
-
-      const mm = gsap.matchMedia()
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.set(items, { autoAlpha: 0, y: 24 })
-        gsap.to(items, {
-          autoAlpha: 1,
-          y: 0,
-          stagger: 0.08,
-          duration: 0.7,
-          ease: 'power3.out',
-        })
-      })
-    },
-    { scope: heroRef },
-  )
-
+  // Сборку текста делает сам HeroLayer (useHeroAssembly); на reduced-motion
+  // он ничего не анимирует — текст сразу в собранном виде.
   return (
     <>
       {/* Постер-hero: статичный первый кадр видео + контент героя поверх */}
       <section
-        ref={heroRef}
         id="hero"
         className="relative h-[100svh] min-h-[640px] overflow-hidden bg-[var(--color-bg)] lg:h-[100dvh]"
       >
