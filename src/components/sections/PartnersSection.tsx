@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
@@ -113,7 +114,25 @@ export function MobilePartnerCard({ member, compact = false }: MobilePartnerCard
   }
 
   return (
-    <div className="aspect-[3/2] w-full" style={{ perspective: '1200px' }}>
+    <div className="relative aspect-[3/2] w-full" style={{ perspective: '1200px' }}>
+      {/* Переход на страницу партнёра. Тап по самой карточке переворачивает её
+          (регалии), поэтому ссылка — отдельная пилюля в пустом левом верхнем
+          углу фото. Вынесена из role="button" (вложенные интерактивные элементы)
+          и прячется, когда карточка перевёрнута. */}
+      {member.slug && (
+        <Link
+          href={`/partners/${member.slug}`}
+          aria-label={`${member.name} — страница партнёра`}
+          tabIndex={flipped ? -1 : 0}
+          aria-hidden={flipped || undefined}
+          className={`absolute z-10 flex items-center gap-1 rounded-full bg-[var(--color-lime)] font-semibold text-[#1a2200] shadow-[0_6px_18px_-6px_rgba(25,35,10,0.45)] transition-opacity duration-300 ${
+            compact ? 'left-2 top-2 px-2.5 py-1 text-[10px]' : 'left-3 top-3 px-3.5 py-1.5 text-xs'
+          } ${flipped ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
+        >
+          Профиль
+          <span aria-hidden>→</span>
+        </Link>
+      )}
       <div
         role="button"
         tabIndex={0}
@@ -506,6 +525,16 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
               style={{ transformOrigin: 'bottom center' }}
             >
               <PartnerCard member={member} />
+              {/* Клик по карточке — на страницу партнёра. Ссылка поверх визитки
+                  (у PartnerCard pointer-events-none), hover-события веера ловит
+                  родительский div, ссылка их не мешает. */}
+              {member.slug && (
+                <Link
+                  href={`/partners/${member.slug}`}
+                  aria-label={`${member.name} — страница партнёра`}
+                  className="absolute inset-0 z-10 rounded-2xl outline-offset-4"
+                />
+              )}
             </div>
           ))}
         </div>

@@ -170,6 +170,11 @@ function PartnerView({ partner }: { partner: TeamMember }) {
 
             <div className="mt-12 md:mt-14">
               <Eyebrow>{partner.role}</Eyebrow>
+              {profile.roleNote && (
+                <p className="mt-4 max-w-[36ch] text-base leading-snug text-[var(--color-muted)] md:text-lg">
+                  {profile.roleNote}
+                </p>
+              )}
             </div>
 
             <WordReveal delay={0.3} waitForIntro>
@@ -229,8 +234,21 @@ function PartnerView({ partner }: { partner: TeamMember }) {
           </RevealOnScroll>
 
           {profile.figure && (
-            <RevealOnScroll delay={0.12} y={24} duration={0.7} blur={8}>
-              <div className={`${DARK_PANEL_CLASS} flex h-full flex-col justify-between gap-8 p-7 md:p-10`}>
+            <RevealOnScroll
+              delay={0.12}
+              y={24}
+              duration={0.7}
+              blur={8}
+              className={profile.figure.tail ? 'lg:self-start' : undefined}
+            >
+              {/* Цифра с подводкой и продолжением — цельное предложение, читается
+                  подряд; без продолжения (Анна) панель тянется на высоту соседней
+                  и разводит подводку и цифру по краям. */}
+              <div
+                className={`${DARK_PANEL_CLASS} flex flex-col p-7 md:p-10 ${
+                  profile.figure.tail ? 'gap-5' : 'h-full justify-between gap-8'
+                }`}
+              >
                 <LimeBar side="right" />
                 <p className="text-[0.95rem] leading-[1.7] text-white/80 md:text-base">{profile.figure.lead}</p>
                 <p
@@ -238,8 +256,11 @@ function PartnerView({ partner }: { partner: TeamMember }) {
                   style={{ fontSize: 'clamp(2.4rem, 5vw, 3.6rem)', textShadow: '0 0 40px var(--color-lime-glow)' }}
                 >
                   {profile.figure.value}
-                  <span className="text-white/60">.</span>
+                  {!profile.figure.tail && <span className="text-white/60">.</span>}
                 </p>
+                {profile.figure.tail && (
+                  <p className="text-[0.95rem] leading-[1.7] text-white/80 md:text-base">{profile.figure.tail}</p>
+                )}
               </div>
             </RevealOnScroll>
           )}
@@ -248,10 +269,16 @@ function PartnerView({ partner }: { partner: TeamMember }) {
 
       {/* ── Подход к работе + девиз ─────────────────────────────────────────── */}
       <section className="relative mx-auto max-w-[1120px] px-6 pb-16 md:pb-24">
-        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
-          <div className="lg:sticky lg:top-28 lg:self-start">
+        {/* Есть девиз — слева бейдж и девиз, справа абзацы; девиза нет — бейдж над
+            абзацами на всю ширину, иначе левая колонка остаётся пустой. */}
+        <div
+          className={
+            profile.tagline ? 'grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14' : 'flex flex-col gap-8'
+          }
+        >
+          <div className={profile.tagline ? 'lg:sticky lg:top-28 lg:self-start' : undefined}>
             <RevealOnScroll y={20} duration={0.7} blur={8}>
-              <Eyebrow>Подход к работе</Eyebrow>
+              <Eyebrow>{profile.approachTitle ?? 'Подход к работе'}</Eyebrow>
               {profile.tagline && (
                 <p className="mt-8 max-w-[16ch] font-heading text-[clamp(1.6rem,3.2vw,2.5rem)] font-black leading-[1.1] tracking-[-0.02em] text-[var(--color-text)]">
                   {profile.tagline}
@@ -264,7 +291,7 @@ function PartnerView({ partner }: { partner: TeamMember }) {
             {profile.approach.map((paragraph, i) => (
               <RevealOnScroll key={paragraph} delay={i * 0.06} y={24} duration={0.7} blur={8}>
                 <div className="relative overflow-hidden rounded-[var(--radius-lg)] border p-6 md:p-8" style={PANEL_STYLE}>
-                  <p className="text-base leading-[1.75] text-[var(--color-text)] md:text-[1.05rem]">{paragraph}</p>
+                  <p className="max-w-[72ch] text-base leading-[1.75] text-[var(--color-text)] md:text-[1.05rem]">{paragraph}</p>
                 </div>
               </RevealOnScroll>
             ))}
@@ -274,7 +301,7 @@ function PartnerView({ partner }: { partner: TeamMember }) {
 
       {/* ── Образование / Преподавание / Признание ─────────────────────────── */}
       <section className="relative mx-auto max-w-[1120px] px-6 pb-20 md:pb-28">
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className={`grid gap-6 ${profile.teaching ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
           <RevealOnScroll y={24} duration={0.7} blur={8}>
             <div className="relative h-full overflow-hidden rounded-[var(--radius-xl)] border p-7 md:p-8" style={PANEL_STYLE}>
               <LimeBar />
@@ -283,15 +310,17 @@ function PartnerView({ partner }: { partner: TeamMember }) {
             </div>
           </RevealOnScroll>
 
-          <RevealOnScroll delay={0.08} y={24} duration={0.7} blur={8}>
-            <div className="relative h-full overflow-hidden rounded-[var(--radius-xl)] border p-7 md:p-8" style={PANEL_STYLE}>
-              <LimeBar />
-              <CardTitle>Преподавание и публичная деятельность</CardTitle>
-              <DotList items={profile.teaching} />
-            </div>
-          </RevealOnScroll>
+          {profile.teaching && (
+            <RevealOnScroll delay={0.08} y={24} duration={0.7} blur={8}>
+              <div className="relative h-full overflow-hidden rounded-[var(--radius-xl)] border p-7 md:p-8" style={PANEL_STYLE}>
+                <LimeBar />
+                <CardTitle>Преподавание и публичная деятельность</CardTitle>
+                <DotList items={profile.teaching} />
+              </div>
+            </RevealOnScroll>
+          )}
 
-          <RevealOnScroll delay={0.16} y={24} duration={0.7} blur={8}>
+          <RevealOnScroll delay={profile.teaching ? 0.16 : 0.08} y={24} duration={0.7} blur={8}>
             <div className={`${DARK_PANEL_CLASS} h-full p-7 md:p-8`}>
               <LimeBar />
               <CardTitle>Признание и рейтинги</CardTitle>

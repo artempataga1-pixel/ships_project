@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+import { useLenis } from 'lenis/react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { NAV_ID_TO_STEP, SEG_DURATION, STEP_NAV_ID, STORY_STEP_EVENT } from './useStoryController'
 
@@ -22,6 +23,11 @@ const PRELOAD_NEXT_THRESHOLD = 0.72
 // Эпсилон записи currentTime — не дёргать видео на суб-фреймовых дельтах
 // почти неподвижного скролла (см. план, этап 2, п.2).
 const CURRENT_TIME_EPSILON = 1 / 30
+
+// Моменты попыток посадки по якорю от монтирования пина, мс.
+const LANDING_DELAYS = [60, 300, 800, 1600, 2600]
+// Сколько от монтирования пина посадка реагирует на пересчёт ScrollTrigger, мс.
+const LANDING_WINDOW = 6000
 
 export const VIDEO_SRC_MOBILE = [
   '/video/story1-mobile.mp4',
@@ -58,7 +64,7 @@ interface LenisLike {
 // scrollY назад к своей внутренней позиции — native scrollTo без lenis.scrollTo
 // в этом случае немедленно перебивается (та же причина, по которой
 // useStoryController всюду зовёт lenis?.scrollTo, а не window.scrollTo).
-export function scrollToMobileScrubStep(step: number, lenis?: LenisLike | null) {
+export function scrollToMobileScrubStep(step: number, lenis?: LenisLike | null, instant = false) {
   if (typeof window === 'undefined') return
   const w = window as ScrubWindow
   const trigger = w.__mobileScrubTrigger
@@ -69,6 +75,22 @@ export function scrollToMobileScrubStep(step: number, lenis?: LenisLike | null) 
   const clamped = Math.max(0, Math.min(step, LAST_STEP))
   const frac = boundaries[clamped] / total
   const y = trigger.start + (trigger.end - trigger.start) * frac
+  if (instant) {
+    // Посадка по якорю при заходе на страницу: без проезда по всей сцене.
+    // Тот же inline-toggle scroll-behavior, что в HomeAnchorScroll — иначе WebKit
+    // превращает instant в плавный скролл (см. scrubTweenScrollTo ниже).
+    if (lenis) {
+      lenis.scrollTo(y, { immediate: true, force: true })
+    } else {
+      const html = document.documentElement
+      html.style.scrollBehavior = 'auto'
+      window.scrollTo({ top: y, behavior: 'instant' })
+      requestAnimationFrame(() => {
+        html.style.scrollBehavior = ''
+      })
+    }
+    return
+  }
   if (lenis) {
     lenis.scrollTo(y)
   } else {
@@ -142,6 +164,14 @@ export interface MobileScrubRefs {
 }
 
 export function useMobileScrubController({ wrapperRef, videoRefs, overlayRefs, active }: MobileScrubRefs) {
+  // Lenis нужен только для посадки по якорю, в зависимости эффекта его не кладём:
+  // он появляется после монтирования, и пин пересоздавался бы из-за этого.
+  const lenis = useLenis()
+  const lenisRef = useRef(lenis)
+  useEffect(() => {
+    lenisRef.current = lenis
+  }, [lenis])
+
   useEffect(() => {
     if (!active) return
     const wrapper = wrapperRef.current
@@ -270,7 +300,45 @@ export function useMobileScrubController({ wrapperRef, videoRefs, overlayRefs, a
     activateVideo(0)
     overlays.forEach((el, i) => applyOverlay(el, i === 0 ? 1 : 0))
 
+    // Заход по якорю на полку сцены (/#about, /#competencies, /#partners — например,
+    // «← Все партнёры» со страницы партнёра): у полок внутри пина нет DOM id, браузер
+    // якорь не находит, и без этого страница открывалась бы на hero. Сажаем на шаг
+    // сразу, с повторами — пин пересчитывает start/end после шрифтов и метаданных
+    // видео. Любой живой ввод пользователя отменяет оставшиеся попытки.
+    const landingId = window.location.hash.slice(1)
+    const landingStep = Object.prototype.hasOwnProperty.call(NAV_ID_TO_STEP, landingId)
+      ? NAV_ID_TO_STEP[landingId]
+      : 0
+    const landingTimers: number[] = []
+    let landing = landingStep > 0
+    const land = () => {
+      if (landing) scrollToMobileScrubStep(landingStep, lenisRef.current, true)
+    }
+    const cancelLanding = () => {
+      landing = false
+      landingTimers.forEach((id) => window.clearTimeout(id))
+    }
+    const landingCancelEvents = ['touchstart', 'wheel', 'pointerdown', 'keydown'] as const
+    if (landing) {
+      LANDING_DELAYS.forEach((delay) => landingTimers.push(window.setTimeout(land, delay)))
+      // Метаданные видео 1/2 доезжают позже и двигают границы пина (а с ними и
+      // trigger.end): на каждый пересчёт садимся заново, пока живо окно посадки.
+      ScrollTrigger.addEventListener('refresh', land)
+      landingTimers.push(
+        window.setTimeout(() => {
+          cancelLanding()
+          ScrollTrigger.removeEventListener('refresh', land)
+        }, LANDING_WINDOW),
+      )
+      landingCancelEvents.forEach((type) =>
+        window.addEventListener(type, cancelLanding, { passive: true, once: true }),
+      )
+    }
+
     return () => {
+      cancelLanding()
+      ScrollTrigger.removeEventListener('refresh', land)
+      landingCancelEvents.forEach((type) => window.removeEventListener(type, cancelLanding))
       ;(window as ScrubWindow).__mobileScrubActive = false
       ;(window as ScrubWindow).__mobileScrubTrigger = undefined
       videos.forEach((v) => v?.removeEventListener('loadedmetadata', onLoadedMeta))
