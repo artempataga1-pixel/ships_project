@@ -1,4 +1,5 @@
 import { ReturnAnchorLink } from '@/components/ui/ReturnAnchorLink'
+import { SectionComingSoon } from '@/components/sections/SectionComingSoon'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
 import type { CaseStudy } from '@/types/content'
 
@@ -135,6 +136,19 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
 }
 
 export function CasesSection() {
+  // Кейсов пока нет (см. case-studies.ts) — вместо sticky-заголовка с потоком
+  // карточек показываем заглушку
+  if (CASE_STUDIES.length === 0) {
+    return (
+      <SectionComingSoon
+        id="cases"
+        eyebrow="избранные дела"
+        title="Кейсы"
+        text="Архив избранных дел бюро скоро появится здесь."
+      />
+    )
+  }
+
   return (
     <section
       id="cases"

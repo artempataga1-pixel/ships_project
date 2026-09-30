@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
+import { SectionComingSoon } from '@/components/sections/SectionComingSoon'
 import { MEDIA } from '@/constants/content/media'
 import type { MediaItem } from '@/types/content'
 
@@ -184,6 +185,19 @@ export function ArticlesSection() {
     },
     { scope: sectionRef },
   )
+
+  // Публикаций пока нет (см. media.ts) — вместо пина показываем заглушку.
+  // Хуки выше отработали вхолостую: без карточек useGSAP выходит сразу.
+  if (MEDIA.length === 0) {
+    return (
+      <SectionComingSoon
+        id="articles"
+        eyebrow="публикации"
+        title="Статьи"
+        text="Публикации и комментарии экспертов компании скоро появятся здесь."
+      />
+    )
+  }
 
   return (
     <section id="articles" ref={sectionRef} className="relative scroll-mt-16 bg-[var(--color-bg)]">
