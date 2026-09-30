@@ -147,7 +147,7 @@ export function useHeroAssembly(
         tl.to(word, {
           autoAlpha: 1,
           scale: scale * 1.04,
-          duration: 0.9,
+          duration: 0.65,
           ease: 'power2.out',
           force3D: false,
         })
@@ -155,10 +155,10 @@ export function useHeroAssembly(
             x: 0,
             y: 0,
             scale: 1,
-            duration: 1.15,
+            duration: 0.9,
             ease: 'power3.inOut',
             force3D: false,
-          }, '+=0.35')
+          }, '+=0.25')
           .to(wipeTl, { progress: 1, duration: 1.2, ease: 'power2.inOut' }, '-=0.3')
           .to(tail, {
             autoAlpha: 1,
