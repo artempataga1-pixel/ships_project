@@ -36,9 +36,32 @@ export interface ValueItem {
   description: string
 }
 
+/* Полный профайл партнёра для персональной страницы /partners/[slug].
+   Тексты — дословно из doks/kontent/partner-*.md. */
+export interface PartnerProfile {
+  /** Вводный абзац героя. */
+  lead: string
+  /** Абзацы про специализацию. */
+  specialization: string[]
+  /** Ключевая цифра: подводка (дословный текст абзаца) + выделяемое значение. */
+  figure?: { lead: string; value: string }
+  /** Абзацы про подход к работе. */
+  approach: string[]
+  /** Девиз-цитата под подходом. */
+  tagline?: string
+  education: string[]
+  /** Преподавание и публичная деятельность. */
+  teaching: string[]
+  /** Признание и рейтинги. */
+  recognition: string[]
+}
+
 export interface TeamMember {
   name: string
   role: string
+  /** Слаг персональной страницы /partners/<slug>; нет профайла — нет страницы. */
+  slug?: string
+  profile?: PartnerProfile
   /** Готовая карточка-визитка (фото + имя + роль впечатаны в изображение). */
   photo?: string
   /** Регалии для выезжающей 3D-панели при наведении на карточку. */

@@ -1,4 +1,5 @@
-import type { CaseStudy, MediaItem, Practice, Product } from '@/types/content'
+import type { CaseStudy, MediaItem, Practice, Product, TeamMember } from '@/types/content'
+import { TEAM } from '@/constants/content/team'
 import { PRACTICE_ITEMS } from '@/constants/content/practices'
 import { PRODUCTS } from '@/constants/content/products'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
@@ -41,4 +42,13 @@ export function getCasesForPractice(practiceId: string): CaseStudy[] {
 
 export function getArticlesForPractice(practiceId: string): MediaItem[] {
   return MEDIA.filter((item) => item.practiceIds?.includes(practiceId))
+}
+
+/* Партнёры с персональной страницей — те, у кого заполнены slug и profile. */
+export function getPartnersWithProfile(): TeamMember[] {
+  return TEAM.filter((member) => member.slug && member.profile)
+}
+
+export function getPartnerBySlug(slug: string): TeamMember | undefined {
+  return getPartnersWithProfile().find((member) => member.slug === slug)
 }

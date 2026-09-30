@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/site'
-import { getPracticesSorted } from '@/lib/content'
+import { getPartnersWithProfile, getPracticesSorted } from '@/lib/content'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -30,5 +30,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }))
 
-  return [...staticRoutes, ...practiceRoutes, ...caseRoutes]
+  const partnerRoutes: MetadataRoute.Sitemap = getPartnersWithProfile().map((partner) => ({
+    url: `${SITE_URL}/partners/${partner.slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }))
+
+  return [...staticRoutes, ...practiceRoutes, ...partnerRoutes, ...caseRoutes]
 }
