@@ -22,13 +22,12 @@ export interface HeroContent {
 
 export interface AboutContent {
   heading: string
-  description: string
-  /* «Мы не считаем дела —» — жирным, как в hero */
-  quoteLead: string
-  /* «мы проживаем каждое как своё.» — курсив-бронза, акцент внутри той же фразы */
-  quoteAccent: string
-  /* второе предложение — снова жирным, без акцента */
-  quoteRest: string
+  /* первый абзац — выделен типографикой */
+  lead: string
+  /* абзацы между первым и последним — обычным текстом */
+  body: string[]
+  /* последний абзац — выделен типографикой */
+  closing: string
 }
 
 export interface ValueItem {
