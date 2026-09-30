@@ -38,27 +38,37 @@ const VIDEO_SRC = ['/video/story1.mp4', '/video/story2.mp4', '/video/story3.mp4'
 // давали текст МЕЛЬЧЕ мобильного clamp() (пустое место в hero на iPad landscape).
 export function HeroLayer() {
   // Первый экран по ТЗ 27.09.2026 — минимализм: название фирмы, заголовок
-  // в две строки и подстрочник. Никаких CTA/счётчиков/слоганов (заказчик просит
-  // не добавлять самовольно). Анимацию сборки «слово → фраза → подстрочник»
-  // делает отдельная задача — здесь остаётся общий fade-стаггер (data-hero-fade).
+  // и подстрочник. Никаких CTA/счётчиков/слоганов (заказчик просит не добавлять
+  // самовольно). Анимацию сборки «слово → фраза → подстрочник» делает отдельная
+  // задача — здесь остаётся общий fade-стаггер (data-hero-fade).
+  // Кегль и ширина считаются от границы плиты на фоне (см. .hero-copy в
+  // globals.css) — текст растёт, пока не упрётся в плиту, и не заходит на неё.
+  // Ниже xl вторая строка ломается после первого слова (3 строки), с xl — 2.
+  const [line2First, ...line2Rest] = HERO.titleLine2.split(' ')
+
   return (
-    <div className="relative h-full min-h-[720px] w-full px-8 xl:px-[min(2.1875vw,3.5rem)]">
-      <div className="relative z-10 max-w-[70rem] pt-[clamp(96px,13vh,150px)] xl:max-w-[min(50vw,80rem)] xl:pt-[min(9vw,230px)]">
+    <div className="hero-copy relative flex h-full w-full items-center px-8 pb-24 pt-20 xl:px-[min(2.1875vw,3.5rem)] xl:pb-16 xl:pt-24">
+      <div className="relative z-10">
         <p
           data-hero-fade
-          className="mb-[clamp(1rem,2.5vh,1.75rem)] text-[clamp(1rem,3.2vw,1.5rem)] font-semibold tracking-[-0.01em] text-[var(--color-text)] xl:mb-[min(1.5625vw,2.5rem)] xl:text-[clamp(1.125rem,1.40625vw,2.25rem)]"
+          className="hero-brand mb-[0.9em] font-semibold tracking-[-0.01em] text-[var(--color-text)]"
         >
           {HERO.brand}
         </p>
 
-        <h1 className="font-heading font-medium leading-[1.03] tracking-[-0.055em] text-[clamp(2rem,8vw,9rem)] xl:text-[min(5.625vw,9rem)]">
+        <h1 className="hero-title font-heading font-medium leading-[1.03] tracking-[-0.055em]">
           <span data-hero-fade className="block">{HERO.titleLine1}</span>{' '}
-          <span data-hero-fade className="block">{HERO.titleLine2}</span>
+          <span data-hero-fade className="block">
+            {line2First}
+            <br className="xl:hidden" />
+            {' '}
+            {line2Rest.join(' ')}
+          </span>
         </h1>
 
         <p
           data-hero-fade
-          className="mt-[clamp(1.5rem,3vh,2.5rem)] max-w-[12rem] text-[clamp(1rem,3.2vw,2.25rem)] font-medium leading-relaxed text-[var(--color-muted)] sm:max-w-[27rem] sm:text-[clamp(0.95rem,2.6vw,1.6rem)] xl:mt-[min(1.5625vw,2.5rem)] xl:max-w-[min(35vw,50rem)] xl:text-[clamp(1.125rem,1.40625vw,2.25rem)]"
+          className="hero-sub mt-[1.1em] font-medium leading-relaxed text-[var(--color-muted)]"
         >
           {HERO.subtitle}
         </p>

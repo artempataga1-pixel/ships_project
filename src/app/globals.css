@@ -262,6 +262,47 @@ body {
   outline-color: transparent;
 }
 
+/* Текст первого экрана (HeroLayer) не должен заходить на плиту с лаймовой
+   гранью. Фон — poster_start.jpg (1920×1080) / видео: object-cover, центр,
+   scale 1.14; грань плиты в постере стоит на x=984. Отсюда экранная координата
+   грани: 50vw + 24px·1.14·cover, где cover = max(W/1920, H/1080) — считаем её
+   в CSS и подгоняем кегль под свободную ширину слева от плиты (--hero-avail).
+   Запас (отступ слева + зазор до грани) вычтен уже в --hero-avail.
+   Ниже 1280px заголовок в 3 строки (Превращаем / сложное / в ясное) — самое
+   длинное слово 5.83em; с 1280px в 2 строки — «сложное в ясное» 7.4em. */
+.hero-copy {
+  --hero-cover: max(calc(100vw / 1920), calc(100svh / 1080));
+  --hero-slab-x: calc(50vw + 27.36 * var(--hero-cover));
+  --hero-avail: calc(var(--hero-slab-x) - 3.5rem);
+}
+@media (min-width: 1280px) {
+  .hero-copy {
+    --hero-avail: calc(var(--hero-slab-x) - min(2.1875vw, 3.5rem) - 2.5vw);
+  }
+}
+.hero-brand {
+  font-size: clamp(0.75rem, calc(var(--hero-avail) / 9.5), 1.5rem);
+}
+.hero-title {
+  font-size: max(1.25rem, min(calc(var(--hero-avail) / 6), 9rem));
+}
+.hero-sub {
+  max-width: var(--hero-avail);
+  text-wrap: balance;
+  font-size: clamp(0.95rem, calc(var(--hero-avail) / 14), 1.75rem);
+}
+@media (min-width: 1280px) {
+  .hero-brand {
+    font-size: clamp(1.125rem, calc(var(--hero-avail) / 26), 2rem);
+  }
+  .hero-title {
+    font-size: min(calc(var(--hero-avail) / 7.6), 11rem);
+  }
+  .hero-sub {
+    font-size: clamp(1.125rem, calc(var(--hero-avail) / 21), 2.5rem);
+  }
+}
+
 /* Скроллер нижнего меню (MobileBottomNav) — горизонтальный скролл пунктов
    без видимого скроллбара */
 .no-scrollbar {
