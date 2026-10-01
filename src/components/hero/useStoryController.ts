@@ -114,6 +114,34 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       speedUp: null as null | (() => void),
       skipAccum: 0,
       lastTickAt: 0,
+      // Жест пальца, на котором случился relock, «сгорел»: палец ещё на экране,
+      // touchY остался от начала жеста — без флага его продолжение сразу ушло бы
+      // в реверс с «Партнёров». Сбрасывается новым touchstart.
+      touchSpent: false,
+    }
+
+    // Прибить страницу к 0 и заморозить Lenis. Порядок важен: сначала stop()
+    // (сбрасывает цель анимации на фактическую позицию), потом scrollTo с force.
+    // Наоборот — scrollTo(0) молча выходит, если цель плавной прокрутки уже 0
+    // (target === targetScroll), а stop() замораживает страницу на 1–2px.
+    const lockAtTop = () => {
+      if (lenis) {
+        lenis.stop()
+        lenis.scrollTo(0, { immediate: true, force: true })
+        return
+      }
+      // Тач без Lenis (iPad Pro в ландшафте — ширина story, но SmoothScrollProvider
+      // Lenis не монтирует): нативный мгновенный скролл. scroll-behavior:smooth на
+      // таче (globals.css) в WebKit перебивает behavior:'instant' — снимаем его
+      // инлайном на время прыжка (см. HomeAnchorScroll)
+      const html = document.documentElement
+      html.style.scrollBehavior = 'auto'
+      window.scrollTo({ top: 0, behavior: 'instant' })
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          html.style.scrollBehavior = ''
+        }),
+      )
     }
 
     // ── Помощники отображения ──────────────────────────────────────────────
@@ -295,18 +323,24 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     const exitTo = (targetId = 'practices') => {
       st.released = true
       st.leftStory = false // взведётся, когда страница отъедет от стори вниз
-      lenis?.start()
       const el = document.getElementById(targetId)
-      if (el) lenis?.scrollTo(el, { offset: 0 })
-      else lenis?.scrollTo(window.innerHeight)
+      if (lenis) {
+        lenis.start()
+        if (el) lenis.scrollTo(el, { offset: 0 })
+        else lenis.scrollTo(window.innerHeight)
+        return
+      }
+      // Тач без Lenis: нативный плавный скролл с учётом scroll-margin (как у Lenis)
+      const margin = el ? parseFloat(getComputedStyle(el).scrollMarginTop) || 0 : 0
+      const top = el ? el.getBoundingClientRect().top + window.scrollY - margin : window.innerHeight
+      window.scrollTo({ top, behavior: 'smooth' })
     }
 
     // Реактивация стори при возврате скроллом вверх (на финальном шаге)
     const relock = () => {
       st.released = false
       st.leftStory = false
-      lenis?.scrollTo(0, { immediate: true })
-      lenis?.stop()
+      lockAtTop()
       st.step = LAST_STEP
       const seg = LAST_STEP - 1
       activateVideo(seg)
@@ -319,6 +353,10 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       }
       showOnly(LAST_STEP, true)
       emitStep(LAST_STEP)
+      // Хвост того же жеста (инерция тачпада/колеса) иначе сразу запускал реверс
+      // и «Партнёры» проскакивались — гасим так же, как после обычного шага
+      armCooldown()
+      st.touchSpent = true
     }
 
     // Тик во время проигрыша: копим сумму |deltaY|, при достижении порога —
@@ -374,10 +412,14 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     let touchY = 0
     const onTouchStart = (e: TouchEvent) => {
       touchY = e.touches[0]?.clientY ?? 0
+      st.touchSpent = false
     }
     const onTouchMove = (e: TouchEvent) => {
       if (st.released) return
-      e.preventDefault()
+      // Жест, начатый нативным скроллом (до relock), браузер отменить уже не даёт —
+      // preventDefault на нём только сыплет предупреждения в консоль
+      if (e.cancelable) e.preventDefault()
+      if (st.touchSpent) return
       const dy = touchY - (e.touches[0]?.clientY ?? 0)
       if (Math.abs(dy) < TOUCH_THRESHOLD) return
       touchY = e.touches[0]?.clientY ?? 0
@@ -390,10 +432,7 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     const onLenisScroll = (e: { scroll: number }) => {
       const y = e?.scroll ?? window.scrollY
       if (!st.released) {
-        if (y > 1) {
-          lenis?.scrollTo(0, { immediate: true })
-          lenis?.stop()
-        }
+        if (y > 1) lockAtTop()
       } else {
         // Реактивируем стори только после того, как страница реально отъехала
         // вниз (иначе первое scroll-событие exitTo с y≈0 сразу вернуло бы назад).
@@ -413,8 +452,7 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       if (st.released) {
         st.released = false
         st.leftStory = false
-        lenis?.scrollTo(0, { immediate: true })
-        lenis?.stop()
+        lockAtTop()
       }
       st.step = target
       if (target === 0) {
@@ -504,8 +542,12 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     window.addEventListener(STORY_GOTO_EVENT, onGoto)
     window.addEventListener(STORY_EXIT_EVENT, onExit)
     lenis?.on('scroll', onLenisScroll)
+    // Без Lenis (тач) гард и реактивацию кормит нативный scroll
+    const onNativeScroll = () => onLenisScroll({ scroll: window.scrollY })
+    if (!lenis) window.addEventListener('scroll', onNativeScroll, { passive: true })
 
     return () => {
+      window.removeEventListener('scroll', onNativeScroll)
       ;(window as StoryWindow).__storyActive = false
       cancelAnimationFrame(st.raf)
       window.removeEventListener('wheel', onWheel)
