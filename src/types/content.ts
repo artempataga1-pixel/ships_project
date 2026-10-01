@@ -3,12 +3,6 @@ export interface NavItem {
   href: string
 }
 
-export interface Stat {
-  value: number
-  label: string
-  suffix: string
-}
-
 export interface HeroContent {
   /* «Шумская и партнёры» — название фирмы, жирная строка над заголовком */
   brand: string
@@ -28,12 +22,6 @@ export interface AboutContent {
   body: string[]
   /* последний абзац — выделен типографикой */
   closing: string
-}
-
-export interface ValueItem {
-  icon: 'target' | 'eye' | 'award'
-  title: string
-  description: string
 }
 
 /* Полный профайл партнёра для персональной страницы /partners/[slug].
