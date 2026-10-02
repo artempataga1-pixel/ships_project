@@ -313,7 +313,7 @@ export function CompetenciesSection({ variant = 'flow' }: CompetenciesSectionPro
             <SectionHeading
               id="competencies-heading"
               title="Ключевые компетенции"
-              subtitle="Практики — направления нашей специализации. Ключевые компетенции — конкретные задачи, которые мы ведём чаще всего"
+              subtitle="Конкретные задачи, которые мы ведём чаще всего"
               className="scroll-mt-16 text-center lg:max-w-2xl"
             />
           </div>
