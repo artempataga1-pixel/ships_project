@@ -84,7 +84,7 @@ function PartnerCard({ member }: { member: TeamMember }) {
 
 // Мобильная карточка-визитка с переворотом по тапу: лицо — фото, обратная
 // сторона — графитовая панель с регалиями (имя/роль уже есть на фото, поэтому
-// не дублируем). Обратная сторона НЕ скроллится (см. ниже, топ-5 регалий) —
+// не дублируем). Обратная сторона НЕ скроллится (см. ниже, автоподгонка кегля) —
 // собственный скролл внутри карточки конфликтовал с обычным скроллом
 // страницы (палец «застревал» в карточке).
 interface MobilePartnerCardProps {
@@ -99,11 +99,35 @@ interface MobilePartnerCardProps {
 
 export function MobilePartnerCard({ member, compact = false }: MobilePartnerCardProps) {
   const [flipped, setFlipped] = useState(false)
-  // На мобильной обратной стороне регалии не скроллятся (карточка занимает
-  // весь экран — скролл по ней конфликтовал с обычным скроллом страницы),
-  // поэтому берём не более 5 самых весомых пунктов, а не весь список
-  // (полный — только в десктопной выезжающей панели, там своя авто-подгонка).
-  const achievements = (member.achievements ?? []).slice(0, 5)
+  const listRef = useRef<HTMLUListElement>(null)
+  const achievements = member.achievements ?? []
+
+  // Обратная сторона не скроллится (скролл внутри карточки конфликтовал со
+  // скроллом страницы), поэтому полный список регалий вписываем, уменьшая
+  // кегль списка, пока пункты не поместятся по высоте.
+  useClientLayoutEffect(() => {
+    const list = listRef.current
+    if (!list) return
+    const fit = () => {
+      list.style.fontSize = ''
+      const base = parseFloat(getComputedStyle(list).fontSize)
+      const items = list.children
+      const first = items[0] as HTMLElement | undefined
+      const last = items[items.length - 1] as HTMLElement | undefined
+      if (!first || !last) return
+      // offset*, а не getBoundingClientRect — на них не влияет 3D-переворот
+      const overflows = () => last.offsetTop + last.offsetHeight - first.offsetTop > list.clientHeight
+      for (let factor = 1; overflows() && factor > 0.6; ) {
+        factor -= 0.04
+        list.style.fontSize = `${base * factor}px`
+      }
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(list)
+    document.fonts?.ready.then(fit)
+    return () => ro.disconnect()
+  }, [])
 
   const toggle = () => setFlipped((v) => !v)
   const onKeyDown = (e: KeyboardEvent) => {
@@ -116,20 +140,20 @@ export function MobilePartnerCard({ member, compact = false }: MobilePartnerCard
   return (
     <div className="relative aspect-[3/2] w-full" style={{ perspective: '1200px' }}>
       {/* Переход на страницу партнёра. Тап по самой карточке переворачивает её
-          (регалии), поэтому ссылка — отдельная пилюля в пустом левом верхнем
-          углу фото. Вынесена из role="button" (вложенные интерактивные элементы)
-          и прячется, когда карточка перевёрнута. */}
+          (регалии), поэтому ссылка — отдельная пилюля в правом нижнем углу.
+          Вынесена из role="button" (вложенные интерактивные элементы) и
+          прячется, когда карточка перевёрнута. */}
       {member.slug && (
         <Link
           href={`/partners/${member.slug}`}
-          aria-label={`${member.name} — страница партнёра`}
+          aria-label={`${member.name} — узнать больше`}
           tabIndex={flipped ? -1 : 0}
           aria-hidden={flipped || undefined}
           className={`absolute z-10 flex items-center gap-1 rounded-full bg-[var(--color-lime)] font-semibold text-[#1a2200] shadow-[0_6px_18px_-6px_rgba(25,35,10,0.45)] transition-opacity duration-300 ${
-            compact ? 'left-2 top-2 px-2.5 py-1 text-[10px]' : 'left-3 top-3 px-3.5 py-1.5 text-xs'
+            compact ? 'bottom-2 right-2 px-2.5 py-1 text-[10px]' : 'bottom-3 right-3 px-3.5 py-1.5 text-xs'
           } ${flipped ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
         >
-          Профиль
+          Узнать больше
           <span aria-hidden>→</span>
         </Link>
       )}
@@ -156,7 +180,11 @@ export function MobilePartnerCard({ member, compact = false }: MobilePartnerCard
             className="object-cover"
           />
           {/* Подсказка, что карточку можно перевернуть */}
-          <span className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1.5 text-[11px] font-medium text-white backdrop-blur-sm">
+          <span
+            className={`pointer-events-none absolute flex items-center gap-1.5 rounded-full bg-black/50 font-medium text-white backdrop-blur-sm ${
+              compact ? 'left-2 top-2 px-2 py-1 text-[10px]' : 'left-3 top-3 px-2.5 py-1.5 text-[11px]'
+            }`}
+          >
             <svg
               aria-hidden
               width="13"
@@ -196,10 +224,11 @@ export function MobilePartnerCard({ member, compact = false }: MobilePartnerCard
           />
           {achievements.length > 0 ? (
             <ul
+              ref={listRef}
               className={
                 compact
-                  ? 'flex h-full flex-col justify-center gap-1 pl-2'
-                  : 'flex h-full flex-col justify-center gap-[clamp(6px,1.6vw,14px)] pl-[clamp(10px,2.4vw,20px)]'
+                  ? 'flex h-full flex-col justify-center gap-[0.45em] pl-2 text-[8.5px]'
+                  : 'flex h-full flex-col justify-center gap-[0.6em] pl-[clamp(10px,2.4vw,20px)] text-[clamp(10.5px,2.6vw,19px)]'
               }
             >
               {achievements.map((item) => (
@@ -207,8 +236,8 @@ export function MobilePartnerCard({ member, compact = false }: MobilePartnerCard
                   key={item}
                   className={
                     compact
-                      ? 'flex gap-1 text-[8.5px] leading-[1.15] text-white/85'
-                      : 'flex gap-[0.6em] text-[clamp(10.5px,2.6vw,19px)] leading-[1.3] text-white/85'
+                      ? 'flex gap-1 leading-[1.15] text-white/85'
+                      : 'flex gap-[0.6em] leading-[1.3] text-white/85'
                   }
                 >
                   <span
@@ -531,9 +560,17 @@ export function PartnersSection({ variant = 'flow' }: PartnersSectionProps) {
               {member.slug && (
                 <Link
                   href={`/partners/${member.slug}`}
-                  aria-label={`${member.name} — страница партнёра`}
-                  className="absolute inset-0 z-10 rounded-2xl outline-offset-4"
-                />
+                  aria-label={`${member.name} — узнать больше`}
+                  className="group absolute inset-0 z-10 rounded-2xl outline-offset-4"
+                >
+                  <span
+                    aria-hidden
+                    className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full bg-[var(--color-lime)] px-4 py-2 text-sm font-semibold text-[#1a2200] shadow-[0_6px_18px_-6px_rgba(25,35,10,0.45)] transition-transform duration-300 group-hover:-translate-y-0.5"
+                  >
+                    Узнать больше
+                    <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
+                  </span>
+                </Link>
               )}
             </div>
           ))}
