@@ -394,10 +394,14 @@ _(Версия 3 от 30.09: после независимого ревью и �
 
 - [x] **12.0 Route groups** (выполнено 02.10.2026). Создать worktree. Route groups `(site)` и `(admin)`, перенос страниц без изменения поведения.
   - Критерий: сайт идентичен до и после (scroll-story, лого-интро, якоря, `/#partners` на мобилке, скрины desktop и mobile); пустая `/admin` без хедера, Lenis и курсора.
-- [ ] **12.1 Инфраструктура.** `docker-compose.yml` (сначала `db`), Prisma, схема, миграция, одноразовый сид, `.env.example`.
+- [x] **12.1 Инфраструктура** (выполнено 02.10.2026). `docker-compose.yml` (сначала `db`), Prisma, схема, миграция, одноразовый сид, `.env.example`.
   - Критерий: в базе 5 практик и 44 продукта, скрипт сверки подтверждает дословное совпадение текстов и порядка продуктов с константами.
 - [ ] **12.2 Переезд сайта на базу.** Серверный слой, пропсы в клиентские компоненты, форма заявок без базы, sitemap, удаление констант.
   - Критерий: сайт визуально идентичен до и после на desktop и mobile (сравнение скринов), тестовая заявка уходит.
+  - **Перед удалением констант** прогнать `npm run db:verify`. В том же коммите, что и удаление констант, удалить `prisma/export-seed-data.ts` и `prisma/verify-seed.ts` (или переписать сверку на `seed-data.json`): они импортируют константы и попадают в type-check `next build`.
+  - Дата публикации теперь `Date` (колонка `DATE`): в компонентах выводить через `formatMediaDate` из `src/lib/media-date.ts`, а не `item.date` строкой.
+  - `description`/`serviceGroups` практики приходят из Prisma как `JsonValue`: привести к `string[]`/`PracticeServiceGroup[]` в **одном** месте серверного слоя.
+  - `src/lib/prisma.ts` при отсутствии `DATABASE_URL` не падает (pg тихо идёт на localhost:5432, там база di-smart). Если слою данных нужна громкая ошибка — проверять лениво, при первом запросе, а не на верхнем уровне модуля.
   - Сравнивать скриптами `tmp/task12/` с `tmp/task12/baseline-12.0` (HTML побайтно и скрины), плюс регресс задачи 13 на :3140. Существующий slug, отрендеренный по требованию, должен отдавать полный HTML, а не `__next_error__` (см. нюансы 12.0).
 - [ ] **12.3 Авторизация.** Логин и rate-limit, `noindex` (в layout админки уже стоит), `Disallow: /admin` в `robots.ts`. Решить, нужна ли своя 404 для `/admin/*`: сейчас там сайтовая из `global-not-found`.
   - Критерий: `/admin/*` без cookie редиректит на логин, неверный пароль не пускает, после 5 ошибок блокировка, Server Action без сессии отклоняется.
@@ -411,6 +415,8 @@ _(Версия 3 от 30.09: после независимого ревью и �
   - Полировка UX, JSON-экспорт всех данных кнопкой.
   - Инструкция для заказчика `doks/admin-instrukciya.md` плюс копия в `Desktop\Library`.
   - Полный `docker-compose` (app, migrate, db, backup), решение про `generateStaticParams` при `docker build`, локальный прогон всего стека в Docker.
+  - Из 12.1: `postinstall: prisma generate`, а `prisma`/`tsx` в devDependencies — в Dockerfile `npm ci --ignore-scripts` и отдельный `npx prisma generate` после `COPY prisma prisma.config.ts`; образу `migrate` нужны dev-зависимости и сгенерированный клиент (сид импортирует `src/generated`). Первый запуск на VPS: `migrate deploy`, затем `prisma db seed` (сид одноразовый, сам себя пропускает).
+  - Из 12.1: в VPS-варианте compose пароль базы без дефолта (`${POSTGRES_PASSWORD:?…}`), у `db` убрать `ports`. Сейчас дефолт `yuriki/yuriki` и порт `127.0.0.1:5433` — только для локалки.
   - Ревью субагентом, e2e «добавил кейс → увидел на сайте».
   - **Дальше пауза:** заказчик проверяет локально, только потом отдельная задача «переезд на VPS»: сервер, nginx, SSL, DNS, мерж `worktree-admin` в `main`, отключение Vercel workflow, обновление памяти про автопуш.
 
@@ -474,10 +480,38 @@ _(Версия 3 от 30.09: после независимого ревью и �
   - Грабля PowerShell: пути с `[...]` удалять через `Remove-Item -LiteralPath`, иначе молча ничего не удаляется. И не передавать удалённые пути в `git add` вместе с остальными: git падает на pathspec и не добавляет **ничего**.
 
 #### 12.1 Инфраструктура
-**Статус:** [ ] не начата
-- Сделано: _(заполнить)_
-- Проверено: _(заполнить)_
-- Учесть в следующих подзадачах: _(заполнить)_
+**Статус:** [x] выполнена 02.10.2026, коммит `63e6f57` в `worktree-admin` (без пуша)
+- Сделано:
+  - Пакеты как в di-smart: `prisma@7.10.0` и `tsx` (dev), `@prisma/client@7.10.0`, `@prisma/adapter-pg@7.10.0`, `pg`, `dotenv`. Тег `latest` у `prisma` сейчас указывает на `8.0.0-rc` — не брать, держать 7.10.
+  - `docker-compose.yml` — пока только `db` (postgres:16-alpine), порт **`127.0.0.1:5433`** (5432 занят базой di-smart), том `db-data`, учётка по умолчанию `yuriki/yuriki/yuriki`.
+  - `prisma.config.ts` грузит `.env.local`, затем `.env`. `DATABASE_URL=postgresql://yuriki:yuriki@127.0.0.1:5433/yuriki` добавлен в `.env.local` worktree. `127.0.0.1`, а не `localhost`: на Windows `localhost` может уйти в `::1`.
+  - Схема `prisma/schema.prisma`, миграция `20261002081100_init`:
+    - `Practice`: id-строка, `order`, `description` и `serviceGroups` в `Json`, `image`/`imageRatio`. `num` не хранится, это `String(order).padStart(2,'0')`.
+    - `Product`: id-строка, `practiceId` (Restrict), `sortOrder`, `hasPage`, `description?`.
+    - `CaseStudy`: id cuid, `slug` unique, `amount?`/`year?`, `isPublished`, `sortOrder`.
+    - `MediaItem`: id cuid, **`date` — `DATE`, а не строка**, `image`, `url?`, `isPublished`, `sortOrder`.
+    - У кейсов и публикаций неявные many-to-many с `Practice` (`_CaseStudyToPractice`, `_MediaItemToPractice`).
+  - **Отклонение от плана:** сид читает не константы, а снимок `prisma/seed-data.json`. Иначе после удаления констант в 12.2 сид перестал бы работать, а он нужен на VPS. Снимок делает `prisma/export-seed-data.ts`. Тот же скрипт проверяет, что обе стороны связи «практика ↔ продукт» согласованы, `num` выводится из `order` и нет ссылок на несуществующие практики.
+  - В сид, кроме 5 практик и 44 продуктов, попали 4 кейса и 4 публикации из задачи 16. Порядок продуктов берётся из `Practice.productIds`, у кейсов и публикаций — из порядка массивов.
+  - `prisma/seed.ts` одноразовый: если есть хоть одна практика, пишет «Сид пропущен» и ничего не трогает. Вставка идёт в одной транзакции.
+  - `prisma/verify-seed.ts` (`npm run db:verify`) собирает из базы объекты в форме типов и сравнивает их с константами через `isDeepStrictEqual`.
+  - `src/lib/prisma.ts` — клиент с кешем в `globalThis`. `src/lib/media-date.ts` — `formatMediaDate` («15 апр 2025», по UTC) и `parseMediaDate` с round-trip проверкой.
+  - `PracticeServiceGroup` в `src/types/content.ts` переведён из `interface` в `type`. Иначе Prisma не принимает его как `InputJsonValue`: у интерфейса нет неявной индексной сигнатуры.
+  - Скрипты: `postinstall: prisma generate`, `db:up`, `db:migrate`, `db:seed`, `db:verify`. В `.gitignore` добавлен `/src/generated`, в ESLint — `src/generated/**`. `.env.example` дополнен.
+- Проверено:
+  - `npm run db:verify` → OK: 5 практик, 44 продукта (порядок внутри практик тоже), 4 кейса, 4 публикации совпадают посимвольно.
+  - Негативный тест: в базе дописал точку в заголовок практики и сдвинул `sortOrder` продукта. Сверка поймала **обе** порчи и вернула exit 1. После отката снова OK.
+  - Прогон с нуля во временной базе `yuriki_fresh`: `migrate deploy` → сид → повторный сид (пропущен) → сверка OK. Связей кейс↔практика 4, публикация↔практика 3: у Forbes практик нет, как в константах. Временная база удалена.
+  - Повторный экспорт даёт тот же `seed-data.json` (md5 совпал). Без `DATABASE_URL` скрипты падают с понятной ошибкой.
+  - `tsc --noEmit` 0, ESLint по новым файлам 0, `npm run build` ок, роуты те же. `prisma generate` работает без `DATABASE_URL` (postinstall не зависит от базы).
+  - Ревьюер (субагент): критичного нет. Принято: `-d` в healthcheck, явная проверка `DATABASE_URL`, `127.0.0.1`, round-trip даты, поправлены комментарии про сид. Хвосты для 12.2 и 12.7 вписаны в описания этих подзадач выше.
+- Учесть в следующих подзадачах:
+  - **Prisma 7: `migrate dev` и `migrate reset` сид не запускают** (и `generate` после миграции тоже). Порядок на чистой машине: `npm run db:up` → `npm run db:migrate` → `npm run db:seed`.
+  - **`prisma migrate reset` агенту запрещён самой Prisma** без явного согласия пользователя (переменная `PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION`). Чтобы проверить что-то «с нуля», создавать временную базу в том же контейнере (`CREATE DATABASE …`), гонять на ней с `DATABASE_URL`, потом `DROP`.
+  - Скрипты в `prisma/` запускаются через `tsx` напрямую. Первой строкой импортировать `./load-env`, иначе `.env.local` не подхватится: его грузит только Prisma CLI через `prisma.config.ts`.
+  - Docker Desktop на машине сам не стартует. Если `docker` пишет «failed to connect to the docker API», запустить `C:\Program Files\Docker\Docker\Docker Desktop.exe` и подождать ~30 с.
+  - Compose-проект называется по папке (`project-yuriki`). После мержа в `main` основная папка и worktree будут делить один контейнер и том. Это нормально, но `down -v` в одной папке снесёт базу обеим.
+  - При записи даты из `<input type="date">` в админке (12.6) делать `new Date(\`${v}T00:00:00Z\`)`, как в сиде. `new Date(y, m, d)` даст сдвиг на день.
 
 #### 12.2 Переезд сайта на базу
 **Статус:** [ ] не начата
