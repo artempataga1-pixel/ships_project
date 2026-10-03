@@ -110,16 +110,9 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
           {item.year}
         </span>
 
-        {/* Сумма — крупным чёрным текстом по центру карточки */}
-        <span
-          className="
-            absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2
-            whitespace-nowrap font-heading font-black tracking-[-0.03em]
-            text-[clamp(1.1rem,4vw,3rem)] text-[var(--color-text)]
-          "
-        >
-          {item.amount}
-        </span>
+        {/* Суммы на карточке главной нет (решение 03.10, вопрос 17): на
+            ширинах меньше 1440 название дела, растущее снизу вверх, наезжало
+            на неё. Сумма остаётся на странице кейса и на странице практики. */}
 
         {/* Название дела + «Подробнее» — снизу карточки */}
         <div className="absolute inset-x-[6%] bottom-[9%] flex items-end justify-between gap-4">
