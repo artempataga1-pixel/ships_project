@@ -693,6 +693,21 @@ _(Версия 3 от 30.09: после независимого ревью и �
   - `restore-12.6.sh` чистит все папки `uploads/`; новый тест-набор — `admin-12.6b.mjs`.
   - Фото практики должно быть светлым — проверка «на глаз» в инструкцию (см. 12.7); технической проверки яркости нет.
 
+#### Демо-стенд для заказчицы на Vercel (поставлено пользователем 04.10, до 12.7)
+**Статус:** [x] поднят 04.10.2026 — https://yuriki-admin-demo.vercel.app (админка: `/admin`, логин `admin`, пароль — у пользователя)
+- Решения пользователя: Vercel, а не туннель; хранение фото **переключаемое** (не одноразовое); заявки с демо — как на проде (тот же бот, группа «Тест»: прод-значения на Vercel помечены Sensitive и не читаются, взяты локальные); индексацию не закрывали; деплой руками из CLI.
+- Сделано (коммит `7c40092` в `worktree-admin`, без пуша): `lib/admin/image-upload.ts` — при `BLOB_READ_WRITE_TOKEN` фото идут в Vercel Blob (`put`, `del`; путь в базе — полный URL блоба), без него — диск, как для VPS; `next.config.ts` — `remotePatterns` на `*.public.blob.vercel-storage.com`; **большие фото (>3 МБ) уменьшаются в браузере** до 2400 px JPEG до отправки (лимит тела запроса к функции Vercel — 4,5 МБ, касается Server Actions; на VPS тоже меньше трафика), кнопка сохранения ждёт подготовки фото; `prisma.config.ts` — миграции по `DATABASE_URL_UNPOOLED` (Neon), если он есть; `.vercelignore`.
+- Vercel: отдельный проект **`yuriki-admin-demo`** (прод `project-yuriki` не тронут), папка worktree привязана к нему (`.vercel/`). Neon через Marketplace (`vercel integration add neon --plan free_v3`, регион us-east-1), Blob store `yuriki-admin-demo-photos` (public). Переменные: `ADMIN_LOGIN`, `ADMIN_PASSWORD` (свой для демо, 20 символов), `SESSION_SECRET`, `TELEGRAM_*`, плюс от интеграций `DATABASE_URL*`, `BLOB_READ_WRITE_TOKEN`. В базе — миграции и сид, `db:verify` на Neon OK.
+- Проверено: `tmp/task12/demo-smoke.mjs` на живом демо — **22 OK** (страницы 200, вход, cookie `Secure`, публикация с фото 12,6 МБ → Blob → главная → удаление и файл из хранилища; фото продукта → страница практики → «убрать»; хранилище пустое, база как после сида); тестовая заявка → 200 `ok:true`. Локальные e2e после изменений: `admin-12.6` 104, `admin-12.6b` 43, `admin-12.5` 68, `admin-12.4` 56 — OK.
+- Грабли:
+  - `vercel blob create-store … --yes` **перезаписывает `.env.local`** привязанной папки переменными облачного проекта (удалил локальные `ADMIN_*`, `TELEGRAM_*`, подменил `DATABASE_URL` на Neon). Восстановлено; облачные переменные лежат в `.env.demo` worktree (в `.gitignore`). Перед такими командами — бэкап `.env.local`.
+  - Проект, созданный `vercel project add`, получает `framework: null` — сборка Next проходит, но всё отдаёт `404 NOT_FOUND` платформы. Лечится PATCH `{"framework":"nextjs"}` в API проекта и передеплоем.
+  - `vercel env add` без `--value … --yes` ждёт ввода и висит; значение, начинающееся с `-` (id Telegram-группы), передавать как `--value=-…`.
+  - Удалённый блоб ещё отдаётся из CDN-кеша по старому URL (если его кто-то открывал); в хранилище его нет. Адрес — UUID, сайт на него не ссылается.
+  - Лимит входа на Vercel — в памяти каждого экземпляра функции, слабее, чем на VPS.
+- Как обновлять демо после правок ветки: из `D:\IT\VS\.claude\worktrees\admin\project-yuriki` — `npx vercel deploy --prod --yes`; миграции — с `DATABASE_URL`/`DATABASE_URL_UNPOOLED` из `.env.demo`: `npx prisma migrate deploy`. Откат данных демо к сиду — очистить таблицы на Neon и `npm run db:seed` с теми же переменными.
+- После показа: решить, удалять ли проект (`vercel project rm yuriki-admin-demo`), базу Neon и Blob store. Hobby-тариф Vercel по правилам — для некоммерческого использования; для временного показа терпимо, для постоянного — нет.
+
 #### 12.7 Сдача и подготовка к VPS
 **Статус:** [ ] не начата
 - Сделано: _(заполнить)_
