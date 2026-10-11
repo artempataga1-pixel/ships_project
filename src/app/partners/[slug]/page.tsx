@@ -201,6 +201,7 @@ function PartnerView({ partner }: { partner: TeamMember }) {
                 alt={`${partner.name} — ${partner.role}`}
                 fill
                 priority
+                quality={partner.portrait ? 90 : undefined}
                 sizes="(min-width: 1280px) 480px, (min-width: 640px) 440px, 90vw"
                 className={`object-cover ${partner.portrait ? 'object-center' : 'object-right'}`}
               />
