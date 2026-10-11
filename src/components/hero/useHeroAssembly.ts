@@ -140,14 +140,14 @@ export function useHeroAssembly(
 
         tl = gsap.timeline({
           // Пауза под растворение лоадера сцены (transition 700мс в разметке).
-          delay: 0.45,
+          delay: 0.35,
           onComplete: reveal,
         })
 
         tl.to(word, {
           autoAlpha: 1,
           scale: scale * 1.04,
-          duration: 0.65,
+          duration: 0.45,
           ease: 'power2.out',
           force3D: false,
         })
@@ -155,18 +155,18 @@ export function useHeroAssembly(
             x: 0,
             y: 0,
             scale: 1,
-            duration: 0.9,
+            duration: 0.65,
             ease: 'power3.inOut',
             force3D: false,
-          }, '+=0.25')
-          .to(wipeTl, { progress: 1, duration: 1.2, ease: 'power2.inOut' }, '-=0.3')
+          }, '+=0.12')
+          .to(wipeTl, { progress: 1, duration: 0.75, ease: 'power2.inOut' }, '-=0.25')
           .to(tail, {
             autoAlpha: 1,
             y: 0,
-            duration: 0.8,
-            stagger: 0.12,
+            duration: 0.55,
+            stagger: 0.08,
             ease: 'power3.out',
-          }, '-=0.35')
+          }, '-=0.3')
 
         // Уже листали до старта или страница открылась не на первом экране
         // (восстановленная позиция скролла на мобилке) — сразу быстрый темп.
