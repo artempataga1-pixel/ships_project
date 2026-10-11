@@ -239,11 +239,13 @@ function PartnerView({ partner }: { partner: TeamMember }) {
               y={24}
               duration={0.7}
               blur={8}
-              className={profile.figure.tail ? 'lg:self-start' : undefined}
+              className={profile.figure.tail ? 'lg:sticky lg:top-28 lg:self-start' : undefined}
             >
               {/* Цифра с подводкой и продолжением — цельное предложение, читается
-                  подряд; без продолжения (Анна) панель тянется на высоту соседней
-                  и разводит подводку и цифру по краям. */}
+                  подряд; карточка ниже соседней, поэтому липнет и едет вместе со
+                  скроллом, пока не кончится «Специализация». Без продолжения
+                  (Анна) панель тянется на высоту соседней и разводит подводку и
+                  цифру по краям. */}
               <div
                 className={`${DARK_PANEL_CLASS} flex flex-col p-7 md:p-10 ${
                   profile.figure.tail ? 'gap-5' : 'h-full justify-between gap-8'
