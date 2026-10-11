@@ -188,21 +188,21 @@ function PartnerView({ partner }: { partner: TeamMember }) {
             </p>
           </div>
 
-          {/* Портрет. Готовая визитка (public/images/team) содержит имя и должность
-              слева — вписываем её в вертикальную рамку и прижимаем вправо, чтобы
-              остался только портрет: имя и роль на странице уже набраны текстом. */}
+          {/* Портрет. Есть отдельный кроп 4:5 (portrait) — ставим по центру. Нет —
+              берём визитку (public/images/team): в ней имя и должность слева,
+              поэтому прижимаем вправо, чтобы остался только портрет. */}
           <div className="w-full max-w-[440px] self-center xl:w-[38%] xl:max-w-[480px] xl:shrink-0">
             <div
               className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-xl)] border"
               style={PANEL_STYLE}
             >
               <Image
-                src={partner.photo!}
+                src={partner.portrait ?? partner.photo!}
                 alt={`${partner.name} — ${partner.role}`}
                 fill
                 priority
                 sizes="(min-width: 1280px) 480px, (min-width: 640px) 440px, 90vw"
-                className="object-cover object-right"
+                className={`object-cover ${partner.portrait ? 'object-center' : 'object-right'}`}
               />
               <LimeBar />
             </div>

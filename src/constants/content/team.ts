@@ -77,6 +77,9 @@ export const TEAM: TeamMember[] = [
     name: 'Посаженников Максим Сергеевич',
     role: 'Старший партнёр',
     photo: '/images/team/maksim.jpg',
+    // Кроп визитки 570..1260 × 0..862 px: лицо по центру, плечи обрезаны
+    // симметрично, впечатанное имя не попадает.
+    portrait: '/images/team/maksim-portrait.jpg',
     panelSide: 'right',
     slug: 'maksim-posazhennikov',
     profile: MAKSIM_PROFILE,
