@@ -569,6 +569,19 @@ body {
   transition: transform 750ms cubic-bezier(0.2, 0.75, 0.25, 1);
 }
 
+/* До lg высоту сцены задаёт распорка-padding (PracticeCard) вместе с
+   min-height, а не aspect-ratio: WebKit (все браузеры iPhone) при
+   aspect-ratio игнорирует min-height, и длинный оборот («Строительство»)
+   срезал ссылку «Узнать подробнее». Процентная height:100% от сцены с
+   auto-высотой не резолвится — поэтому грани растягиваем через inset. */
+@media (max-width: 1023.98px) {
+  .practice-flip-inner {
+    position: absolute;
+    inset: 0;
+    height: auto;
+  }
+}
+
 .practice-flip-face {
   position: absolute;
   inset: 0;

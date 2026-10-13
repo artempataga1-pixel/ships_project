@@ -5,12 +5,28 @@ import { AboutSection } from '@/components/sections/AboutSection'
 import { CompetenciesOrbitCompact } from '@/components/sections/CompetenciesOrbitCompact'
 import { PartnersFlipCompact } from '@/components/sections/PartnersFlipCompact'
 import { HeroLayer } from './ScrollStory'
+import { NAV_ID_TO_STEP } from './useStoryController'
 import { useMobileScrubController, VIDEO_SRC_MOBILE } from './useMobileScrubController'
 
 // Предохранитель: если canplaythrough первого сегмента не пришёл вовремя
 // (медленная сеть) — активируем пин всё равно, чтобы страница не зависла
 // на постере (аналог SEEK_TIMEOUT_MS десктопа, см. план, этап 4).
 const LOAD_TIMEOUT_MS = 2500
+
+// Полки, которые в scrub-режиме живут внутри пина (в flow-разметке — секции)
+const SCENE_SELECTOR = '#hero, #about, #competencies, #partners'
+
+// Якорь реально существующей секции/карточки ниже сцены. Мусорный хэш
+// (#top, метки рекламы) и id внутри самих полок (#about-card…) не в счёт —
+// там человек остаётся на hero, и лоадер должен ждать видео как обычно.
+// Зовётся в render-фазе первого рендера сцены: в DOM ещё flow-разметка
+// (ScrollStory рендерит FlowFallback до апгрейда), у полок там свои id.
+function landsBelowScene(hash: string): boolean {
+  const id = hash.slice(1)
+  if (!id || Object.prototype.hasOwnProperty.call(NAV_ID_TO_STEP, id)) return false
+  const el = document.getElementById(id)
+  return !!el && !el.closest(SCENE_SELECTOR)
+}
 
 // ══════════════════════════════════════════════════════════════════════════
 // MOBILE SCRUB: континуальный scroll-scrub (<1280px, no reduced-motion) —
@@ -22,7 +38,15 @@ export function MobileScrubScene() {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   // overlayRefs[0..3] = hero · about · competencies(compact) · partners(compact)
   const overlayRefs = useRef<(HTMLElement | null)[]>([])
-  const [ready, setReady] = useState(false)
+  // Заход по якорю НИЖЕ сцены (/#practice-<slug>, /#case-<slug>, /#cases… —
+  // возврат со страниц практик/кейсов): пин активируем сразу, не дожидаясь
+  // видео. Его спейсер (~4400px) сдвигает всё, что ниже; на iOS canplaythrough
+  // без жеста не приходит, пин вставал только по таймауту через 2.5с — уже
+  // после того, как HomeAnchorScroll довёз скролл до карточки, и человек
+  // оказывался посреди героя. Героя он в этот момент всё равно не видит, а
+  // раскладка становится финальной до посадки. window здесь читать безопасно:
+  // сцена монтируется только на клиенте (ScrollStory стартует в режиме flow).
+  const [ready, setReady] = useState(() => landsBelowScene(window.location.hash))
 
   useMobileScrubController({ wrapperRef, videoRefs, overlayRefs, active: ready })
 

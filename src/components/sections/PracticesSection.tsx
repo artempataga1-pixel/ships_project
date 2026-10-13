@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from 'react'
 import Image from 'next/image'
 import { ReturnAnchorLink } from '@/components/ui/ReturnAnchorLink'
 import { useGSAP } from '@gsap/react'
@@ -37,6 +37,13 @@ const CARD_VARIANTS: CardVariant[] = [
   { align: 'lg:self-center', width: 'w-full lg:w-[23vw] lg:min-w-[290px]' },              // 04 Судебные споры · 2/3
   { align: 'lg:self-center', width: 'w-full lg:w-[19vw] lg:min-w-[250px]' },              // 05 Семейное · 9/16
 ]
+
+/* «4/3» → «75%»: высота распорки в процентах ширины (padding-top считается
+   от ширины контейнера) — мобильная замена aspect-ratio, см. PracticeCard. */
+function ratioPadding(ratio: string): string {
+  const [w, h] = ratio.split('/').map(Number)
+  return w > 0 && h > 0 ? `${(h / w) * 100}%` : '0'
+}
 
 /* Контурный логотип-скобка (декор фона заголовочного экрана, ~16% opacity) —
    угловые border-рамки + три бара, как .logo-outline в референс-коде. */
@@ -231,11 +238,17 @@ function PracticeCard({
             короче, чем её же оборот с описанием, и текст упирался в границу
             панели. Прокрутка внутри оборота исключена — на iOS она перехватывает
             вертикальный тач-скролл страницы (см. MobilePartnerCard), поэтому
-            высоту добирает сама карточка, а кадр досаживает object-cover. */}
+            высоту добирает сама карточка, а кадр досаживает object-cover.
+            До lg пропорцию держит распорка padding-top, а не aspect-ratio:
+            WebKit при aspect-ratio молча игнорирует min-height (на iPhone
+            оборот «Строительства» был 257px вместо 330 и срезал ссылку).
+            Ниже 360px (iPhone SE в режиме «Увеличенный») текст оборота
+            переносится на лишние строки — там запас высоты больше. */}
         <div
-          className="practice-flip-scene relative min-h-[330px] w-full rounded-[var(--radius-md)] lg:min-h-0"
-          style={{ aspectRatio: item.imageRatio, boxShadow: 'var(--shadow-card)' }}
+          className="practice-flip-scene relative min-h-[390px] min-[360px]:min-h-[330px] w-full rounded-[var(--radius-md)] lg:min-h-0 lg:aspect-[var(--card-ratio)]"
+          style={{ '--card-ratio': item.imageRatio, boxShadow: 'var(--shadow-card)' } as CSSProperties}
         >
+          <div aria-hidden className="lg:hidden" style={{ paddingTop: ratioPadding(item.imageRatio) }} />
           <div className="practice-flip-inner">
             {isTouch ? (
               <button
