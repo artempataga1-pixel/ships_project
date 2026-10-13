@@ -18,7 +18,7 @@ function Passthrough({
 interface AboutSectionProps {
   /** 'flow' — обычная секция потока; 'story' — оверлей внутри ScrollStory. */
   variant?: 'flow' | 'story'
-  /** Мобильный скраб (<1280px, MobileScrubScene) — узкий 100dvh экран без
+  /** Мобильная стори (<1280px, MobileStoryScene) — узкий 100dvh экран без
    *  собственной прокрутки, десктопные clamp() из story-варианта туда не
    *  влезают. Урезает паддинги/кегль, только вместе с variant='story'. */
   compact?: boolean

@@ -6,7 +6,7 @@ import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { KEY_COMPETENCIES } from '@/constants/content/key-competencies'
 
-/* Компактный блок компетенций для MobileScrubScene (континуальный скраб, <1280px).
+/* Компактный блок компетенций для MobileStoryScene (мобильная стори, <1280px).
 
    Здесь была эллиптическая орбита — зеркало десктопной. На 10 карточках (сейчас
    9) она перестала работать чисто арифметически: сцена 360×240 даёт внешний

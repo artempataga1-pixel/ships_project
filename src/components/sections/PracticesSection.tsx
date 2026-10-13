@@ -340,8 +340,9 @@ export function PracticesSection() {
             scrub: 1,
             anticipatePin: 1,
             invalidateOnRefresh: true,
-            // Ниже hero-скраба (refreshPriority 3), выше «Статей» (1) —
-            // см. коммент в useMobileScrubController.ts
+            // Выше «Статей» (1): пины пересчитываются сверху вниз по странице.
+            // На 1024–1279px раньше над коллажем жил пин мобильного скраба (3)
+            // — без порядка коллаж пинился на ~4200px раньше своих карточек
             refreshPriority: 2,
           },
         })

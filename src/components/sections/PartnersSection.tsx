@@ -89,7 +89,7 @@ function PartnerCard({ member }: { member: TeamMember }) {
 // страницы (палец «застревал» в карточке).
 interface MobilePartnerCardProps {
   member: TeamMember
-  // compact — карточка внутри шага scroll-scrub (MobileScrubScene), в разы
+  // compact — карточка внутри полки мобильной стори (MobileStoryScene), в разы
   // меньше, чем в обычном потоке (max-w-[280px] против max-w-[640px]) — те же
   // clamp(...,vw,...) размеры текста/отступов, посчитанные под широкую
   // карточку, здесь не помещаются (регалии вылезают за края панели). Компакт

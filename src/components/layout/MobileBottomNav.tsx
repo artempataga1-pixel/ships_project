@@ -1,10 +1,9 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useLenis } from 'lenis/react'
 import { NAV_ITEMS } from '@/constants/nav'
 import { useActiveSection } from '@/components/layout/useActiveSection'
-import { handleMobileNavClick } from '@/components/hero/useMobileScrubController'
+import { handleStoryNavClick } from '@/components/hero/useStoryController'
 import { useFormFocus } from '@/lib/useFormFocus'
 import { useContactsHref } from '@/lib/useContactsHref'
 
@@ -14,13 +13,13 @@ const LAMP_MIN_WIDTH = 44
 
 // Нижнее фиксированное меню до 1024px: все 7 пунктов, горизонтальный скролл
 // с автоцентрированием активного и той же «лампой», что у десктопной LimelightNav.
-// Десктопный story-контроллер (isStoryActive) на мобиле не монтируется — для
-// practices/articles/cases/contacts клики по <a> идут обычным переходом/якорем.
+// На главной живёт мобильная стори (MobileStoryScene): клики по пунктам
+// перехватывает handleStoryNavClick — полки стори мгновенным прыжком, секции
+// ниже — мягким выходом. Вне главной — обычный переход по href.
 export function MobileBottomNav() {
   // NAV_ITEMS отдаём в useActiveSection нетронутым — он ищет секции по id из
   // href; подменённый «/contacts» без решётки сломал бы подсветку пункта.
   const activeIndex = useActiveSection(NAV_ITEMS)
-  const lenis = useLenis()
   const contactsHref = useContactsHref()
   // Во время ввода в поле формы iOS-клавиатура двигает fixed-элементы —
   // прячем меню, чтобы оно не наезжало на поля/кнопку отправки
@@ -99,11 +98,11 @@ export function MobileBottomNav() {
               }}
             >
               {/* «Контакты» вне главной ведут на отдельную страницу, остальные
-                  пункты — прежними якорями главной. handleMobileNavClick на
+                  пункты — прежними якорями главной. handleStoryNavClick на
                   адресе без решётки сам выходит в no-op. */}
               <a
                 href={item.href === '/#contacts' ? contactsHref : item.href}
-                onClick={(e) => handleMobileNavClick(e, item.href, lenis)}
+                onClick={(e) => handleStoryNavClick(e, item.href)}
                 className={`block whitespace-nowrap rounded-full px-4 py-3 text-sm font-medium transition-colors duration-200 ${
                   i === activeIndex ? 'text-[var(--color-text)]' : 'text-[#333333]'
                 }`}

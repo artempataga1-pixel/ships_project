@@ -133,8 +133,8 @@ export function ArticlesSection() {
             scrub: 1,
             anticipatePin: 1,
             invalidateOnRefresh: true,
-            // Последний пин по порядку страницы — см. коммент в
-            // useMobileScrubController.ts
+            // Последний пин по порядку страницы: практики (2) → статьи (1),
+            // чем выше приоритет, тем раньше ScrollTrigger его пересчитывает
             refreshPriority: 1,
           },
         })

@@ -15,7 +15,7 @@ export const LAST_STEP = 3
 // id для подсветки навбара (Hero без пункта меню → null)
 export const STEP_NAV_ID = [null, 'about', 'competencies', 'partners'] as const
 // Длительности сегментов (fallback, если video.duration ещё не готов).
-// Экспортирована для useMobileScrubController — те же 3 сегмента, тот же fallback.
+// Мобильная сцена — те же 3 сегмента (свои 720p-файлы), тот же fallback.
 export const SEG_DURATION = [8, 8, 10]
 
 // Настройки перехвата ввода
@@ -45,6 +45,16 @@ const DEFAULT_TICK_MAGNITUDE = 120 // вклад одного «тика» дл�
 export const STORY_STEP_EVENT = 'story:step' // detail: { step, id }
 export const STORY_GOTO_EVENT = 'story:goto' // detail: { step }
 export const STORY_EXIT_EVENT = 'story:exit' // detail: { id }
+// Идёт ли проигрыш сегмента — для плашки «Нажмите, чтобы пропустить»
+export const STORY_BUSY_EVENT = 'story:busy' // detail: { busy }
+
+// Сколько после тап-скипа глотаем click того же касания: иначе он долетал бы
+// до только что открытой полки (переворачивал карточку партнёра и т.п.)
+const SKIP_CLICK_SWALLOW_MS = 600
+
+// Сколько ждать метаданные несгруженного сегмента, прежде чем открыть полку
+// без анимации (StoryOptions.skipIfNotReady)
+const READY_WAIT_MS = 800
 
 // Секция-якорь → шаг стори. Пункты меню ниже (practices…) выходят из стори.
 export const NAV_ID_TO_STEP: Record<string, number> = {
@@ -75,22 +85,54 @@ export function handleStoryAwareAnchorClick(e: React.MouseEvent, id: string) {
   window.dispatchEvent(new CustomEvent(STORY_EXIT_EVENT, { detail: { id } }))
 }
 
+// Клик по пункту меню вида «/#id» (нижнее мобильное меню, футер), пока стори
+// жива: полки стори — мгновенный прыжок на шаг, секции ниже — мягкий выход.
+// Та же логика, что у LimelightNav. Вне стори — обычный переход по href.
+export function handleStoryNavClick(e: React.MouseEvent, href: string) {
+  if (!isStoryActive()) return
+  const id = href.split('#')[1]
+  if (!id) return
+  e.preventDefault()
+  if (id in NAV_ID_TO_STEP) {
+    window.dispatchEvent(new CustomEvent(STORY_GOTO_EVENT, { detail: { step: NAV_ID_TO_STEP[id] } }))
+  } else {
+    window.dispatchEvent(new CustomEvent(STORY_EXIT_EVENT, { detail: { id } }))
+  }
+}
+
+// Отличия мобильного режима (<1280px). Без опций — десктопное поведение.
+export interface StoryOptions {
+  // Полный сегмент за столько секунд (десктоп — NORMAL_SECONDS)
+  normalSeconds?: number
+  // Касание сцены во время проигрыша — прыжок в конец сегмента
+  tapToSkip?: boolean
+  // Новый currentTime — только когда прошлая перемотка закончилась: iOS иначе
+  // копит очередь seek'ов, и кадры идут рывками
+  seekGate?: boolean
+  // Видео сегмента без метаданных (медленная сеть) — полка сразу, без анимации
+  skipIfNotReady?: boolean
+}
+
 export interface StoryRefs {
   wrapperRef: React.RefObject<HTMLElement | null>
   videoRefs: React.MutableRefObject<(HTMLVideoElement | null)[]>
   // overlayRefs[0..3] = hero · about · competencies · partners
   overlayRefs: React.MutableRefObject<(HTMLElement | null)[]>
   active: boolean // стори-режим включён (десктоп без reduced-motion)
+  options?: StoryOptions
 }
 
-export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active }: StoryRefs) {
+export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active, options }: StoryRefs) {
+  const normalSeconds = options?.normalSeconds ?? NORMAL_SECONDS
+  const tapToSkip = !!options?.tapToSkip
+  const seekGate = !!options?.seekGate
+  const skipIfNotReady = !!options?.skipIfNotReady
   const lenis = useLenis()
 
   // videoRefs/overlayRefs приходят аргументами хука, поэтому React Compiler не
   // признаёт их за refs и считает мутацией пропсов обычную работу с DOM-узлами
   // (play/pause/currentTime). Мутируются только сами элементы, не .current —
   // поведение корректное, правило глушим точечно.
-  // eslint-disable-next-line react-hooks/immutability
   useEffect(() => {
     if (!active) return
     const wrapper = wrapperRef.current
@@ -118,6 +160,13 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       // touchY остался от начала жеста — без флага его продолжение сразу ушло бы
       // в реверс с «Партнёров». Сбрасывается новым touchstart.
       touchSpent: false,
+      // Был ли живой ввод: до него соседние сегменты не грузим — не спорим
+      // за полосу со шрифтами/JS на старте (мобильные видео ленивые)
+      interacted: false,
+      // Отмена ожидания загрузки сегмента (playWhenReady)
+      cancelWait: null as null | (() => void),
+      // Отмена отложенного reveal полки (afterSeek ждёт seeked)
+      cancelSeek: null as null | (() => void),
     }
 
     // Прибить страницу к 0 и заморозить Lenis. Порядок важен: сначала stop()
@@ -176,6 +225,109 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
         new CustomEvent(STORY_STEP_EVENT, { detail: { step, id: STEP_NAV_ID[step] } }),
       )
     }
+    const setBusy = (busy: boolean) => {
+      st.busy = busy
+      window.dispatchEvent(new CustomEvent(STORY_BUSY_EVENT, { detail: { busy } }))
+    }
+
+    // Догрузка сегмента. Мобильная сцена держит src сегментов 1/2 в data-src
+    // (preload="none"), первый — с preload="metadata". На десктопе у всех src и
+    // preload="auto" — функции ничего не делают.
+    // Только назначить отложенный src (true — назначили сейчас)
+    const ensureSrc = (seg: number) => {
+      const v = videos[seg]
+      const lazySrc = v?.dataset.src
+      if (!v || !lazySrc || v.getAttribute('src')) return false
+      v.src = lazySrc
+      v.preload = 'auto'
+      v.load()
+      return true
+    }
+    const ensureLoaded = (seg: number) => {
+      if (!skipIfNotReady) return
+      const v = videos[seg]
+      if (!v || ensureSrc(seg)) return
+      if (v.preload !== 'auto') v.preload = 'auto'
+      // load() — только видео, которое стоит без данных (iOS без жеста не
+      // грузит даже метаданные). Уже загруженное он сбросил бы в ноль прямо
+      // перед проигрышем, а грузящееся — начал бы качать заново.
+      if (v.readyState === 0 && v.networkState !== HTMLMediaElement.NETWORK_LOADING) v.load()
+    }
+    // На полке step нужны сегмент вперёд (step) и назад (step-1)
+    const prepareAround = (step: number) => {
+      if (!skipIfNotReady || !st.interacted) return
+      if (step < LAST_STEP) ensureLoaded(step)
+      if (step > 0) ensureLoaded(step - 1)
+    }
+    // Поставить кадр сегмента. До метаданных старые iOS теряют currentTime (а
+    // load() его сбрасывает), да и длительность ещё запасная — повторяем на
+    // loadedmetadata с реальной. Новая постановка или проигрыш этого видео
+    // отменяет отложенную.
+    const pendingFrame: (null | (() => void))[] = []
+    const cancelFrame = (seg: number) => {
+      pendingFrame[seg]?.()
+      pendingFrame[seg] = null
+    }
+    const placeFrame = (seg: number, getTime: () => number) => {
+      const v = videos[seg]
+      if (!v) return
+      cancelFrame(seg)
+      try {
+        v.currentTime = getTime()
+      } catch {}
+      if (v.readyState >= 1) return
+      const onMeta = () => {
+        pendingFrame[seg] = null
+        try {
+          v.currentTime = getTime()
+        } catch {}
+      }
+      v.addEventListener('loadedmetadata', onMeta, { once: true })
+      pendingFrame[seg] = () => v.removeEventListener('loadedmetadata', onMeta)
+    }
+    // Видео сегмента может проигрываться: метаданные есть (длительность и
+    // перемотка). Кадры при перемотке браузер дотягивает сам.
+    const segReady = (seg: number) => {
+      const v = videos[seg]
+      return !!v && !!v.getAttribute('src') && v.readyState >= 1
+    }
+    // Сегмент не готов (медленная сеть) — полка без анимации, мягким fade
+    const jumpToShelf = (step: number) => {
+      restAt(step, false, false)
+      armCooldown()
+    }
+    // Сегмент не готов: ждём метаданные до READY_WAIT_MS (касание только что
+    // разбудило загрузку — на iOS это нормальный случай первого свайпа), потом
+    // либо играем, либо сдаёмся на полку сразу. Пока ждём, ввод игнорируется,
+    // тап-скип — сразу полка. Отменяется переходом из меню (cancelWait).
+    const playWhenReady = (seg: number, dir: 1 | -1) => {
+      if (!skipIfNotReady || segReady(seg)) return playSegment(seg, dir)
+      const toStep = dir > 0 ? seg + 1 : seg
+      const v = videos[seg]
+      ensureLoaded(seg)
+      st.busy = true
+      let done = false
+      const stop = () => {
+        done = true
+        window.clearTimeout(timer)
+        v?.removeEventListener('loadedmetadata', onMeta)
+        st.busy = false
+        st.forceFinish = null
+        st.cancelWait = null
+      }
+      const go = (play: boolean) => {
+        if (done) return
+        stop()
+        if (play && segReady(seg)) playSegment(seg, dir)
+        else jumpToShelf(toStep)
+      }
+      const onMeta = () => go(true)
+      v?.addEventListener('loadedmetadata', onMeta)
+      const timer = window.setTimeout(() => go(false), READY_WAIT_MS)
+      st.forceFinish = () => go(false)
+      st.cancelWait = stop
+    }
+
     const armCooldown = () => {
       st.cooldown = true
       window.setTimeout(() => {
@@ -188,19 +340,27 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     // раньше, чем видео реально дорисовывало нужный кадр → текст новой полки
     // повисал на старом/чужом фоне. Ждём 'seeked' (с таймаутом-предохранителем
     // на случай, если currentTime уже совпадал и событие не пришло).
-    const SEEK_TIMEOUT_MS = 250
+    // На мобилке (seekGate) финальная перемотка дольше — iOS тянет кадр сетью.
+    const SEEK_TIMEOUT_MS = seekGate ? 600 : 250
     const afterSeek = (v: HTMLVideoElement, targetTime: number, cb: () => void) => {
       let done = false
       const onSeeked = () => settle()
-      const settle = () => {
-        if (done) return
+      const cleanupSeek = () => {
         done = true
         v.removeEventListener('seeked', onSeeked)
         clearTimeout(timer)
+        if (st.cancelSeek === cleanupSeek) st.cancelSeek = null
+      }
+      const settle = () => {
+        if (done) return
+        cleanupSeek()
         cb()
       }
       v.addEventListener('seeked', onSeeked)
       const timer = window.setTimeout(settle, SEEK_TIMEOUT_MS)
+      // Переход из меню/выход/размонтирование посреди ожидания — колбэк не
+      // должен потом перетереть выбранный шаг
+      st.cancelSeek = cleanupSeek
       try {
         v.currentTime = targetTime
       } catch {
@@ -215,109 +375,83 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     // на ~64 fps, и на маках это фризило — при этом реверс, идущий скрабом,
     // оставался плавным. Один механизм в обе стороны убирает и расхождение
     // ощущений: вперёд и назад теперь буквально одна и та же математика.
-    const playForward = (seg: number) => {
+    // Проигрыш сегмента seg в направлении dir (1 — вперёд 0→конец, полка
+    // seg+1; -1 — назад конец→0, полка seg). Одна математика в обе стороны.
+    const playSegment = (seg: number, dir: 1 | -1) => {
       const v = videos[seg]
       if (!v) return
-      st.busy = true
+      setBusy(true)
       st.skipAccum = 0
       hideAll()
       activateVideo(seg)
       v.pause()
+      cancelFrame(seg)
       const dur = segDuration(seg)
-      // Хвост 0.05с — тот же, что у реверса: точный последний кадр браузеры
-      // отдают неохотно, а полка всё равно показывается по afterSeek.
+      // Хвост 0.05с: точный последний кадр браузеры отдают неохотно, а полка
+      // всё равно показывается по afterSeek.
       const endTime = dur - 0.05
+      const fromTime = dir > 0 ? 0 : endTime
+      const toTime = dir > 0 ? endTime : 0
+      const toStep = dir > 0 ? seg + 1 : seg
+      // Соседи полки назначения начинают грузиться уже сейчас — быстрая серия
+      // свайпов не упирается в ожидание загрузки
+      prepareAround(toStep)
       try {
-        v.currentTime = 0
+        v.currentTime = fromTime
       } catch {}
-      // Завершение сегмента: showOnly полки seg+1. Reveal — только после
-      // реального кадра в конце, иначе текст новой полки покажется раньше,
-      // чем видео туда доедет (заметно при форс-финише из меню).
+      // Завершение: полка toStep. Reveal — только после реального кадра в
+      // конце, иначе текст новой полки покажется раньше, чем видео туда
+      // доедет (заметно при форс-финише из меню и тап-скипе). Однократное:
+      // скип может прийти, пока финиш уже ждёт seeked.
+      let finished = false
       const finish = () => {
+        if (finished) return
+        finished = true
         cancelAnimationFrame(st.raf)
-        afterSeek(v, endTime, () => {
-          st.step = seg + 1
+        st.forceFinish = null
+        st.speedUp = null
+        afterSeek(v, toTime, () => {
+          st.step = toStep
           showOnly(st.step)
           emitStep(st.step)
           armCooldown()
-          st.busy = false
-          st.forceFinish = null
-          st.speedUp = null
+          setBusy(false)
+          prepareAround(st.step)
         })
       }
       st.forceFinish = finish
-      let rate = dur / NORMAL_SECONDS
+      let rate = dur / normalSeconds
       st.speedUp = () => {
         rate = dur / FAST_SECONDS
       }
+      // seekGate: позиция идёт по своим часам, а в видео уходит, только когда
+      // прошлая перемотка закончилась. Без него — как раньше, от currentTime.
+      let clock = fromTime
       let last = performance.now()
       const frame = (now: number) => {
         const dt = (now - last) / 1000
         last = now
-        const t = v.currentTime + dt * rate
-        if (t >= endTime) {
+        const t = (seekGate ? clock : v.currentTime) + dir * dt * rate
+        clock = t
+        if (dir > 0 ? t >= endTime : t <= 0) {
           finish()
           return
         }
-        try {
-          v.currentTime = t
-        } catch {}
+        if (!seekGate || !v.seeking) {
+          try {
+            v.currentTime = t
+          } catch {}
+        }
         st.raf = requestAnimationFrame(frame)
       }
       st.raf = requestAnimationFrame(frame)
     }
 
-    // Назад: сегмент fromStep-1 гоним от конца к 0 через rAF в том же темпе,
-    // что и вперёд: полный сегмент = NORMAL_SECONDS, при скипе — FAST_SECONDS.
-    const playReverse = (fromStep: number) => {
-      const seg = fromStep - 1
-      const v = videos[seg]
-      if (!v) return
-      st.busy = true
-      st.skipAccum = 0
-      hideAll()
-      activateVideo(seg)
-      v.pause()
-      const dur = segDuration(seg)
-      try {
-        v.currentTime = dur - 0.05
-      } catch {}
-      // Завершение реверса: кадр 0, полка seg. Вызывается из rAF при t<=0 либо
-      // форс-финишем (переход из меню). Reveal — только после реального seek
-      // к 0 (при форс-финише currentTime может быть далеко от 0).
-      const finish = () => {
-        cancelAnimationFrame(st.raf)
-        afterSeek(v, 0, () => {
-          st.step = seg
-          showOnly(st.step)
-          emitStep(st.step)
-          armCooldown()
-          st.busy = false
-          st.forceFinish = null
-          st.speedUp = null
-        })
-      }
-      st.forceFinish = finish
-      let rate = dur / NORMAL_SECONDS
-      st.speedUp = () => {
-        rate = dur / FAST_SECONDS
-      }
-      let last = performance.now()
-      const frame = (now: number) => {
-        const dt = (now - last) / 1000
-        last = now
-        const t = v.currentTime - dt * rate
-        if (t <= 0) {
-          finish()
-          return
-        }
-        try {
-          v.currentTime = t
-        } catch {}
-        st.raf = requestAnimationFrame(frame)
-      }
-      st.raf = requestAnimationFrame(frame)
-    }
+    // Вперёд: сегмент seg (= текущий шаг)
+    const playForward = (seg: number) => playWhenReady(seg, 1)
+
+    // Назад: сегмент fromStep-1 от конца к 0 в том же темпе
+    const playReverse = (fromStep: number) => playWhenReady(fromStep - 1, -1)
 
     // Отпустить стори — дальше обычный скролл. target — id секции для scrollTo.
     const exitTo = (targetId = 'practices') => {
@@ -343,14 +477,10 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       lockAtTop()
       st.step = LAST_STEP
       const seg = LAST_STEP - 1
+      ensureSrc(seg)
       activateVideo(seg)
-      const v = videos[seg]
-      if (v) {
-        v.pause()
-        try {
-          v.currentTime = segDuration(seg) - 0.05
-        } catch {}
-      }
+      videos[seg]?.pause()
+      placeFrame(seg, () => segDuration(seg) - 0.05)
       showOnly(LAST_STEP, true)
       emitStep(LAST_STEP)
       // Хвост того же жеста (инерция тачпада/колеса) иначе сразу запускал реверс
@@ -394,12 +524,14 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
 
     // ── Перехват ввода ──────────────────────────────────────────────────────
     const onWheel = (e: WheelEvent) => {
+      markInteracted()
       if (st.released) return // отпущено — скроллит Lenis
       e.preventDefault()
       if (Math.abs(e.deltaY) < WHEEL_THRESHOLD) return
       trigger(e.deltaY > 0 ? 1 : -1, Math.abs(e.deltaY))
     }
     const onKey = (e: KeyboardEvent) => {
+      markInteracted()
       if (st.released) return
       if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(e.key)) {
         e.preventDefault()
@@ -409,13 +541,83 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
         trigger(-1)
       }
     }
+    // Первый живой ввод — пора догружать соседние сегменты
+    const markInteracted = () => {
+      if (st.interacted) return
+      st.interacted = true
+      prepareAround(st.step)
+    }
+
+    // Глушим click, порождённый ТЕМ ЖЕ касанием, что скипнуло анимацию. Только
+    // его: жест ушёл в свайп — снимаем сразу; после touchend ждём click
+    // недолго; SKIP_CLICK_SWALLOW_MS — страховка, если touchend не пришёл.
+    let swallowArmed = false
+    let swallowTimer = 0
+    const swallowClick = (e: MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      disarmSwallow()
+    }
+    const disarmSwallow = () => {
+      swallowArmed = false
+      window.clearTimeout(swallowTimer)
+      window.removeEventListener('click', swallowClick, { capture: true })
+    }
+    const armSwallow = () => {
+      disarmSwallow()
+      swallowArmed = true
+      window.addEventListener('click', swallowClick, { capture: true })
+      swallowTimer = window.setTimeout(disarmSwallow, SKIP_CLICK_SWALLOW_MS)
+    }
+    const onTouchEnd = () => {
+      if (!swallowArmed) return
+      window.clearTimeout(swallowTimer)
+      swallowTimer = window.setTimeout(disarmSwallow, 350)
+    }
+
     let touchY = 0
+    // Начало жеста и его ось — для касаний вне сцены (шапка, нижнее меню):
+    // горизонтальный жест отдаём браузеру (меню листается вбок), вертикальный
+    // — стори, как и по самой сцене.
+    let touchX0 = 0
+    let touchY0 = 0
+    let touchInScene = true
+    let touchAxis: null | 'x' | 'y' = null
     const onTouchStart = (e: TouchEvent) => {
       touchY = e.touches[0]?.clientY ?? 0
+      touchX0 = e.touches[0]?.clientX ?? 0
+      touchY0 = touchY
+      const startTarget = e.target as Node | null
+      touchInScene = !!startTarget && wrapper.contains(startTarget)
+      touchAxis = null
       st.touchSpent = false
+      markInteracted()
+      // Тап-скип: касание самой сцены (не шапки/нижнего меню — их клики
+      // и так перехватывают анимацию) во время проигрыша — сразу в конец
+      // сегмента. Остаток жеста (свайп) сгорает, click не долетает до полки.
+      if (tapToSkip && st.busy && !st.released && st.forceFinish) {
+        if (touchInScene) {
+          st.forceFinish()
+          st.touchSpent = true
+          armSwallow()
+        }
+      }
     }
     const onTouchMove = (e: TouchEvent) => {
+      const x = e.touches[0]?.clientX ?? 0
+      const y = e.touches[0]?.clientY ?? 0
+      if (swallowArmed && Math.hypot(x - touchX0, y - touchY0) > 10) disarmSwallow()
       if (st.released) return
+      if (!touchInScene) {
+        // Ось решаем по первым 8px; до этого не мешаем браузеру
+        if (!touchAxis) {
+          const dx = Math.abs(x - touchX0)
+          const dyAbs = Math.abs(y - touchY0)
+          if (Math.max(dx, dyAbs) < 8) return
+          touchAxis = dx > dyAbs ? 'x' : 'y'
+        }
+        if (touchAxis === 'x') return
+      }
       // Жест, начатый нативным скроллом (до relock), браузер отменить уже не даёт —
       // preventDefault на нём только сыплет предупреждения в консоль
       if (e.cancelable) e.preventDefault()
@@ -445,7 +647,9 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     const onGoto = (e: Event) => {
       const target = (e as CustomEvent<{ step: number }>).detail.step
       cancelAnimationFrame(st.raf)
-      st.busy = false
+      st.cancelWait?.()
+      st.cancelSeek?.()
+      setBusy(false)
       st.forceFinish = null
       st.speedUp = null
       st.skipAccum = 0
@@ -454,34 +658,14 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
         st.leftStory = false
         lockAtTop()
       }
-      st.step = target
-      if (target === 0) {
-        activateVideo(0)
-        const v = videos[0]
-        if (v) {
-          v.pause()
-          try {
-            v.currentTime = 0
-          } catch {}
-        }
-      } else {
-        const seg = target - 1
-        activateVideo(seg)
-        const v = videos[seg]
-        if (v) {
-          v.pause()
-          try {
-            v.currentTime = segDuration(seg) - 0.05
-          } catch {}
-        }
-      }
-      showOnly(target, true)
-      emitStep(target)
+      restAt(target)
     }
     const onExit = (e: Event) => {
       const id = (e as CustomEvent<{ id: string }>).detail.id
       cancelAnimationFrame(st.raf)
-      st.busy = false
+      st.cancelWait?.()
+      st.cancelSeek?.()
+      setBusy(false)
       st.forceFinish = null
       st.speedUp = null
       st.skipAccum = 0
@@ -499,20 +683,18 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
     // silent — не слать story:step: при отпущенном старте (якорь ниже стори)
     // страница стоит на другой секции, и событие с partners зажгло бы лампу
     // навбара над «Партнёрами» — подсветку там должен давать observer секций.
-    const restAt = (step: number, silent = false) => {
+    // instant=false — полка проявляется мягко (сегмент не успел загрузиться).
+    const restAt = (step: number, silent = false, instant = true) => {
       st.step = step
       const seg = Math.max(step - 1, 0)
+      // Кадр полки нужен сейчас — ленивый сегмент (мобилка) грузим сразу
+      ensureSrc(seg)
       activateVideo(seg)
-      // eslint-disable-next-line react-hooks/immutability
-      const v = videos[seg]
-      if (v) {
-        v.pause()
-        try {
-          v.currentTime = step === 0 ? 0 : segDuration(seg) - 0.05
-        } catch {}
-      }
-      showOnly(step, true)
+      videos[seg]?.pause()
+      placeFrame(seg, () => (step === 0 ? 0 : segDuration(seg) - 0.05))
+      showOnly(step, instant)
       if (!silent) emitStep(step)
+      prepareAround(step)
     }
 
     // Загрузка с якорем на секцию НИЖЕ стори (навбар с внутренних страниц,
@@ -534,11 +716,17 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       lenis?.stop()
       restAt(0)
     }
+    // Тач без Lenis: страница могла остаться не на нуле (восстановление скролла
+    // браузером, ранний якорный скролл по flow-разметке до апгрейда) — гард
+    // сработает только на следующем scroll-событии, поэтому запираем сразу.
+    if (!lenis && !st.released) lockAtTop()
 
     window.addEventListener('wheel', onWheel, { passive: false })
     window.addEventListener('keydown', onKey)
     window.addEventListener('touchstart', onTouchStart, { passive: true })
     window.addEventListener('touchmove', onTouchMove, { passive: false })
+    window.addEventListener('touchend', onTouchEnd, { passive: true })
+    window.addEventListener('touchcancel', onTouchEnd, { passive: true })
     window.addEventListener(STORY_GOTO_EVENT, onGoto)
     window.addEventListener(STORY_EXIT_EVENT, onExit)
     lenis?.on('scroll', onLenisScroll)
@@ -550,14 +738,21 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active 
       window.removeEventListener('scroll', onNativeScroll)
       ;(window as StoryWindow).__storyActive = false
       cancelAnimationFrame(st.raf)
+      st.cancelWait?.()
+      st.cancelSeek?.()
+      disarmSwallow()
+      pendingFrame.forEach((_, seg) => cancelFrame(seg))
+      if (st.busy) setBusy(false)
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('touchstart', onTouchStart)
       window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onTouchEnd)
+      window.removeEventListener('touchcancel', onTouchEnd)
       window.removeEventListener(STORY_GOTO_EVENT, onGoto)
       window.removeEventListener(STORY_EXIT_EVENT, onExit)
       lenis?.off('scroll', onLenisScroll)
       lenis?.start()
     }
-  }, [active, lenis, wrapperRef, videoRefs, overlayRefs])
+  }, [active, lenis, wrapperRef, videoRefs, overlayRefs, normalSeconds, tapToSkip, seekGate, skipIfNotReady])
 }

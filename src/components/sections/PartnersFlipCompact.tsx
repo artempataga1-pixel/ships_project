@@ -3,7 +3,7 @@
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { MobilePartnerCard, MOBILE_TEAM_ORDER } from './PartnersSection'
 
-/* Компактная мобильная раскладка партнёров для MobileScrubScene — те же
+/* Компактная мобильная раскладка партнёров для MobileStoryScene — те же
    карточки-визитки с переворотом по тапу (лицо — фото, обратная сторона —
    регалии), что в flow-фолбэке PartnersSection (reduced-motion) и на проде,
    но втиснутые в фиксированную область одного шага scroll-scrub вместо

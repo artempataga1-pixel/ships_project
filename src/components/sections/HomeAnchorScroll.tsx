@@ -264,6 +264,15 @@ export function HomeAnchorScroll() {
       }
 
       const step = () => {
+        // Стори ожила уже после старта попыток (апгрейд flow → стори идёт
+        // эффектом позже), а якорь — её полка (#about…): посадкой рулит
+        // контроллер стори, запертый на нуле. Докручивать дальше — драться с
+        // ним за scrollY (страница дёргается и встаёт на 1px). Убираем оверлей.
+        if (!isHandledHash(`#${id}`)) {
+          setFaded(true)
+          fadeTimer = window.setTimeout(() => setCover(false), 400)
+          return
+        }
         const el = getTargetElement(id)
         if (el) {
           const target = resolveTarget(id, el)

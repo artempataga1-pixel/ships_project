@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Phone } from 'lucide-react'
+import { STORY_STEP_EVENT, handleStoryAwareAnchorClick } from '@/components/hero/useStoryController'
 import { NAV_ITEMS } from '@/constants/nav'
 import { useActiveSection } from '@/components/layout/useActiveSection'
 import { useFormFocus } from '@/lib/useFormFocus'
@@ -27,6 +29,9 @@ export function FloatingContactFab() {
        «/contacts», и обычный переход туда стоит недорого: страница лёгкая. */
     <a
       href={contactsHref}
+      // Пока на главной жива стори (страница заперта на нуле), нативный якорь
+      // тут же откатился бы гардом — уходим мягким выходом из стори
+      onClick={(e) => handleStoryAwareAnchorClick(e, 'contacts')}
       aria-label="Связаться с нами"
       aria-hidden={isHidden}
       tabIndex={isHidden ? -1 : undefined}
@@ -40,25 +45,44 @@ export function FloatingContactFab() {
   )
 }
 
-// true, пока в вьюпорте виден хотя бы кусочек #hero (моб. FlowFallback,
-// см. ScrollStory.tsx). Стартуем с true — на первом кадре пользователь
-// всегда на героблоке, так кнопка не мигает видимой перед скрытием.
+// true, пока пользователь на героблоке. Стартуем с true — на первом кадре
+// он всегда там, так кнопка не мигает видимой перед скрытием.
+//
+// Два источника: виден ли #hero (flow-постер или маркер первого экрана
+// мобильной стори) и шаг стори. Пока стори заперта, страница стоит на нуле на
+// ВСЕХ полках и маркер виден всегда — героем считается только шаг 0.
+// #hero ищем на каждом пересчёте, а не один раз: при апгрейде flow → стори
+// элемент пересоздаётся, observer на старом узле молчал бы.
 function useIsOnHero(): boolean {
   const [isOnHero, setIsOnHero] = useState(true)
+  const pathname = usePathname()
 
   useEffect(() => {
-    const hero = document.getElementById('hero')
-    if (!hero) {
-      // Внутренние страницы (/cases/…, /practices/…) — героблока нет вообще,
-      // прятать FAB не за чем.
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- намеренный сброс дефолта при монтировании вне главной
-      setIsOnHero(false)
-      return
+    let storyStep: number | null = null
+    const update = () => {
+      // Внутренние страницы (/cases/…, /practices/…) — героблока нет вообще
+      const hero = document.getElementById('hero')
+      if (!hero) return setIsOnHero(false)
+      const r = hero.getBoundingClientRect()
+      const visible = r.bottom > 0 && r.top < window.innerHeight
+      setIsOnHero(visible && (storyStep === null || storyStep === 0))
     }
-    const observer = new IntersectionObserver(([entry]) => setIsOnHero(entry.isIntersecting))
-    observer.observe(hero)
-    return () => observer.disconnect()
-  }, [])
+    const onStep = (e: Event) => {
+      storyStep = (e as CustomEvent<{ step: number }>).detail.step
+      update()
+    }
+    // Первый замер — кадром позже: разметка новой страницы уже в DOM
+    const raf = requestAnimationFrame(update)
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    window.addEventListener(STORY_STEP_EVENT, onStep)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+      window.removeEventListener(STORY_STEP_EVENT, onStep)
+    }
+  }, [pathname])
 
   return isOnHero
 }

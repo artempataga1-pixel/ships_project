@@ -2,14 +2,12 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useLenis } from 'lenis/react'
 import { X, Send, ExternalLink } from 'lucide-react'
 import { NAV_ITEMS } from '@/constants/nav'
 import { CONTACT_INFO } from '@/constants/content/contacts'
-import { handleMobileNavClick } from '@/components/hero/useMobileScrubController'
+import { handleStoryNavClick } from '@/components/hero/useStoryController'
 
 export function Footer() {
-  const lenis = useLenis()
   return (
     <footer className="border-t border-[var(--color-line)] bg-[var(--color-surface-soft)] pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <div className="max-w-[1440px] mx-auto px-8 py-12">
@@ -65,11 +63,11 @@ export function Footer() {
               {NAV_ITEMS.map((item) => (
                 <li key={item.href}>
                   {/* Обычный <a> — якорный клик перехватывает Lenis (плавный скролл).
-                      На мобильном скраб-пине about/competencies/partners не имеют
-                      DOM id (см. handleMobileNavClick) — там нужен программный scrollTo. */}
+                      Пока на главной жива стори, полки about/competencies/partners
+                      не имеют DOM id — клик уходит в контроллер (handleStoryNavClick). */}
                   <a
                     href={item.href}
-                    onClick={(e) => handleMobileNavClick(e, item.href, lenis)}
+                    onClick={(e) => handleStoryNavClick(e, item.href)}
                     className="text-sm text-[var(--color-muted)] hover:text-[var(--color-lime-ink)] transition-colors duration-200"
                     style={{ fontFamily: 'var(--font-body)' }}
                   >
