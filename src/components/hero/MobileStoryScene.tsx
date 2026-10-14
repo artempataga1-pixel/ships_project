@@ -5,15 +5,20 @@ import { AboutSection } from '@/components/sections/AboutSection'
 import { CompetenciesOrbitCompact } from '@/components/sections/CompetenciesOrbitCompact'
 import { PartnersFlipCompact } from '@/components/sections/PartnersFlipCompact'
 import { HeroLayer } from './ScrollStory'
-import { STORY_BUSY_EVENT, useStoryController, type StoryOptions } from './useStoryController'
+import {
+  STORY_BUSY_EVENT,
+  STORY_SKIP_EVENT,
+  useStoryController,
+  type StoryOptions,
+} from './useStoryController'
 
 // Предохранитель: если canplaythrough первого сегмента не пришёл вовремя
 // (медленная сеть, iOS без жеста) — снимаем лоадер всё равно, чтобы страница
 // не зависла на постере.
 const LOAD_TIMEOUT_MS = 2500
 
-// Плашка «Нажмите, чтобы пропустить» появляется не сразу: короткий скип
-// пальцем по инерции не должен её мигнуть
+// Кнопка «Нажмите, чтобы пропустить» появляется не сразу: в первые доли
+// секунды пропускать ещё нечего, и кнопка не мигает на коротком сегменте
 const SKIP_HINT_DELAY_MS = 400
 
 export const VIDEO_SRC_MOBILE = [
@@ -25,12 +30,13 @@ export const VIDEO_SRC_MOBILE = [
 // Мобильный режим стори (<1280px): тот же контроллер, что на десктопе —
 // свайп запускает сегмент, он проигрывается сам. Отличия (правка 13.10.2026,
 // заказчица жаловалась на «рваную» картинку скраба пальцем): сегмент за 2с,
-// касание сцены во время проигрыша — прыжок в конец, перемотка без очереди
+// пропуск — только кнопкой (правка 14.10: свайп во время анимации ничего не
+// делает), перемотка без очереди
 // seek'ов (iOS), не догрузилось видео — полка сразу. Константа вне компонента —
 // стабильная ссылка, эффект контроллера не пересоздаётся на каждом рендере.
 const MOBILE_STORY_OPTIONS: StoryOptions = {
   normalSeconds: 2,
-  tapToSkip: true,
+  skipButton: true,
   seekGate: true,
   skipIfNotReady: true,
 }
@@ -128,20 +134,31 @@ export function MobileStoryScene() {
           <PartnersFlipCompact />
         </div>
 
-        {/* «Нажмите, чтобы пропустить» — во время проигрыша сегмента. Сам тап
-            ловит контроллер (касание любой точки сцены), плашка — подсказка.
-            Посадка — над нижним меню (h-14 + safe-area), как у FAB; та же
-            белая пилюля, что «Нажмите» на карточках практик. */}
+        {/* Кнопка «Нажмите, чтобы пропустить» — во время проигрыша сегмента.
+            Единственный способ пропуска на мобилке (правка заказчицы 14.10:
+            свайп во время анимации ничего не делает). Посадка — над нижним
+            меню (h-14 + safe-area), как у FAB; та же белая пилюля, что
+            «Нажмите» на карточках практик. min-h 44px — тач-цель по HIG.
+            Обёртка насквозь прозрачна для касаний, ловит только сама кнопка,
+            и только пока видна. */}
         <div
-          aria-hidden
           className={`pointer-events-none absolute inset-x-0 z-30 flex justify-center transition-opacity duration-300 ${
             skipHint ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom) + 1.25rem)' }}
+          style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom) + 1rem)' }}
         >
-          <span className="rounded-full bg-[var(--color-surface)] px-4 py-2 text-[13px] font-medium text-[var(--color-text)] shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent(STORY_SKIP_EVENT))}
+            disabled={!skipHint}
+            aria-hidden={!skipHint}
+            tabIndex={skipHint ? 0 : -1}
+            className={`min-h-11 rounded-full bg-[var(--color-surface)] px-5 text-[13px] font-medium text-[var(--color-text)] shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-[0.97] transition-transform ${
+              skipHint ? 'pointer-events-auto' : 'pointer-events-none'
+            }`}
+          >
             Нажмите, чтобы пропустить
-          </span>
+          </button>
         </div>
 
         {/* Лоадер до готовности (canplaythrough/таймаут) — тот же паттерн, что у StoryScene */}

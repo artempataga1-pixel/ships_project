@@ -47,10 +47,8 @@ export const STORY_GOTO_EVENT = 'story:goto' // detail: { step }
 export const STORY_EXIT_EVENT = 'story:exit' // detail: { id }
 // Идёт ли проигрыш сегмента — для плашки «Нажмите, чтобы пропустить»
 export const STORY_BUSY_EVENT = 'story:busy' // detail: { busy }
-
-// Сколько после тап-скипа глотаем click того же касания: иначе он долетал бы
-// до только что открытой полки (переворачивал карточку партнёра и т.п.)
-const SKIP_CLICK_SWALLOW_MS = 600
+// Кнопка «Нажмите, чтобы пропустить» → прыжок в конец текущего сегмента
+export const STORY_SKIP_EVENT = 'story:skip'
 
 // Сколько ждать метаданные несгруженного сегмента, прежде чем открыть полку
 // без анимации (StoryOptions.skipIfNotReady)
@@ -104,8 +102,10 @@ export function handleStoryNavClick(e: React.MouseEvent, href: string) {
 export interface StoryOptions {
   // Полный сегмент за столько секунд (десктоп — NORMAL_SECONDS)
   normalSeconds?: number
-  // Касание сцены во время проигрыша — прыжок в конец сегмента
-  tapToSkip?: boolean
+  // Пропуск анимации — только кнопкой (STORY_SKIP_EVENT). Свайп/колесо во
+  // время проигрыша ничего не делают: ни скипа, ни ускорения, и тот же жест
+  // не запускает следующий сегмент после конца (правка заказчицы 14.10.2026)
+  skipButton?: boolean
   // Новый currentTime — только когда прошлая перемотка закончилась: iOS иначе
   // копит очередь seek'ов, и кадры идут рывками
   seekGate?: boolean
@@ -124,7 +124,7 @@ export interface StoryRefs {
 
 export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active, options }: StoryRefs) {
   const normalSeconds = options?.normalSeconds ?? NORMAL_SECONDS
-  const tapToSkip = !!options?.tapToSkip
+  const skipButton = !!options?.skipButton
   const seekGate = !!options?.seekGate
   const skipIfNotReady = !!options?.skipIfNotReady
   const lenis = useLenis()
@@ -510,7 +510,9 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active,
     // ── Диспетчер «тика» ────────────────────────────────────────────────────
     const trigger = (dir: number, magnitude = DEFAULT_TICK_MAGNITUDE) => {
       if (st.busy) {
-        countSkipTick(magnitude) // залочено проигрышем — но набор SPEEDUP_DELTA_THRESHOLD ускорит анимацию
+        // залочено проигрышем — на десктопе набор SPEEDUP_DELTA_THRESHOLD
+        // ускорит анимацию; в режиме кнопки ввод просто игнорируется
+        if (!skipButton) countSkipTick(magnitude)
         return
       }
       if (st.cooldown) return
@@ -548,33 +550,6 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active,
       prepareAround(st.step)
     }
 
-    // Глушим click, порождённый ТЕМ ЖЕ касанием, что скипнуло анимацию. Только
-    // его: жест ушёл в свайп — снимаем сразу; после touchend ждём click
-    // недолго; SKIP_CLICK_SWALLOW_MS — страховка, если touchend не пришёл.
-    let swallowArmed = false
-    let swallowTimer = 0
-    const swallowClick = (e: MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      disarmSwallow()
-    }
-    const disarmSwallow = () => {
-      swallowArmed = false
-      window.clearTimeout(swallowTimer)
-      window.removeEventListener('click', swallowClick, { capture: true })
-    }
-    const armSwallow = () => {
-      disarmSwallow()
-      swallowArmed = true
-      window.addEventListener('click', swallowClick, { capture: true })
-      swallowTimer = window.setTimeout(disarmSwallow, SKIP_CLICK_SWALLOW_MS)
-    }
-    const onTouchEnd = () => {
-      if (!swallowArmed) return
-      window.clearTimeout(swallowTimer)
-      swallowTimer = window.setTimeout(disarmSwallow, 350)
-    }
-
     let touchY = 0
     // Начало жеста и его ось — для касаний вне сцены (шапка, нижнее меню):
     // горизонтальный жест отдаём браузеру (меню листается вбок), вертикальный
@@ -592,21 +567,10 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active,
       touchAxis = null
       st.touchSpent = false
       markInteracted()
-      // Тап-скип: касание самой сцены (не шапки/нижнего меню — их клики
-      // и так перехватывают анимацию) во время проигрыша — сразу в конец
-      // сегмента. Остаток жеста (свайп) сгорает, click не долетает до полки.
-      if (tapToSkip && st.busy && !st.released && st.forceFinish) {
-        if (touchInScene) {
-          st.forceFinish()
-          st.touchSpent = true
-          armSwallow()
-        }
-      }
     }
     const onTouchMove = (e: TouchEvent) => {
       const x = e.touches[0]?.clientX ?? 0
       const y = e.touches[0]?.clientY ?? 0
-      if (swallowArmed && Math.hypot(x - touchX0, y - touchY0) > 10) disarmSwallow()
       if (st.released) return
       if (!touchInScene) {
         // Ось решаем по первым 8px; до этого не мешаем браузеру
@@ -622,6 +586,13 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active,
       // preventDefault на нём только сыплет предупреждения в консоль
       if (e.cancelable) e.preventDefault()
       if (st.touchSpent) return
+      // Режим кнопки: свайп во время проигрыша не действует, и жест сгорает
+      // целиком — иначе, продолжись он после конца сегмента, запустил бы
+      // следующий
+      if (skipButton && st.busy) {
+        st.touchSpent = true
+        return
+      }
       const dy = touchY - (e.touches[0]?.clientY ?? 0)
       if (Math.abs(dy) < TOUCH_THRESHOLD) return
       touchY = e.touches[0]?.clientY ?? 0
@@ -634,13 +605,23 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active,
     const onLenisScroll = (e: { scroll: number }) => {
       const y = e?.scroll ?? window.scrollY
       if (!st.released) {
-        if (y > 1) lockAtTop()
+        // Порог 1px — под Lenis (его субпиксельный хвост). На таче Lenis нет,
+        // и остаток ровно в 1px (ранний якорный скролл до апгрейда) иначе
+        // так и висел бы
+        if (y > (lenis ? 1 : 0)) lockAtTop()
       } else {
         // Реактивируем стори только после того, как страница реально отъехала
         // вниз (иначе первое scroll-событие exitTo с y≈0 сразу вернуло бы назад).
         if (y > window.innerHeight * 0.5) st.leftStory = true
         if (st.leftStory && y <= REACTIVATE_Y) relock()
       }
+    }
+
+    // Кнопка «Нажмите, чтобы пропустить» — конец сегмента и его полка (или
+    // полка сразу, если сегмент ещё ждёт загрузки)
+    const onSkip = () => {
+      if (!skipButton || !st.busy || st.released) return
+      st.forceFinish?.()
     }
 
     // ── Навигация из меню ───────────────────────────────────────────────────
@@ -725,8 +706,7 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active,
     window.addEventListener('keydown', onKey)
     window.addEventListener('touchstart', onTouchStart, { passive: true })
     window.addEventListener('touchmove', onTouchMove, { passive: false })
-    window.addEventListener('touchend', onTouchEnd, { passive: true })
-    window.addEventListener('touchcancel', onTouchEnd, { passive: true })
+    window.addEventListener(STORY_SKIP_EVENT, onSkip)
     window.addEventListener(STORY_GOTO_EVENT, onGoto)
     window.addEventListener(STORY_EXIT_EVENT, onExit)
     lenis?.on('scroll', onLenisScroll)
@@ -740,19 +720,17 @@ export function useStoryController({ wrapperRef, videoRefs, overlayRefs, active,
       cancelAnimationFrame(st.raf)
       st.cancelWait?.()
       st.cancelSeek?.()
-      disarmSwallow()
       pendingFrame.forEach((_, seg) => cancelFrame(seg))
       if (st.busy) setBusy(false)
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('touchstart', onTouchStart)
       window.removeEventListener('touchmove', onTouchMove)
-      window.removeEventListener('touchend', onTouchEnd)
-      window.removeEventListener('touchcancel', onTouchEnd)
+      window.removeEventListener(STORY_SKIP_EVENT, onSkip)
       window.removeEventListener(STORY_GOTO_EVENT, onGoto)
       window.removeEventListener(STORY_EXIT_EVENT, onExit)
       lenis?.off('scroll', onLenisScroll)
       lenis?.start()
     }
-  }, [active, lenis, wrapperRef, videoRefs, overlayRefs, normalSeconds, tapToSkip, seekGate, skipIfNotReady])
+  }, [active, lenis, wrapperRef, videoRefs, overlayRefs, normalSeconds, skipButton, seekGate, skipIfNotReady])
 }
