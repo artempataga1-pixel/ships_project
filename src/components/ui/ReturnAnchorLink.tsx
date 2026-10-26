@@ -32,9 +32,11 @@ type Props = ComponentProps<typeof Link> & {
 
 export function rememberReturnAnchor(hash: string) {
   if (typeof window === 'undefined') return
-  // Карточки живут только на главной, но подстраховываемся: чужую страницу
-  // переписывать нечем — там этого якоря нет.
-  if (window.location.pathname !== '/') return
+  // Карточки живут на главной и на страницах практик (кейсы, с 26.10).
+  // Помечаем запись только если якорь действительно есть на текущей
+  // странице — иначе возвращаться было бы не к чему. На странице практики
+  // хэш при возврате подхватывает ScrollTopOnLoad и довозит до карточки.
+  if (!document.getElementById(hash.slice(1))) return
   if (window.location.hash === hash) return
   window.history.replaceState(
     window.history.state,

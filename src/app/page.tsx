@@ -4,6 +4,7 @@ import { PracticesSection } from '@/components/sections/PracticesSection'
 import { ArticlesSection } from '@/components/sections/ArticlesSection'
 import { CasesSection } from '@/components/sections/CasesSection'
 import { ContactsSection } from '@/components/sections/ContactsSection'
+import { getFeaturedPublications } from '@/lib/content'
 
 // Одностраничный сайт. Начало — scroll-story: единое видео-полотно, скролл
 // чередует проматывание ролика и «полки покоя» (О нас · Компетенции · Партнёры).
@@ -17,7 +18,7 @@ export default function Home() {
       <ScrollStory />
 
       <PracticesSection />
-      <ArticlesSection />
+      <ArticlesSection featured={getFeaturedPublications()} />
       <CasesSection />
       <ContactsSection />
     </>

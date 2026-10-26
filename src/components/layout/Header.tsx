@@ -1,20 +1,46 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { NAV_ITEMS } from '@/constants/nav'
 import { LimelightNav } from '@/components/layout/LimelightNav'
 import { LogoLink } from '@/components/layout/LogoLink'
 import { handleStoryAwareAnchorClick } from '@/components/hero/useStoryController'
 import { useContactsHref } from '@/lib/useContactsHref'
 
+/* Прокручена ли страница от самого верха. Подложка шапки на xl включается
+   только после прокрутки: вверху (герой главной, стори, герои внутренних
+   страниц) шапка остаётся прозрачной, как задумано дизайном. Стори на
+   главной держит scrollY = 0, пока листаются её полки, — там шапка тоже
+   прозрачная. */
+function useScrolledFromTop(threshold = 8): boolean {
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > threshold)
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [threshold])
+  return scrolled
+}
+
 export function Header() {
   // На главной — якорь к блоку, с внутренних страниц — /contacts (см. хук)
   const contactsHref = useContactsHref()
+  const scrolled = useScrolledFromTop()
   // z-[90] — ниже оверлея LogoIntro (z-[100]), если интро вернут
   return (
     // Чёрная плашка — только мобилка/планшет (<xl): без неё логотип сливается
-    // с контентом секций при скролле (header прозрачный). На xl+ header
-    // остаётся прозрачным, как и был.
-    <header className="fixed top-0 inset-x-0 z-[90] bg-[var(--color-black)] xl:bg-transparent">
+    // с контентом секций при скролле. На xl+ вверху страницы header прозрачный,
+    // а после прокрутки — светлая полупрозрачная подложка с размытием: без неё
+    // карточки и заголовки секций проезжали прямо под пунктами меню, и текст
+    // сливался (замечание e2e, 26.10).
+    <header
+      className={`fixed top-0 inset-x-0 z-[90] bg-[var(--color-black)] transition-[background-color,box-shadow] duration-300 ${
+        scrolled
+          ? 'xl:bg-[var(--color-bg)]/85 xl:shadow-[0_1px_0_var(--color-line)] xl:backdrop-blur-md'
+          : 'xl:bg-transparent'
+      }`}
+    >
       <div className="max-w-[1440px] mx-auto h-12 px-8 flex items-center justify-between gap-8 xl:h-16">
         {/* Логотип — клиентский якорь «домой»: из любой точки сайта на hero.
             data-header-logo для LogoIntro внутри. */}

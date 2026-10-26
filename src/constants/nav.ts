@@ -8,7 +8,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Ключевые компетенции', href: '/#competencies' },
   { label: 'Партнёры', href: '/#partners' },
   { label: 'Практики', href: '/#practices' },
-  { label: 'Статьи', href: '/#articles' },
+  { label: 'Публикации', href: '/#articles' },
   { label: 'Кейсы', href: '/#cases' },
   { label: 'Контакты', href: '/#contacts' },
 ]

@@ -149,36 +149,97 @@ export interface KeyCompetency {
   practiceIds?: string[]
 }
 
-export interface Case {
-  title: string
-  desc: string
-  amount: string
-  year: string
+/* ── Публикации и аналитика (страница /publications, ТЗ заказчика 21.10) ──
+   Одна запись = одна публикация или комментарий. Поля повторяют список
+   раздела 13 ТЗ «Управление публикациями» — чтобы позже 1-в-1 лечь в админку. */
+
+/* Автор — слаг персональной страницы партнёра (/partners/<slug>) */
+export type PublicationAuthorId = 'anna-shumskaya' | 'maksim-posazhennikov'
+
+/* Тема фильтра — 8 рубрик из раздела 9 ТЗ */
+export type PublicationTopicId =
+  | 'bankrotstvo'
+  | 'subsidiarnaya-otvetstvennost'
+  | 'rukovoditeli-kdl'
+  | 'korporativnye-spory'
+  | 'zashchita-aktivov'
+  | 'stroitelstvo-podryad'
+  | 'nedvizhimost'
+  | 'sobstvenniki-biznesa'
+
+export interface PublicationTopic {
+  id: PublicationTopicId
+  label: string
 }
 
-export interface MediaItem {
+export interface Publication {
+  /* Сквозной номер из контентной таблицы заказчика (1–25) */
+  num: number
+  /* main — авторские публикации и экспертные материалы (№1–17);
+     probankrotstvo — комментарии Анны на PROбанкротство (№18–25) */
+  kind: 'main' | 'probankrotstvo'
+  authors: PublicationAuthorId[]
+  /* Роль автора, если он не автор всего материала:
+     «экспертный комментарий», «интервью», «участники круглого стола» */
+  authorRole?: string
   publisher: string
+  year: string
+  /* Точная дата ДД.ММ.ГГГГ — есть только у комментариев PROбанкротство */
+  date?: string
   title: string
-  date: string
-  /* готовое фото-превью статьи (public/images/articles/…) */
-  image: string
-  /* ссылка на реальную публикацию в источнике; пока не расставлена — кнопка "Читать" неактивна */
-  url?: string
-  /* id практик, к которым относится публикация (Practice.id) */
+  /* Рубрика карточки PROбанкротство («Субсидиарная ответственность») */
+  rubric?: string
+  /* Редакционное превью 2–3 предложения */
+  preview: string
+  /* Строка «Для кого» */
+  audience: string
+  /* Теги для показа на карточке (2–4) */
+  tags: string[]
+  /* Темы фильтра */
+  topics: PublicationTopicId[]
+  url: string
+  /* Фирменная обложка избранного материала (public/images/publications/…) */
+  cover?: string
+  featured?: boolean
+  /* Ручной порядок внутри своего блока; меньше — выше */
+  order: number
+  /* Скрыть материал, не удаляя его */
+  hidden?: boolean
+  /* id практик, на страницах которых материал выводится (Practice.id) */
   practiceIds?: string[]
 }
 
+/* Кейс. Два вида записей в одном реестре:
+   — демо-кейсы главной (onHome): только summary/amount/year, без практик;
+   — настоящие кейсы практик (doks заказчика от 26.10): развёрнутые разделы
+     situation/actions/result|status/why, тексты дословно из документа. */
 export interface CaseStudy {
   slug: string
+  /* Полное название — на странице кейса и в метатегах */
   title: string
+  /* Сокращённое название для карточки, если полное в неё не влезает */
+  shortTitle?: string
   category: string
-  desc: string
-  amount: string
-  year: string
-  /* 1–2 предложения для отдельной страницы кейса */
+  desc?: string
+  /* Сумма — только если она есть в описании дела */
+  amount?: string
+  /* Подпись к сумме на странице кейса; по умолчанию «Сумма спора» */
+  amountLabel?: string
+  year?: string
+  /* Короткий итог: подпись под карточкой практики и description страницы */
   summary: string
+  /* Развёрнутые разделы страницы кейса */
+  situation?: string[]
+  task?: string
+  actions?: string[]
+  result?: string[]
+  /* Для дел, которые ещё идут, — вместо результата */
+  status?: string
+  why?: string
   /* id практик, к которым относится кейс (Practice.id) */
   practiceIds?: string[]
+  /* Показывать в блоке «Кейсы» на главной */
+  onHome?: boolean
 }
 
 export interface ContactInfo {

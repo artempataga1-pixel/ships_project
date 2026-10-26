@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: now, changeFrequency: 'monthly', priority: 1 },
     { url: `${SITE_URL}/contacts`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${SITE_URL}/publications`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${SITE_URL}/privacy-policy`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ]
@@ -23,7 +24,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }))
 
-  const caseRoutes: MetadataRoute.Sitemap = CASE_STUDIES.map((caseStudy) => ({
+  /* Демо-кейсы главной (onHome) — не настоящие дела фирмы: в карту сайта
+     не попадают, страницы закрыты noindex (см. cases/[slug]/page.tsx). */
+  const caseRoutes: MetadataRoute.Sitemap = CASE_STUDIES.filter((c) => !c.onHome).map((caseStudy) => ({
     url: `${SITE_URL}/cases/${caseStudy.slug}`,
     lastModified: now,
     changeFrequency: 'monthly',

@@ -15,7 +15,7 @@ const useClientLayoutEffect = typeof window === 'undefined' ? useEffect : useLay
       /#practice-<slug>, а на мобиле ещё и /#about, /#competencies, /#partners,
       см. isHandledHash). Браузер мгновенно скроллит к якорю ещё по ранней
       flow-разметке, затем на десктопе ScrollStory апгрейдится до story и пины
-      (Практики/Статьи) добавляют spacer-высоту — секции уезжают, и вьюпорт
+      (Практики/Публикации) добавляют spacer-высоту — секции уезжают, и вьюпорт
       оказывается на чужом блоке. Пока раскладка устаканивается, страница
       закрыта фоновым оверлеем; каждая попытка ставит скролл заново, и как
       только позиция цели перестаёт меняться — оверлей растворяется.
@@ -78,6 +78,21 @@ function isHandledHash(hash: string): boolean {
   return true
 }
 
+/* «Склеенный» хэш вида «#cases#case-<slug>». Получается так: главную открыли
+   по /#cases, ушли на кейс, вернулись кнопкой «← Все кейсы» (/#case-<slug>) —
+   роутер Next запомнил адрес главной вместе с первым хэшем и дописывает к
+   нему новый. Ни один якорь такого id не находит, и возврат приземлялся в
+   самый верх. Оставляем последний фрагмент — именно он и есть цель перехода.
+   Вызывается в layout-эффекте этого компонента: он стоит на главной первым,
+   поэтому отрабатывает раньше всех остальных читателей хэша (стори, сборка
+   героя). history.state передаём как есть — см. ReturnAnchorLink. */
+function normalizeStackedHash() {
+  const { hash, pathname, search } = window.location
+  const last = hash.lastIndexOf('#')
+  if (last <= 0) return
+  window.history.replaceState(window.history.state, '', `${pathname}${search}${hash.slice(last)}`)
+}
+
 export function HomeAnchorScroll() {
   const lenis = useLenis()
   const [cover, setCover] = useState(false) // оверлей смонтирован
@@ -85,6 +100,7 @@ export function HomeAnchorScroll() {
 
   // Оверлей — до первой отрисовки, чтобы чужой блок не мигнул даже на кадр
   useClientLayoutEffect(() => {
+    normalizeStackedHash()
     if (isHandledHash(window.location.hash)) setCover(true)
   }, [])
 
@@ -139,7 +155,7 @@ export function HomeAnchorScroll() {
     // «Контакты»/«Партнёры»/«Компетенции» — секция сама садится под шапку
     // верно (scroll-mt-16), но перед заголовком у неё большой py (дизайнерский
     // «воздух» для десктопного центрирования) — если целиться в край секции,
-    // заголовок оказывается заметно ниже верха экрана (не так, как у «Статьи»,
+    // заголовок оказывается заметно ниже верха экрана (не так, как у «Публикаций»,
     // где заголовок стоит почти вплотную к краю). Целимся прямо в заголовок.
     const HEADING_ANCHOR: Record<string, string> = {
       contacts: 'contacts-anchor',
@@ -187,7 +203,7 @@ export function HomeAnchorScroll() {
     // «О нас» — по просьбе не «к верху», а карточка с текстом по центру
     // экрана (#about-card, см. AboutSection). Единственное исключение из
     // общего «встаёт сверху» — остальные полки (Компетенции/Партнёры/
-    // Практики/Кейсы/Статьи) выравниваются к верху через resolveGenericTarget.
+    // Практики/Кейсы/Публикации) выравниваются к верху через resolveGenericTarget.
     const resolveAboutTarget = (): number | null => {
       const card = document.getElementById('about-card')
       if (!card) return null

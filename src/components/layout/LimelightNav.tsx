@@ -105,10 +105,13 @@ export function LimelightNav({ items }: { items: NavItem[] }) {
                 (anchors в SmoothScrollProvider) и плавно скроллит к секции.
                 «Контакты» вне главной подменяются на /contacts: якорь означал бы
                 полную загрузку главной со сторибуком ради формы. */}
+            {/* whitespace-nowrap + px-3 до 1440: с «Публикациями» вместо «Статей»
+                (26.10) семь пунктов на 1280 не влезали, и «О компании» с
+                «Ключевыми компетенциями» ломались в две строки. */}
             <a
               href={item.href === '/#contacts' ? contactsHref : item.href}
               onClick={(e) => handleClick(e, item)}
-              className={`block rounded-full px-4 py-1.5 text-[15px] font-medium transition-colors duration-200 ${
+              className={`block whitespace-nowrap rounded-full px-3 py-1.5 text-[15px] font-medium transition-colors duration-200 min-[1440px]:px-4 ${
                 i === targetIndex
                   ? 'text-[var(--color-text)]'
                   : 'text-[#333333]'

@@ -1,7 +1,5 @@
-'use client'
-
 import Image from 'next/image'
-import Link from 'next/link'
+import { ReturnAnchorLink } from '@/components/ui/ReturnAnchorLink'
 import type { CaseStudy } from '@/types/content'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { Typewriter } from '@/components/ui/Typewriter'
@@ -30,7 +28,10 @@ import { ComingSoonPanel } from './ComingSoonPanel'
 function gridColumnsClass(count: number): string {
   if (count === 1) return 'md:grid-cols-1 md:max-w-[520px]'
   if (count === 2) return 'md:grid-cols-2'
-  return 'md:grid-cols-2 lg:grid-cols-3'
+  /* Три колонки — только с xl: на 1024 карточка в трети ширины уже
+     заголовка кейса (у настоящих дел они до 150 знаков) — он наезжал на
+     плашку категории у 9 из 13 карточек. */
+  return 'md:grid-cols-2 xl:grid-cols-3'
 }
 
 /* Кадры-концепты под карточки кейсов (свои, сгенерированные). Смещены по
@@ -44,10 +45,20 @@ const CASE_IMAGES = [
 ]
 
 function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
+  /* На карточке — сокращённое название, если полное в неё не влезает;
+     на странице кейса всегда полное (решение 26.10). */
+  const cardTitle = item.shortTitle ?? item.title
+
   return (
-    <Link
+    /* id — якорь возврата: кнопка «← К практике» на странице кейса ведёт на
+       /practices/<slug>#case-<slug>, до него довозит ScrollTopOnLoad.
+       ReturnAnchorLink дописывает тот же хэш в текущую запись истории —
+       чтобы и браузерный «Назад» приземлял на карточку, а не в верх страницы. */
+    <ReturnAnchorLink
+      id={`case-${item.slug}`}
+      returnHash={`#case-${item.slug}`}
       href={`/cases/${item.slug}`}
-      className="case-flip group flex h-full flex-col rounded-[20px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-lime-ink)]"
+      className="case-flip group scroll-mt-28 flex h-full flex-col rounded-[20px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-lime-ink)]"
     >
       {/* Медиа-область: двусторонняя карточка. Лицо — заблюренный кадр с
           заголовком поверх (заголовок переехал НА кадр по правке заказчика,
@@ -100,7 +111,7 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
                   h3 позиционирован абсолютно по кадру, и лишний блочный
                   контейнер снаружи сбил бы привязку к нижнему краю. */}
               <Typewriter as="span" delay={0.35} speed={0.012} maxDuration={0.8}>
-                {item.title}
+                {cardTitle}
               </Typewriter>
             </h3>
           </div>
@@ -125,11 +136,13 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
               <span className="font-heading text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-lime)]">
                 {item.category}
               </span>
-              <span className="text-xs font-medium tabular-nums text-white/55">{item.year}</span>
+              {item.year && (
+                <span className="text-xs font-medium tabular-nums text-white/55">{item.year}</span>
+              )}
             </div>
 
-            <p className="relative max-w-[22ch] font-heading text-lg font-extrabold leading-snug tracking-[-0.01em] text-white md:text-xl">
-              {item.title}
+            <p className="relative max-w-[28ch] font-heading text-lg font-extrabold leading-snug tracking-[-0.01em] text-white md:text-xl">
+              {cardTitle}
             </p>
 
             <span className="case-flip-cta relative inline-flex items-center gap-3 font-heading text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-lime)]">
@@ -148,7 +161,7 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
       {/* Под карточкой — описание. Кегль поднят с 13px до 16px: в прежнем
           размере текст читался подписью к картинке, хотя именно он объясняет,
           что за дело было. */}
-      <p className="mt-5 px-1 text-base leading-[1.6] text-[var(--color-text)] md:text-[1.0625rem] md:leading-[1.65]">
+      <p className="mb-4 mt-5 px-1 text-base leading-[1.6] text-[var(--color-text)] md:text-[1.0625rem] md:leading-[1.65]">
         <Typewriter as="span" delay={0.5} speed={0.012} maxDuration={1.1}>
           {item.summary}
         </Typewriter>
@@ -159,15 +172,30 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
           и моноширинными цифрами, чтобы у соседних карточек он вставал в одну
           вертикаль. Отделены тонкой линией — иначе цифры прилипали к последней
           строке описания и читались его продолжением. */}
-      <div className="mt-4 flex items-baseline justify-between gap-4 border-t border-[var(--color-line)] px-1 pt-4">
-        <span className="font-heading text-xl font-black tracking-[-0.02em] text-[var(--color-lime-ink)] md:text-[1.4rem]">
-          {item.amount}
-        </span>
-        <span className="text-sm font-medium tabular-nums text-[var(--color-muted)]">
-          {item.year}
-        </span>
-      </div>
-    </Link>
+      {/* Ни суммы, ни года в описании дела нет — строки нет совсем, чтобы
+          под текстом не висела пустая линия. */}
+      {(item.amount || item.year) && (
+        <div className="mt-auto flex items-baseline justify-between gap-4 border-t border-[var(--color-line)] px-1 pt-4">
+          {/* Подпись к сумме обязательна: у настоящих кейсов это не всегда
+              «сумма спора» — бывает «не включено в реестр» или «взыскано». */}
+          <span className="flex flex-col gap-1">
+            {item.amount && item.amountLabel && (
+              <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
+                {item.amountLabel}
+              </span>
+            )}
+            <span className="font-heading text-xl font-black tracking-[-0.02em] text-[var(--color-lime-ink)] md:text-[1.4rem]">
+              {item.amount}
+            </span>
+          </span>
+          {item.year && (
+            <span className="text-sm font-medium tabular-nums text-[var(--color-muted)]">
+              {item.year}
+            </span>
+          )}
+        </div>
+      )}
+    </ReturnAnchorLink>
   )
 }
 

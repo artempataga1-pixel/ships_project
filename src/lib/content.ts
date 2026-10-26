@@ -1,9 +1,9 @@
-import type { CaseStudy, MediaItem, Practice, Product, TeamMember } from '@/types/content'
+import type { CaseStudy, Practice, Product, Publication, TeamMember } from '@/types/content'
 import { TEAM } from '@/constants/content/team'
 import { PRACTICE_ITEMS } from '@/constants/content/practices'
 import { PRODUCTS } from '@/constants/content/products'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
-import { MEDIA } from '@/constants/content/media'
+import { PUBLICATIONS } from '@/constants/content/publications'
 
 /* Чистые функции над константами контент-слоя — единственная точка, через
    которую вёрстка ходит за связями «практика ↔ продукт ↔ кейс ↔ статья».
@@ -40,8 +40,32 @@ export function getCasesForPractice(practiceId: string): CaseStudy[] {
   return CASE_STUDIES.filter((item) => item.practiceIds?.includes(practiceId))
 }
 
-export function getArticlesForPractice(practiceId: string): MediaItem[] {
-  return MEDIA.filter((item) => item.practiceIds?.includes(practiceId))
+/* Кейсы блока «Кейсы» на главной (пока — демо-набор, см. case-studies.ts) */
+export function getHomeCases(): CaseStudy[] {
+  return CASE_STUDIES.filter((item) => item.onHome)
+}
+
+export function getCaseBySlug(slug: string): CaseStudy | undefined {
+  return CASE_STUDIES.find((item) => item.slug === slug)
+}
+
+/* Видимые публикации в ручном порядке (order). Скрытые (hidden) не выводятся
+   нигде — так материал убирается с сайта без удаления записи (ТЗ, раздел 13). */
+export function getVisiblePublications(): Publication[] {
+  return PUBLICATIONS.filter((item) => !item.hidden).sort((a, b) => a.order - b.order)
+}
+
+/* Избранные — стопка блока «Публикации» на главной */
+export function getFeaturedPublications(): Publication[] {
+  return getVisiblePublications().filter((item) => item.kind === 'main' && item.featured)
+}
+
+/* Блок «Публикации и аналитика» на странице практики — не больше трёх
+   карточек: раскладка блока рассчитана на один ряд из трёх. */
+export function getPublicationsForPractice(practiceId: string): Publication[] {
+  return getVisiblePublications()
+    .filter((item) => item.practiceIds?.includes(practiceId))
+    .slice(0, 3)
 }
 
 /* Партнёры с персональной страницей — те, у кого заполнены slug и profile. */

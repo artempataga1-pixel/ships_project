@@ -1,7 +1,6 @@
-'use client'
-
-import Image from 'next/image'
-import type { MediaItem } from '@/types/content'
+import Link from 'next/link'
+import type { Publication } from '@/types/content'
+import { PUBLICATION_AUTHORS } from '@/constants/content/publication-meta'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { ComingSoonPanel } from './ComingSoonPanel'
 
@@ -18,13 +17,11 @@ import { ComingSoonPanel } from './ComingSoonPanel'
    резиновый: «ПроБанкротство» в 60px не помещается в карточку ни на одном
    разумном экране.
 
-   Подложка — реальное превью публикации (public/images/articles) под
-   градиентом: снизу плотный, кверху прозрачный. Так и кадр виден, и тёмный
-   текст внизу гарантированно читается независимо от того, насколько светлым
-   окажется само превью.
+   Подложка — лайм-градиент без фото: стоковые превью сняты вместе с
+   выдуманными статьями (26.10), а фирменные обложки заказчика есть только у
+   избранных и с впечатанным текстом — под градиентом они читались бы кашей.
 
-   У публикаций пока нет ссылок на источник (MediaItem.url не расставлен) —
-   поэтому карточка не кликабельна. Появится url — здесь встанет <a>. */
+   Карточка — ссылка на оригинал в СМИ, в новой вкладке (ТЗ, раздел 6). */
 
 /* Плотность лайм-подсветки по карточкам — аналог трёх разных overlay
    референса: соседние карточки не должны выглядеть под копирку. */
@@ -34,9 +31,11 @@ const TONES = [
   'linear-gradient(180deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,.58) 48%, rgba(244,248,238,.94) 100%)',
 ]
 
-const MIN_HEIGHTS = ['min-h-[450px]', 'min-h-[350px]', 'min-h-[450px]']
+const MIN_HEIGHTS = ['min-h-[380px]', 'min-h-[320px]', 'min-h-[380px]']
 
-function ArticleCard({ item, index }: { item: MediaItem; index: number }) {
+function ArticleCard({ item, index }: { item: Publication; index: number }) {
+  const authors = item.authors.map((id) => PUBLICATION_AUTHORS[id].name).join(', ')
+
   return (
     /* min-w-0 обязателен: без него flex-элемент не сжимается уже своего
        min-content, а min-content здесь задаёт название издания в крупном
@@ -45,22 +44,16 @@ function ArticleCard({ item, index }: { item: MediaItem; index: number }) {
     /* Наведение — свой сюжет, отличный и от продуктов (пиксельная волна), и от
        кейсов (косой блик + наводка на резкость): карточка приподнимается,
        рамка уходит в лайм, снизу расцветает лайм-подсветка, кадр подъезжает,
-       а под названием издания вырастает лайм-подчёркивание. Публикации пока
-       не кликабельны (у MediaItem нет url), поэтому отклик намеренно
-       спокойный — он показывает, что карточка живая, но ничего не обещает. */
-    <article
-      className={`group relative flex min-w-0 flex-1 flex-col justify-end overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-line)] p-8 shadow-[var(--shadow-card)] transition-[transform,box-shadow,border-color] duration-500 ease-out hover:-translate-y-1.5 hover:border-[var(--color-lime)] hover:shadow-[0_28px_60px_-26px_var(--color-lime-glow)] motion-reduce:transition-none md:p-10 ${
+       а под названием издания вырастает лайм-подчёркивание. */
+    <a
+      href={item.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Читать публикацию: ${item.title} — ${item.publisher}, ${item.year} (откроется в новой вкладке)`}
+      className={`group relative flex min-w-0 flex-1 flex-col justify-end overflow-hidden rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-line)] p-8 shadow-[var(--shadow-card)] transition-[transform,box-shadow,border-color] duration-500 ease-out hover:-translate-y-1.5 hover:border-[var(--color-lime)] hover:shadow-[0_28px_60px_-26px_var(--color-lime-glow)] motion-reduce:transition-none md:p-10 ${
         MIN_HEIGHTS[index % MIN_HEIGHTS.length]
       }`}
     >
-      <Image
-        src={item.image}
-        alt=""
-        aria-hidden
-        fill
-        sizes="(max-width: 1023px) 92vw, 33vw"
-        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06] motion-reduce:transition-none"
-      />
       <div
         aria-hidden
         className="absolute inset-0"
@@ -94,14 +87,19 @@ function ArticleCard({ item, index }: { item: MediaItem; index: number }) {
           <h3 className="text-lg leading-snug text-[var(--color-text)] md:text-[22px]">
             {item.title}
           </h3>
-          <p className="mt-3 text-sm font-medium text-[var(--color-muted)]">{item.date}</p>
+          <p className="mt-3 text-sm font-medium text-[var(--color-muted)]">
+            {item.date ?? item.year} · {authors}
+          </p>
+          <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-extrabold text-[var(--color-lime-ink)] group-hover:underline underline-offset-4">
+            Читать публикацию <span aria-hidden>→</span>
+          </span>
         </div>
       </div>
-    </article>
+    </a>
   )
 }
 
-export function ArticlesInsights({ articles }: { articles: MediaItem[] }) {
+export function ArticlesInsights({ articles }: { articles: Publication[] }) {
   return (
     <div className="flex flex-col gap-12 md:gap-[90px]">
       {/* Появление блока переехало на сюжет branding-референса: две строки
@@ -131,6 +129,12 @@ export function ArticlesInsights({ articles }: { articles: MediaItem[] }) {
           <p className="max-w-[42ch] text-base text-[var(--color-muted)] md:text-lg">
             Комментарии юристов фирмы и разборы практики в профильных и деловых изданиях.
           </p>
+          <Link
+            href="/publications"
+            className="mt-5 inline-flex items-center gap-1.5 text-sm font-extrabold text-[var(--color-lime-ink)] hover:underline underline-offset-4"
+          >
+            Все публикации и комментарии <span aria-hidden>→</span>
+          </Link>
         </RevealOnScroll>
       </div>
 
@@ -138,7 +142,7 @@ export function ArticlesInsights({ articles }: { articles: MediaItem[] }) {
         <div className="flex flex-col items-stretch gap-5 lg:flex-row lg:items-end">
           {articles.map((item, index) => (
             <RevealOnScroll
-              key={item.title}
+              key={item.num}
               delay={0.6 + index * 0.15}
               y={24}
               duration={0.7}

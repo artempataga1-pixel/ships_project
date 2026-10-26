@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
+import { getCaseBySlug, getPracticesSorted } from '@/lib/content'
+import type { CaseStudy } from '@/types/content'
 import { ScrollTopOnLoad } from '@/components/ui/ScrollTopOnLoad'
 import { CaseBackground } from '@/components/ui/CaseBackground'
 
@@ -15,11 +17,13 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: CasePageProps): Promise<Metadata> {
   const { slug } = await params
-  const item = CASE_STUDIES.find((c) => c.slug === slug)
+  const item = getCaseBySlug(slug)
   if (!item) return {}
   return {
     title: `${item.title} — Шумская и Партнёры`,
     description: item.summary,
+    /* Демо-кейс главной с выдуманными суммами — поисковикам не отдаём */
+    ...(item.onHome ? { robots: { index: false, follow: true } } : {}),
   }
 }
 
@@ -50,10 +54,59 @@ function LogoOutline({ className }: { className?: string }) {
   )
 }
 
+/* Куда ведёт «← Все кейсы». Демо-кейсы живут на главной — возврат к их
+   карточке там. Настоящие кейсы выводятся на странице своей практики —
+   возврат к карточке в блоке «Связанные кейсы» (якорь case-<slug>,
+   до него довозит ScrollTopOnLoad страницы практики). */
+function backHref(item: CaseStudy): string {
+  const practiceId = item.practiceIds?.[0]
+  const practice = practiceId ? getPracticesSorted().find((p) => p.id === practiceId) : undefined
+  if (!item.onHome && practice) return `/practices/${practice.slug}#case-${item.slug}`
+  return `/#case-${item.slug}`
+}
+
+/* Заголовок раздела страницы кейса — та же лайм-подпись, что у «Результата» */
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <h2 className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-lime-ink)]">
+      {children}
+    </h2>
+  )
+}
+
+/* Раздел из абзацев: «Фабула», «Задача», «Что мы сделали» */
+function TextSection({ label, paragraphs }: { label: string; paragraphs: string[] }) {
+  return (
+    <section className="mt-14 md:mt-16">
+      <SectionLabel>{label}</SectionLabel>
+      <div className="mt-5 flex max-w-[70ch] flex-col gap-4">
+        {paragraphs.map((text, i) => (
+          <p
+            key={i}
+            className="text-base leading-[1.7] text-[var(--color-text)] md:text-lg md:leading-[1.7]"
+          >
+            {text}
+          </p>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export default async function CaseStudyPage({ params }: CasePageProps) {
   const { slug } = await params
-  const item = CASE_STUDIES.find((c) => c.slug === slug)
+  const item = getCaseBySlug(slug)
   if (!item) notFound()
+
+  /* Настоящие кейсы практик расписаны по разделам; у демо-кейсов главной
+     есть только краткий итог — для них прежняя раскладка «Результат». */
+  const detailed = Boolean(item.situation?.length)
+  const hasResult = Boolean(item.result?.length)
+  const resultLabel = hasResult ? 'Результат' : 'Статус'
+  const resultParagraphs = hasResult ? (item.result ?? []) : item.status ? [item.status] : []
+  /* Длинные заголовки настоящих кейсов (до 150 знаков) в кегле демо-кейсов
+     занимали бы пол-экрана — для них кегль ступенью ниже. */
+  const longTitle = item.title.length > 70
 
   return (
     <main
@@ -99,15 +152,17 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
             встроенный hash-scroll Next.js делает это одним ранним прыжком и
             гонится с ним, из-за чего страница иногда оставалась в самом верху. */}
         <Link
-          href={`/#case-${item.slug}`}
+          href={backHref(item)}
           scroll={false}
           className="btn-lime-fill inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
         >
-          ← Все кейсы
+          {item.onHome ? '← Все кейсы' : '← К практике'}
         </Link>
 
         {/* --- Герой: слева мета+заголовок, справа панель с суммой --- */}
-        <div className="mt-14 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <div
+          className={`mt-14 grid gap-10 lg:items-center ${item.amount ? 'lg:grid-cols-[1.1fr_0.9fr]' : ''}`}
+        >
           {/* Левая колонка */}
           <div>
             <div className="flex flex-wrap items-center gap-4">
@@ -120,20 +175,34 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
                   style={{ boxShadow: '0 0 12px var(--color-lime-glow)' }}
                 />
               </span>
-              <span aria-hidden className="text-[var(--color-muted)]">
-                ·
-              </span>
-              <span className="text-sm font-medium uppercase tracking-[0.12em] text-[var(--color-muted)]">
-                {item.desc}
-              </span>
+              {/* Точка и подпись — одним блоком: на 375 точка оставалась
+                  висеть одна в конце строки, а подпись уезжала вниз */}
+              {item.desc && (
+                <span className="inline-flex items-center gap-4 whitespace-nowrap">
+                  <span aria-hidden className="text-[var(--color-muted)]">
+                    ·
+                  </span>
+                  <span className="text-sm font-medium uppercase tracking-[0.12em] text-[var(--color-muted)]">
+                    {item.desc}
+                  </span>
+                </span>
+              )}
             </div>
 
-            <h1 className="mt-8 font-heading text-[clamp(2rem,5vw,3.75rem)] font-black leading-[1.03] tracking-[-0.03em] text-[var(--color-text)]">
+            <h1
+              className={`mt-8 font-heading font-black tracking-[-0.03em] text-[var(--color-text)] ${
+                longTitle
+                  ? 'max-w-[32ch] text-[clamp(1.6rem,3.2vw,2.6rem)] leading-[1.16]'
+                  : 'text-[clamp(2rem,5vw,3.75rem)] leading-[1.03]'
+              }`}
+            >
               {item.title}
             </h1>
           </div>
 
-          {/* Правая колонка — белая панель с суммой и лайм-полосой справа */}
+          {/* Правая колонка — белая панель с суммой и лайм-полосой справа.
+              Суммы нет в описании дела — панели нет, заголовок во всю ширину. */}
+          {item.amount && (
           <div
             className="relative flex min-h-[260px] flex-col justify-center gap-7 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-gradient-to-b from-white to-[var(--color-surface-soft)] p-8"
             style={{ boxShadow: 'var(--shadow-card)' }}
@@ -156,20 +225,37 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
 
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                Сумма спора
+                {item.amountLabel ?? 'Сумма спора'}
               </span>
-              <span className="font-heading text-base font-bold text-[var(--color-muted)]">
-                {item.year}
-              </span>
+              {item.year && (
+                <span className="font-heading text-base font-bold text-[var(--color-muted)]">
+                  {item.year}
+                </span>
+              )}
             </div>
 
             <span className="whitespace-nowrap font-heading text-[clamp(2.5rem,6vw,4.25rem)] font-black tracking-[-0.03em] text-[var(--color-text)]">
               {item.amount}
             </span>
           </div>
+          )}
         </div>
 
-        {/* --- Результат: ghost-panel с лайм-полосой слева (паттерн из About) --- */}
+        {/* --- Разделы дела: фабула, задача, что сделали --- */}
+        {detailed && (
+          <>
+            <TextSection label="Фабула" paragraphs={item.situation ?? []} />
+            {item.task && <TextSection label="Задача" paragraphs={[item.task]} />}
+            {item.actions?.length ? (
+              <TextSection label="Что мы сделали" paragraphs={item.actions} />
+            ) : null}
+          </>
+        )}
+
+        {/* --- Результат: ghost-panel с лайм-полосой слева (паттерн из About).
+            У кейса «Единственное жильё» раздела «Результат» в документе нет
+            (решение 26.10) — панели тоже нет. --- */}
+        {(!detailed || resultParagraphs.length > 0) && (
         <div
           className="relative mt-12 overflow-hidden rounded-[var(--radius-xl)] border p-8 md:p-11"
           style={{
@@ -185,13 +271,26 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
             className="pointer-events-none absolute left-0 top-[12%] h-[76%] w-[3px] bg-[var(--color-lime)]"
             style={{ boxShadow: '0 0 26px var(--color-lime-glow)' }}
           />
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-lime-ink)]">
-            Результат
-          </p>
-          <p className="mt-5 max-w-[62ch] text-lg leading-relaxed text-[var(--color-text)] md:text-xl">
-            {item.summary}
-          </p>
+          <SectionLabel>{detailed ? resultLabel : 'Результат'}</SectionLabel>
+          <div className="mt-5 flex max-w-[62ch] flex-col gap-4">
+            {(detailed ? resultParagraphs : [item.summary]).map((text, i) => (
+              <p key={i} className="text-lg leading-relaxed text-[var(--color-text)] md:text-xl">
+                {text}
+              </p>
+            ))}
+          </div>
         </div>
+        )}
+
+        {/* --- Почему кейс важен: вывод дела, лайм-линия слева --- */}
+        {item.why && (
+          <section className="mt-12 border-l-[3px] border-[var(--color-lime)] pl-6 md:pl-8">
+            <SectionLabel>Почему этот кейс важен</SectionLabel>
+            <p className="mt-5 max-w-[66ch] font-heading text-lg font-bold leading-[1.5] text-[var(--color-text)] md:text-xl">
+              {item.why}
+            </p>
+          </section>
+        )}
 
         {/* CTA под рамкой результата — ведёт на отдельную страницу /contacts.
             Раньше был якорь «/#contacts», то есть полная загрузка главной со

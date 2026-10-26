@@ -1,6 +1,6 @@
 import { ReturnAnchorLink } from '@/components/ui/ReturnAnchorLink'
 import { SectionComingSoon } from '@/components/sections/SectionComingSoon'
-import { CASE_STUDIES } from '@/constants/content/case-studies'
+import { getHomeCases } from '@/lib/content'
 import type { CaseStudy } from '@/types/content'
 
 /* Референс — dizain6.jpg + 02_cases_archive (заголовочный экран). Механика
@@ -106,9 +106,11 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
         </span>
 
         {/* Год — приглушённо в правом верхнем углу */}
-        <span className="absolute right-[8%] top-[10%] text-sm font-medium text-[var(--color-muted)]">
-          {item.year}
-        </span>
+        {item.year && (
+          <span className="absolute right-[8%] top-[10%] text-sm font-medium text-[var(--color-muted)]">
+            {item.year}
+          </span>
+        )}
 
         {/* Суммы на карточке главной нет (решение 03.10, вопрос 17): на
             ширинах меньше 1440 название дела, растущее снизу вверх, наезжало
@@ -129,9 +131,11 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
 }
 
 export function CasesSection() {
+  const cases = getHomeCases()
+
   // Кейсов пока нет (см. case-studies.ts) — вместо sticky-заголовка с потоком
   // карточек показываем заглушку
-  if (CASE_STUDIES.length === 0) {
+  if (cases.length === 0) {
     return (
       <SectionComingSoon
         id="cases"
@@ -226,7 +230,7 @@ export function CasesSection() {
         {/* Первый экран — заголовок виден чистым, карточки ждут за нижней кромкой */}
         <div className="h-[85svh] lg:h-[85dvh]" aria-hidden="true" />
 
-        {CASE_STUDIES.map((item, i) => (
+        {cases.map((item, i) => (
           <div key={item.slug} className={i === 0 ? 'flex flex-col' : 'mt-[30svh] flex flex-col lg:mt-[45dvh]'}>
             <FloatingCaseCard item={item} align={ALIGN_CYCLE[i % 3]} />
           </div>

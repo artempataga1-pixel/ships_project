@@ -7,7 +7,7 @@ import {
   getPracticesSorted,
   getProductsForPractice,
   getCasesForPractice,
-  getArticlesForPractice,
+  getPublicationsForPractice,
 } from '@/lib/content'
 import { ScrollTopOnLoad } from '@/components/ui/ScrollTopOnLoad'
 import { CaseBackground } from '@/components/ui/CaseBackground'
@@ -131,7 +131,7 @@ const PANEL_STYLE = {
 function PracticeView({ practice }: { practice: Practice }) {
   const products = getProductsForPractice(practice.id)
   const cases = getCasesForPractice(practice.id)
-  const articles = getArticlesForPractice(practice.id)
+  const articles = getPublicationsForPractice(practice.id)
 
   return (
     <main className="relative min-h-svh bg-[var(--color-bg)]">
