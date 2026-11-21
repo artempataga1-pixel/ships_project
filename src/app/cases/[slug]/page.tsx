@@ -7,6 +7,7 @@ import type { CaseStudy } from '@/types/content'
 import { ScrollTopOnLoad } from '@/components/ui/ScrollTopOnLoad'
 import { CaseBackground } from '@/components/ui/CaseBackground'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
+import { CaseRoute, type CaseStage } from '@/components/case/CaseRoute'
 
 interface CasePageProps {
   params: Promise<{ slug: string }>
@@ -72,36 +73,21 @@ function SectionLabel({ children }: { children: string }) {
   )
 }
 
-/* Раздел из абзацев: «Фабула», «Задача», «Что мы сделали» */
-function TextSection({ label, paragraphs }: { label: string; paragraphs: string[] }) {
-  return (
-    <section className="mt-14 md:mt-16">
-      <SectionLabel>{label}</SectionLabel>
-      <div className="mt-5 flex max-w-[70ch] flex-col gap-4">
-        {paragraphs.map((text, i) => (
-          <p
-            key={i}
-            className="text-base leading-[1.7] text-[var(--color-text)] md:text-lg md:leading-[1.7]"
-          >
-            {text}
-          </p>
-        ))}
-      </div>
-    </section>
-  )
-}
-
 export default async function CaseStudyPage({ params }: CasePageProps) {
   const { slug } = await params
   const item = getCaseBySlug(slug)
   if (!item) notFound()
 
-  /* Настоящие кейсы практик расписаны по разделам; у демо-кейсов главной
-     есть только краткий итог — для них прежняя раскладка «Результат». */
-  const detailed = Boolean(item.situation?.length)
-  const hasResult = Boolean(item.result?.length)
-  const resultLabel = hasResult ? 'Результат' : 'Статус'
-  const resultParagraphs = hasResult ? (item.result ?? []) : item.status ? [item.status] : []
+  /* Этапы маршрута — только те, что есть в описании дела. Кейс без разделов
+     (только краткий итог) показывает его как результат. */
+  const stages: CaseStage[] = []
+  if (item.situation?.length) stages.push({ kind: 'situation', label: 'Фабула', paragraphs: item.situation })
+  if (item.task) stages.push({ kind: 'task', label: 'Задача', paragraphs: [item.task] })
+  if (item.actions?.length) stages.push({ kind: 'actions', label: 'Что мы сделали', paragraphs: item.actions })
+  const figure = item.amount ? { label: item.amountLabel ?? 'Сумма спора', value: item.amount } : undefined
+  if (item.result?.length) stages.push({ kind: 'result', label: 'Результат', paragraphs: item.result, figure })
+  else if (item.status) stages.push({ kind: 'status', label: 'Статус', paragraphs: [item.status] })
+  else if (!item.situation?.length) stages.push({ kind: 'result', label: 'Результат', paragraphs: [item.summary] })
   /* Длинные заголовки настоящих кейсов (до 150 знаков) в кегле демо-кейсов
      занимали бы пол-экрана — для них кегль ступенью ниже. */
   const longTitle = item.title.length > 70
@@ -250,46 +236,10 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
           )}
         </div>
 
-        {/* --- Разделы дела: фабула, задача, что сделали --- */}
-        {detailed && (
-          <>
-            <TextSection label="Фабула" paragraphs={item.situation ?? []} />
-            {item.task && <TextSection label="Задача" paragraphs={[item.task]} />}
-            {item.actions?.length ? (
-              <TextSection label="Что мы сделали" paragraphs={item.actions} />
-            ) : null}
-          </>
-        )}
-
-        {/* --- Результат: ghost-panel с лайм-полосой слева (паттерн из About).
+        {/* --- Маршрут дела: фабула → задача → что сделали → результат/статус.
             У кейса «Единственное жильё» раздела «Результат» в документе нет
-            (решение 26.10) — панели тоже нет. --- */}
-        {(!detailed || resultParagraphs.length > 0) && (
-        <div
-          className="relative mt-12 overflow-hidden rounded-[var(--radius-xl)] border p-8 md:p-11"
-          style={{
-            background: 'rgba(255,255,255,.64)',
-            borderColor: 'rgba(255,255,255,.85)',
-            backdropFilter: 'blur(8px)',
-            boxShadow: 'var(--shadow-card)',
-          }}
-        >
-          {/* Лайм-полоса слева + glow */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute left-0 top-[12%] h-[76%] w-[3px] bg-[var(--color-lime)]"
-            style={{ boxShadow: '0 0 26px var(--color-lime-glow)' }}
-          />
-          <SectionLabel>{detailed ? resultLabel : 'Результат'}</SectionLabel>
-          <div className="mt-5 flex max-w-[62ch] flex-col gap-4">
-            {(detailed ? resultParagraphs : [item.summary]).map((text, i) => (
-              <p key={i} className="text-lg leading-relaxed text-[var(--color-text)] md:text-xl">
-                {text}
-              </p>
-            ))}
-          </div>
-        </div>
-        )}
+            (решение 26.10) — этапа тоже нет. --- */}
+        <CaseRoute stages={stages} />
 
         {/* --- Почему кейс важен: вывод дела, лайм-линия слева.
             Отделён от «Результата» широкой паузой с затухающей лайм-чертой и
@@ -307,10 +257,12 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
                 }}
               />
             </div>
-            <RevealOnScroll y={30} duration={0.8} className="mt-20 md:mt-28">
-              <section className="border-l-[3px] border-[var(--color-lime)] pl-6 md:pl-8">
+            {/* Вывод дела — цитатой крупнее текста этапов и по их колонке
+                (lg:ml-20 — отступ под линию маршрута) */}
+            <RevealOnScroll y={30} duration={0.8} className="mt-20 md:mt-28 lg:ml-20">
+              <section className="border-l-[3px] border-[var(--color-lime)] pl-6 md:pl-10">
                 <SectionLabel>Почему этот кейс важен</SectionLabel>
-                <p className="mt-5 max-w-[66ch] font-heading text-lg font-bold leading-[1.5] text-[var(--color-text)] md:text-xl">
+                <p className="mt-6 max-w-[58ch] font-heading text-xl font-bold leading-[1.45] tracking-[-0.01em] text-[var(--color-text)] md:text-[1.65rem]">
                   {item.why}
                 </p>
               </section>
