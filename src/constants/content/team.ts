@@ -1,4 +1,5 @@
 import type { PartnerProfile, TeamMember } from '@/types/content'
+import { PARTNER_RATINGS } from './recognition'
 
 /* Готовые карточки-визитки (фото + имя + роль впечатаны в изображении), лежат в
    public/images/team. Скругление и тень карточке даёт вёрстка (PartnersSection).
@@ -83,10 +84,9 @@ export const TEAM: TeamMember[] = [
     panelSide: 'right',
     slug: 'maksim-posazhennikov',
     profile: MAKSIM_PROFILE,
-    // Регалии панели — «Признание и рейтинги» из нового профайла (ТЗ 29.09.2026).
-    // Прежний список (Band-ы, «16 лет Family Office», «капитализация 1 млрд») в новом
-    // ТЗ не значится — убран.
-    achievements: MAKSIM_PROFILE.recognition,
+    // Регалии панели — подробные рейтинги по годам из «Регалии ШиПа (рейтинги)»
+    // (заказчик прислал файл повторно как актуальный, ноябрь 2026)
+    achievements: PARTNER_RATINGS['maksim-posazhennikov'],
   },
   {
     name: 'Шумская Анна Сергеевна',
@@ -104,8 +104,8 @@ export const TEAM: TeamMember[] = [
     panelSide: 'left',
     slug: 'anna-shumskaya',
     profile: ANNA_PROFILE,
-    // Регалии панели — из нового профайла (ТЗ 29.09.2026): рейтинги, затем
-    // преподавание. Прежний список с Band-ами и годами в новом ТЗ не значится.
-    achievements: [...ANNA_PROFILE.recognition, ...(ANNA_PROFILE.teaching ?? [])],
+    // Регалии панели — подробные рейтинги по годам из «Регалии ШиПа (рейтинги)»
+    // (заказчик прислал файл повторно как актуальный, ноябрь 2026)
+    achievements: PARTNER_RATINGS['anna-shumskaya'],
   },
 ]

@@ -332,6 +332,30 @@ function PartnerView({ partner }: { partner: TeamMember }) {
             </div>
           </RevealOnScroll>
         </div>
+
+        {/* Подробные рейтинги по годам — из файла регалий заказчика. Отдельной
+            широкой панелью: в треть ширины десяток строк с годами и Band-ами
+            превращался в узкую простыню. */}
+        {partner.achievements?.length ? (
+          <RevealOnScroll y={24} duration={0.7} blur={8}>
+            <div className={`${DARK_PANEL_CLASS} mt-6 p-7 md:p-10`}>
+              <LimeBar />
+              <CardTitle>Рейтинги по годам</CardTitle>
+              <ul className="mt-6 grid gap-x-12 gap-y-4 md:grid-cols-2">
+                {partner.achievements.map((item) => (
+                  <li key={item} className="flex gap-3 text-[0.95rem] leading-[1.6] text-white/85 md:text-base">
+                    <span
+                      aria-hidden
+                      className="mt-[0.55em] h-2 w-2 shrink-0 rounded-full bg-[var(--color-lime)]"
+                      style={{ boxShadow: '0 0 12px var(--color-lime-glow)' }}
+                    />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </RevealOnScroll>
+        ) : null}
       </section>
 
       {/* ── Обращение ───────────────────────────────────────────────────────── */}

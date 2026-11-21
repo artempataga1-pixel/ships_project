@@ -4,6 +4,7 @@ import { PracticesSection } from '@/components/sections/PracticesSection'
 import { PublicationsTeaser } from '@/components/sections/PublicationsTeaser'
 import { CasesSection } from '@/components/sections/CasesSection'
 import { ContactsSection } from '@/components/sections/ContactsSection'
+import { RecognitionSection } from '@/components/sections/RecognitionSection'
 import { getFeaturedPublications } from '@/lib/content'
 
 // Одностраничный сайт. Начало — scroll-story: единое видео-полотно, скролл
@@ -25,6 +26,7 @@ export default function Home() {
         )}
       />
       <CasesSection />
+      <RecognitionSection />
       <ContactsSection />
     </>
   )
