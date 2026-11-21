@@ -58,12 +58,19 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
       aria-label={`Кейс «${item.title}» — подробнее`}
       className={`group block scroll-mt-[30dvh] ${ALIGN_CLASSES[align]}`}
     >
-      {/* Белая панель с лайм-полосой справа — общая схема карточки редизайна */}
+      {/* Белая панель с лайм-полосой справа — общая схема карточки редизайна.
+          Плашка и название идут потоком (flex-колонка), а не absolute: у
+          настоящих дел название до четырёх строк, и на телефоне/планшете в
+          жёсткой 16/10 оно наезжало на плашку. aspect-[16/10] теперь —
+          минимальная высота: длинное название делает карточку выше. Поэтому
+          overflow-hidden снят с панели (иначе aspect не дал бы ей вырасти),
+          а glow обрезает свой слой. */}
       <div
         className="
-          relative aspect-[16/10] overflow-hidden
+          relative flex aspect-[16/10] flex-col justify-between gap-5
           rounded-[var(--radius-lg)] border border-[var(--color-line)]
           bg-gradient-to-b from-white to-[var(--color-surface-soft)]
+          px-[6%] py-[5.5%]
           transition-transform duration-500 ease-out
           group-hover:scale-[1.02]
         "
@@ -72,12 +79,16 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
         {/* Мягкий лайм-glow из нижнего правого угла (декор ::after в референсе) */}
         <span
           aria-hidden
-          className="pointer-events-none absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(168,204,51,.28), transparent 62%)',
-          }}
-        />
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-[var(--radius-lg)]"
+        >
+          <span
+            className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(168,204,51,.28), transparent 62%)',
+            }}
+          />
+        </span>
 
         {/* Лайм-полоса у правого края + glow */}
         <span
@@ -89,7 +100,7 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
         {/* Плашка категории — пилюля с лайм-квадратиком */}
         <span
           className="
-            absolute left-[6%] top-[9%]
+            relative self-start
             inline-flex items-center gap-3
             rounded-md border border-[var(--color-line)] bg-white
             px-4 py-2
@@ -117,9 +128,11 @@ function FloatingCaseCard({ item, align }: { item: CaseStudy; align: Align }) {
             на неё. Сумма остаётся на странице кейса и на странице практики. */}
 
         {/* Название дела + «Подробнее» — снизу карточки */}
-        <div className="absolute inset-x-[6%] bottom-[9%] flex items-end justify-between gap-4">
+        <div className="relative flex items-end justify-between gap-4">
+          {/* Сокращённое название, если есть: полное у настоящих дел — до 150
+              знаков и в карточку 16/10 не влезает (на странице кейса — полное) */}
           <span className="max-w-[70%] font-heading text-sm md:text-base font-semibold leading-snug text-[var(--color-text)]">
-            {item.title}
+            {item.shortTitle ?? item.title}
           </span>
           <span className="shrink-0 text-sm font-semibold text-[var(--color-lime-ink)] transition-transform duration-300 group-hover:translate-x-1">
             Подробнее →
@@ -176,11 +189,13 @@ export function CasesSection() {
           style={{ borderColor: 'rgba(0,0,0,.08)' }}
         />
 
-        {/* Лайм-точки по периметру орбит */}
+        {/* Лайм-точки по периметру орбит. Нижней центральной (left-[38%]
+            bottom-[8%]) нет: с 1024px она садилась на год в карточке кейса.
+            До md точек нет совсем: на телефоне «избранных дел» во всю ширину,
+            и верхние точки ложились прямо на надпись. */}
         {[
           'left-[10%] top-[46%]',
           'right-[11%] top-[22%]',
-          'left-[38%] bottom-[8%]',
           'right-[14%] top-[56%]',
           'right-[24%] bottom-[16%]',
           'left-[16%] top-[26%]',
@@ -188,7 +203,7 @@ export function CasesSection() {
           <span
             key={pos}
             aria-hidden
-            className={`pointer-events-none absolute ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)]`}
+            className={`pointer-events-none absolute hidden ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)] md:block`}
             style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
           />
         ))}

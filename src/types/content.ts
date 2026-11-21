@@ -209,10 +209,9 @@ export interface Publication {
   practiceIds?: string[]
 }
 
-/* Кейс. Два вида записей в одном реестре:
-   — демо-кейсы главной (onHome): только summary/amount/year, без практик;
-   — настоящие кейсы практик (doks заказчика от 26.10): развёрнутые разделы
-     situation/actions/result|status/why, тексты дословно из документа. */
+/* Кейс — настоящее дело практики (doks заказчика от 26.10): развёрнутые
+   разделы situation/actions/result|status/why, тексты дословно из документа.
+   Какие из них стоят на главной — HOME_CASE_SLUGS в case-studies.ts. */
 export interface CaseStudy {
   slug: string
   /* Полное название — на странице кейса и в метатегах */
@@ -238,8 +237,6 @@ export interface CaseStudy {
   why?: string
   /* id практик, к которым относится кейс (Practice.id) */
   practiceIds?: string[]
-  /* Показывать в блоке «Кейсы» на главной */
-  onHome?: boolean
 }
 
 export interface ContactInfo {

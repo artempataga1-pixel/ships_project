@@ -29,7 +29,7 @@ const INTRO_REST =
   'Здесь собраны публикации и экспертные комментарии, наиболее точно отражающие направления нашей работы.'
 
 export const metadata: Metadata = {
-  title: 'Публикации и аналитика — Шумская и Партнёры',
+  title: 'Публикации и аналитика — Шумская и партнёры',
   description: INTRO_LEAD,
 }
 
@@ -65,10 +65,11 @@ function HeroDecor() {
         className="absolute left-1/2 top-1/2 h-[380px] w-[66%] max-w-[1040px] -translate-x-1/2 -translate-y-[46%] rotate-[8deg] rounded-[50%] border"
         style={{ borderColor: 'rgba(0,0,0,.07)' }}
       />
-      {['right-[6%] top-[18%]', 'left-[10%] bottom-[14%]', 'right-[12%] bottom-[22%]'].map((pos) => (
+      {/* Точки — только с xl и у самого края: с md они ложились на вводный текст */}
+      {['right-[1%] top-[18%]', 'left-[1%] bottom-[14%]', 'right-[1%] bottom-[22%]'].map((pos) => (
         <span
           key={pos}
-          className={`absolute hidden ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)] md:block`}
+          className={`absolute hidden ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)] xl:block`}
           style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
         />
       ))}

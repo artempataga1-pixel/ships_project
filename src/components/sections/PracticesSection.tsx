@@ -430,7 +430,8 @@ export function PracticesSection() {
           'right-[11%] top-[22%]',
           'left-[38%] bottom-[8%]',
           'right-[14%] top-[56%]',
-          'right-[24%] bottom-[16%]',
+          /* до xl эта точка садилась на слоган экрана-заголовка */
+          'right-[24%] bottom-[16%] hidden xl:block',
           'left-[16%] top-[26%]',
         ].map((pos) => (
           <span

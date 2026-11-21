@@ -17,7 +17,7 @@ export function Footer() {
             <Link href="/" aria-label="На главную">
               <Image
                 src="/images/logo.svg"
-                alt="Шумская и Партнёры"
+                alt="Шумская и партнёры"
                 width={227}
                 height={32}
               />
@@ -26,7 +26,7 @@ export function Footer() {
               className="text-sm text-[var(--color-muted)] leading-relaxed"
               style={{ fontFamily: 'var(--font-body)' }}
             >
-              Шумская и Партнёры<br />
+              Шумская и партнёры<br />
               Юридическая компания
             </p>
             <div className="flex items-center gap-4 mt-1">
@@ -106,7 +106,7 @@ export function Footer() {
 
         {/* Копирайт + правовая информация */}
         <div className="mt-10 flex flex-col gap-4 border-t border-[var(--color-line)] pt-6 text-xs text-[var(--color-muted)] sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Шумская и Партнёры. Все права защищены.</span>
+          <span>© {new Date().getFullYear()} Шумская и партнёры. Все права защищены.</span>
           <nav aria-label="Правовая информация" className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link
               href="/privacy-policy"

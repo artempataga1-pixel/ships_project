@@ -148,7 +148,7 @@ export function LogoIntro() {
         {/* eslint-disable-next-line @next/next/no-img-element -- статичный SVG-логотип в оверлее интро, next/image здесь избыточен */}
         <img
           src="/images/logo.svg"
-          alt="Шумская и Партнёры"
+          alt="Шумская и партнёры"
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
       </div>

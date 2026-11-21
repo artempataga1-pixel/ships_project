@@ -2,7 +2,7 @@ import type { CaseStudy, Practice, Product, Publication, TeamMember } from '@/ty
 import { TEAM } from '@/constants/content/team'
 import { PRACTICE_ITEMS } from '@/constants/content/practices'
 import { PRODUCTS } from '@/constants/content/products'
-import { CASE_STUDIES } from '@/constants/content/case-studies'
+import { CASE_STUDIES, HOME_CASE_SLUGS } from '@/constants/content/case-studies'
 import { PUBLICATIONS } from '@/constants/content/publications'
 
 /* Чистые функции над константами контент-слоя — единственная точка, через
@@ -40,9 +40,12 @@ export function getCasesForPractice(practiceId: string): CaseStudy[] {
   return CASE_STUDIES.filter((item) => item.practiceIds?.includes(practiceId))
 }
 
-/* Кейсы блока «Кейсы» на главной (пока — демо-набор, см. case-studies.ts) */
+/* Кейсы блока «Кейсы» на главной — в порядке HOME_CASE_SLUGS; несуществующий
+   слаг отсеивается, чтобы опечатка в списке не роняла главную. */
 export function getHomeCases(): CaseStudy[] {
-  return CASE_STUDIES.filter((item) => item.onHome)
+  return HOME_CASE_SLUGS.map((slug) => CASE_STUDIES.find((item) => item.slug === slug)).filter(
+    (item): item is CaseStudy => Boolean(item),
+  )
 }
 
 export function getCaseBySlug(slug: string): CaseStudy | undefined {

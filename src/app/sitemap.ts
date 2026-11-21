@@ -24,9 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }))
 
-  /* Демо-кейсы главной (onHome) — не настоящие дела фирмы: в карту сайта
-     не попадают, страницы закрыты noindex (см. cases/[slug]/page.tsx). */
-  const caseRoutes: MetadataRoute.Sitemap = CASE_STUDIES.filter((c) => !c.onHome).map((caseStudy) => ({
+  const caseRoutes: MetadataRoute.Sitemap = CASE_STUDIES.map((caseStudy) => ({
     url: `${SITE_URL}/cases/${caseStudy.slug}`,
     lastModified: now,
     changeFrequency: 'monthly',

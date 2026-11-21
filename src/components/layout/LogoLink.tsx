@@ -36,7 +36,7 @@ export function LogoLink() {
       href="/"
       onClick={onClick}
       className="shrink-0 flex items-center ml-4"
-      aria-label="На главную — Шумская и Партнёры"
+      aria-label="На главную — Шумская и партнёры"
       data-header-logo=""
     >
       {/* Мобилка/планшет: логотип мельче + invert (SVG залит #111 — на чёрной
@@ -102,7 +102,7 @@ export function LogoLink() {
       </svg>
       <Image
         src="/images/logo-text.svg"
-        alt="Шумская и Партнёры"
+        alt="Шумская и партнёры"
         width={348}
         height={60}
         priority

@@ -21,10 +21,8 @@ export async function generateMetadata({ params }: CasePageProps): Promise<Metad
   const item = getCaseBySlug(slug)
   if (!item) return {}
   return {
-    title: `${item.title} — Шумская и Партнёры`,
+    title: `${item.title} — Шумская и партнёры`,
     description: item.summary,
-    /* Демо-кейс главной с выдуманными суммами — поисковикам не отдаём */
-    ...(item.onHome ? { robots: { index: false, follow: true } } : {}),
   }
 }
 
@@ -55,15 +53,14 @@ function LogoOutline({ className }: { className?: string }) {
   )
 }
 
-/* Куда ведёт «← Все кейсы». Демо-кейсы живут на главной — возврат к их
-   карточке там. Настоящие кейсы выводятся на странице своей практики —
-   возврат к карточке в блоке «Связанные кейсы» (якорь case-<slug>,
-   до него довозит ScrollTopOnLoad страницы практики). */
+/* Куда ведёт «← К практике»: к карточке в блоке «Связанные кейсы» на странице
+   практики (якорь case-<slug>, до него довозит ScrollTopOnLoad). Кейс без
+   практики — к блоку «Кейсы» на главной. */
 function backHref(item: CaseStudy): string {
   const practiceId = item.practiceIds?.[0]
   const practice = practiceId ? getPracticesSorted().find((p) => p.id === practiceId) : undefined
-  if (!item.onHome && practice) return `/practices/${practice.slug}#case-${item.slug}`
-  return `/#case-${item.slug}`
+  if (practice) return `/practices/${practice.slug}#case-${item.slug}`
+  return '/#cases'
 }
 
 /* Заголовок раздела страницы кейса — та же лайм-подпись, что у «Результата» */
@@ -130,8 +127,9 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
       {/* --- Фоновый декор: эллиптические орбиты + лайм-точки + контурная скобка.
           Привязан к первому экрану, а не ко всей странице: проценты от полной
           высоты длинного кейса роняли точку прямо на «Почему этот кейс важен»,
-          а орбиты резали абзацы «Фабулы». Точки — у краёв и только с lg, где
-          поля вокруг колонки 1120px гарантированно пустые. --- */}
+          а орбиты резали абзацы «Фабулы». Точки — у краёв и только с xl: от
+          1280px поля вокруг колонки 1120px не уже 80px и гарантированно пустые
+          (на 1024 левая точка вставала бы на текст). --- */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-svh">
         <div
           className="absolute left-1/2 top-[52%] h-[560px] w-[92%] max-w-[1400px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[4deg]"
@@ -145,7 +143,7 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
           (pos) => (
             <span
               key={pos}
-              className={`absolute hidden ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)] lg:block`}
+              className={`absolute hidden ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)] xl:block`}
               style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
             />
           ),
@@ -167,7 +165,7 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
           scroll={false}
           className="btn-lime-fill inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
         >
-          {item.onHome ? '← Все кейсы' : '← К практике'}
+          {item.practiceIds?.length ? '← К практике' : '← Все кейсы'}
         </Link>
 
         {/* --- Герой: слева мета+заголовок, справа панель с суммой --- */}

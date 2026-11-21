@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PartnerPageProps): Promise<Me
   if (!partner?.profile) return {}
 
   return {
-    title: `${partner.name} — ${partner.role} — Шумская и Партнёры`,
+    title: `${partner.name} — ${partner.role} — Шумская и партнёры`,
     description: partner.profile.lead,
   }
 }
@@ -127,11 +127,12 @@ function HeroDecor() {
         className="absolute left-1/2 top-1/2 h-[420px] w-[66%] max-w-[1040px] -translate-x-1/2 -translate-y-[46%] rounded-[50%] border rotate-[8deg]"
         style={{ borderColor: 'rgba(0,0,0,.07)' }}
       />
-      {['left-[4%] top-[26%]', 'right-[6%] top-[14%]', 'left-[46%] bottom-[10%]', 'right-[4%] bottom-[22%]'].map(
+      {/* Точки — только с xl и у самого края: с md они ложились на имя партнёра */}
+      {['left-[1%] top-[26%]', 'right-[1%] top-[14%]', 'left-[1%] bottom-[10%]', 'right-[1%] bottom-[22%]'].map(
         (pos) => (
           <span
             key={pos}
-            className={`absolute hidden ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)] md:block`}
+            className={`absolute hidden ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)] xl:block`}
             style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
           />
         ),
