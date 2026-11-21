@@ -20,7 +20,9 @@ export default function Home() {
       <PracticesSection />
       {/* Публикации — только переход: стопка, каталог и фильтры на /publications */}
       <PublicationsTeaser
-        covers={getFeaturedPublications().flatMap((item) => (item.cover ? [item.cover] : []))}
+        covers={getFeaturedPublications().flatMap((item) =>
+          item.cover ? [{ src: item.cover, publisher: item.publisher }] : [],
+        )}
       />
       <CasesSection />
       <ContactsSection />

@@ -1,6 +1,6 @@
 import type { Publication } from '@/types/content'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
-import { AuthorLinks, EXTERNAL_LINK, FieldLabel, ReadLink, TagList } from './PublicationParts'
+import { AuthorLinks, EXTERNAL_LINK, FieldLabel, PubNumber, ReadLink, TagList } from './PublicationParts'
 import { SectionHead } from './SectionHead'
 
 /* Блок «Экспертные комментарии Анны Шумской на PROбанкротство» (разделы 10–11
@@ -28,11 +28,17 @@ function ProbankrotstvoCard({ item }: { item: Publication }) {
       </div>
 
       <div className="flex flex-1 flex-col gap-4 p-6">
-        {item.rubric && (
-          <span className="self-start rounded-md border border-[var(--color-line)] bg-[var(--color-surface-soft)] px-2.5 py-1 text-[0.66rem] font-semibold uppercase leading-snug tracking-[0.12em] text-[var(--color-text)]">
-            {item.rubric}
-          </span>
-        )}
+        {/* Рубрика и номер карточки — одной строкой, как в шаблоне заказчика */}
+        <div className="flex items-start justify-between gap-4">
+          {item.rubric ? (
+            <span className="self-start rounded-md border border-[var(--color-line)] bg-[var(--color-surface-soft)] px-2.5 py-1 text-[0.66rem] font-semibold uppercase leading-snug tracking-[0.12em] text-[var(--color-text)]">
+              {item.rubric}
+            </span>
+          ) : (
+            <span />
+          )}
+          <PubNumber num={item.num} />
+        </div>
         <h3 className="font-heading text-[1.08rem] font-extrabold leading-[1.2] tracking-[-0.015em] break-words text-[var(--color-text)]">
           {item.title}
         </h3>

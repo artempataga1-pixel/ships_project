@@ -1,6 +1,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
+import { MediaLogo } from '@/components/publications/PublicationParts'
+import {
+  COVER_LOGO_COLOR,
+  COVER_LOGO_POSITION,
+  COVER_LOGO_WIDTH,
+} from '@/components/publications/PublicationCards'
 
 /* Блок «Публикации» на главной — только переход в библиотеку. Сама стопка
    карточек с анимацией, каталог и фильтры живут на /publications: на главной
@@ -17,7 +23,7 @@ const FAN = [
   'left-[112px] top-8 z-0 rotate-[9deg] group-hover:translate-x-5 group-hover:rotate-[13deg]',
 ]
 
-export function PublicationsTeaser({ covers }: { covers: string[] }) {
+export function PublicationsTeaser({ covers }: { covers: { src: string; publisher: string }[] }) {
   return (
     <section
       id="articles"
@@ -70,13 +76,19 @@ export function PublicationsTeaser({ covers }: { covers: string[] }) {
               aria-label="Перейти к публикациям"
               className="group relative block h-[300px] w-[272px] sm:h-[340px] sm:w-[312px]"
             >
-              {covers.slice(0, 3).map((src, i) => (
+              {covers.slice(0, 3).map(({ src, publisher }, i) => (
                 <span
                   key={src}
                   className={`absolute block aspect-[4/5] w-[160px] overflow-hidden rounded-[6px] border border-[var(--color-line)] bg-[var(--color-surface-soft)] transition-transform duration-500 ease-out motion-reduce:transition-none sm:w-[200px] ${FAN[i]}`}
                   style={{ boxShadow: 'var(--shadow-card)' }}
                 >
                   <Image src={src} alt="" fill sizes="200px" className="object-cover" />
+                  <MediaLogo
+                    publisher={publisher}
+                    color={COVER_LOGO_COLOR}
+                    width={COVER_LOGO_WIDTH}
+                    className={COVER_LOGO_POSITION}
+                  />
                 </span>
               ))}
             </Link>

@@ -6,7 +6,17 @@ import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { SectionComingSoon } from '@/components/sections/SectionComingSoon'
-import { PUBLICATION_AUTHORS } from '@/constants/content/publication-meta'
+import {
+  AuthorLinks,
+  MediaLogo,
+  PubNumber,
+  PublisherLine,
+} from '@/components/publications/PublicationParts'
+import {
+  COVER_LOGO_COLOR,
+  COVER_LOGO_POSITION,
+  COVER_LOGO_WIDTH,
+} from '@/components/publications/PublicationCards'
 import type { Publication } from '@/types/content'
 
 /* Референс — dizain7/8.jpg + 04_article_card_01/05_article_card_02 (одна и та же
@@ -29,8 +39,6 @@ const PEEK_STEPS = [
 ]
 
 function ArticleCard({ item }: { item: Publication }) {
-  const authors = item.authors.map((id) => PUBLICATION_AUTHORS[id].name).join(', ')
-
   return (
     <article
       className="
@@ -56,26 +64,26 @@ function ArticleCard({ item }: { item: Publication }) {
       <div className="max-w-[1440px] w-full mx-auto px-8 md:px-16 py-12 md:py-10 xl:py-[3.5dvh] grid md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-center">
         {/* Левая колонка — издание, заголовок, автор, превью */}
         <div className="min-w-0">
-          <div className="mb-6 xl:mb-[2.5dvh]">
-            <span className="font-heading text-xs font-black tracking-[0.22em] uppercase text-[var(--color-text)]">
-              {item.publisher} · {item.year}
-            </span>
+          {/* Издание с логотипом и номер материала — как на карточках каталога */}
+          <div className="mb-6 flex items-start justify-between gap-4 xl:mb-[2.5dvh]">
+            <PublisherLine publisher={item.publisher} year={item.year} />
+            <PubNumber num={item.num} />
           </div>
 
           <h3 className="font-heading text-[clamp(1.5rem,2.6vw,2.6rem)] xl:text-[clamp(1.4rem,min(2.2vw,3.6dvh),2.4rem)] font-black leading-[1.04] tracking-[-0.04em] text-[var(--color-text)]">
             {item.title}
           </h3>
 
-          <p className="mt-5 xl:mt-[1.8dvh] text-sm md:text-base font-semibold text-[var(--color-text)]">
-            {authors}
-            {item.authorRole && (
-              <span className="font-normal text-[var(--color-muted)]"> — {item.authorRole}</span>
-            )}
-          </p>
+          {/* Имена — ссылки на страницы партнёров (ТЗ, раздел 6) */}
+          <AuthorLinks
+            authors={item.authors}
+            role={item.authorRole}
+            className="mt-5 text-sm md:text-base xl:mt-[1.8dvh]"
+          />
 
           {/* Превью — суть материала без перехода на сайт СМИ (ТЗ, раздел 8).
               На десктопе карточка ограничена высотой пина — превью режется до
-              двух строк; полный текст — на странице /publications. */}
+              двух строк; полная карточка («Для кого», теги) — в каталоге ниже. */}
           <p className="mt-4 xl:mt-[1.5dvh] max-w-[60ch] text-sm leading-relaxed text-[var(--color-muted)] md:text-base xl:line-clamp-2">
             {item.preview}
           </p>
@@ -98,13 +106,21 @@ function ArticleCard({ item }: { item: Publication }) {
             впечатан). На xl высота привязана к пину, ширина — от пропорции. */}
         <div className="relative mx-auto aspect-[4/5] w-full max-w-[320px] overflow-hidden rounded-[6px] border border-[var(--color-line)] bg-[var(--color-surface-soft)] md:w-[260px] xl:h-[46dvh] xl:w-auto xl:max-w-none">
           {item.cover && (
-            <Image
-              src={item.cover}
-              alt=""
-              fill
-              sizes="(max-width: 768px) 80vw, 360px"
-              className="object-cover"
-            />
+            <>
+              <Image
+                src={item.cover}
+                alt=""
+                fill
+                sizes="(max-width: 768px) 80vw, 360px"
+                className="object-cover"
+              />
+              <MediaLogo
+                publisher={item.publisher}
+                color={COVER_LOGO_COLOR}
+                width={COVER_LOGO_WIDTH}
+                className={COVER_LOGO_POSITION}
+              />
+            </>
           )}
         </div>
       </div>

@@ -1,6 +1,21 @@
 import Image from 'next/image'
 import type { Publication } from '@/types/content'
-import { AuthorLinks, FieldLabel, PublisherLine, ReadLink, TagList } from './PublicationParts'
+import {
+  AuthorLinks,
+  FieldLabel,
+  MediaLogo,
+  PubNumber,
+  PublisherLine,
+  ReadLink,
+  TagList,
+} from './PublicationParts'
+
+/* Цвет логотипа на обложке — тёмно-зелёный, которым набран текст самих
+   обложек заказчика; позиция — низ светлой текстовой колонки кадра, где
+   обложка пустая (верхний левый угол занят впечатанной подписью издания). */
+export const COVER_LOGO_COLOR = '#173f33'
+export const COVER_LOGO_POSITION = 'pointer-events-none absolute bottom-[6.5%] left-[5.5%]'
+export const COVER_LOGO_WIDTH = '30%'
 
 /* Карточки основных публикаций: избранная (с фирменной обложкой) и обычная
    (каталог, без фото). Структура обеих — по разделу 6 ТЗ: издание и год →
@@ -23,9 +38,10 @@ function CardBody({ item, featured }: { item: Publication; featured?: boolean })
       }`}
     >
       <div className="flex flex-col gap-4">
-        <PublisherLine>
-          {item.publisher} · {item.year}
-        </PublisherLine>
+        <div className="flex items-start justify-between gap-4">
+          <PublisherLine publisher={item.publisher} year={item.year} />
+          <PubNumber num={item.num} />
+        </div>
         {/* Заголовок не обрезается ни на одной ширине (раздел 12 ТЗ): никаких
             line-clamp, только перенос. break-words — страховка для длинных
             слов в узкой колонке 375px. */}
@@ -91,6 +107,12 @@ export function FeaturedPublicationCard({ item, eager }: { item: Publication; ea
             sizes="(max-width: 767px) 92vw, 340px"
             loading={eager ? 'eager' : 'lazy'}
             className="object-cover"
+          />
+          <MediaLogo
+            publisher={item.publisher}
+            color={COVER_LOGO_COLOR}
+            width={COVER_LOGO_WIDTH}
+            className={COVER_LOGO_POSITION}
           />
           </div>
         </div>
