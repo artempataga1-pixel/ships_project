@@ -80,14 +80,19 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
 
   /* Этапы маршрута — только те, что есть в описании дела. Кейс без разделов
      (только краткий итог) показывает его как результат. */
+  const labels = item.labels ?? {}
   const stages: CaseStage[] = []
-  if (item.situation?.length) stages.push({ kind: 'situation', label: 'Фабула', paragraphs: item.situation })
-  if (item.task) stages.push({ kind: 'task', label: 'Задача', paragraphs: [item.task] })
+  if (item.situation?.length)
+    stages.push({ kind: 'situation', label: labels.situation ?? 'Фабула', paragraphs: item.situation })
+  if (item.task) stages.push({ kind: 'task', label: labels.task ?? 'Задача', paragraphs: [item.task] })
   if (item.actions?.length) stages.push({ kind: 'actions', label: 'Что мы сделали', paragraphs: item.actions })
   const figure = item.amount ? { label: item.amountLabel ?? 'Сумма спора', value: item.amount } : undefined
-  if (item.result?.length) stages.push({ kind: 'result', label: 'Результат', paragraphs: item.result, figure })
+  if (item.result?.length)
+    stages.push({ kind: 'result', label: labels.result ?? 'Результат', paragraphs: item.result, figure })
   else if (item.status) stages.push({ kind: 'status', label: 'Статус', paragraphs: [item.status] })
-  else if (!item.situation?.length) stages.push({ kind: 'result', label: 'Результат', paragraphs: [item.summary] })
+  else if (!stages.length) stages.push({ kind: 'result', label: 'Результат', paragraphs: [item.summary] })
+  /* Паспорт дела — без строки «Результат»: итог и так раскрыт ниже */
+  const passport = (item.passport ?? []).filter((row) => row.label !== 'Результат')
   /* Длинные заголовки настоящих кейсов (до 150 знаков) в кегле демо-кейсов
      занимали бы пол-экрана — для них кегль ступенью ниже. */
   const longTitle = item.title.length > 70
@@ -236,6 +241,33 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
           )}
         </div>
 
+        {/* --- Паспорт дела (анкеты Максима): направление, регион, роль
+            клиента — справочная строка, поэтому мелко и без акцента --- */}
+        {passport.length > 0 && (
+          <dl
+            className="mt-10 grid gap-x-8 gap-y-5 rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-[var(--color-surface)] p-6 sm:grid-cols-2 md:p-8 lg:grid-cols-3"
+            style={{ boxShadow: 'var(--shadow-card)' }}
+          >
+            {passport.map((row) => (
+              <div key={row.label} className="min-w-0">
+                <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-[var(--color-lime-ink)]">
+                  {row.label}
+                </dt>
+                <dd className="mt-1.5 text-sm leading-[1.55] text-[var(--color-text)] md:text-[0.95rem]">
+                  {row.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        {/* --- «Кратко» — суть дела одним абзацем перед маршрутом --- */}
+        {item.lead && (
+          <p className="mt-10 max-w-[62ch] border-l-[3px] border-[var(--color-lime)] pl-6 font-heading text-lg font-semibold leading-[1.5] text-[var(--color-text)] md:mt-12 md:pl-8 md:text-[1.35rem]">
+            {item.lead}
+          </p>
+        )}
+
         {/* --- Маршрут дела: фабула → задача → что сделали → результат/статус.
             У кейса «Единственное жильё» раздела «Результат» в документе нет
             (решение 26.10) — этапа тоже нет. --- */}
@@ -245,7 +277,7 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
             Отделён от «Результата» широкой паузой с затухающей лайм-чертой и
             выплывает при скролле: прежние 48px читались как продолжение той же
             панели, а не как переход к выводу. --- */}
-        {item.why && (
+        {item.why?.length ? (
           <>
             <div aria-hidden className="mx-auto mt-20 flex justify-center md:mt-28">
               <span
@@ -261,14 +293,38 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
                 (lg:ml-20 — отступ под линию маршрута) */}
             <RevealOnScroll y={30} duration={0.8} className="mt-20 md:mt-28 lg:ml-20">
               <section className="border-l-[3px] border-[var(--color-lime)] pl-6 md:pl-10">
-                <SectionLabel>Почему этот кейс важен</SectionLabel>
-                <p className="mt-6 max-w-[58ch] font-heading text-xl font-bold leading-[1.45] tracking-[-0.01em] text-[var(--color-text)] md:text-[1.65rem]">
-                  {item.why}
-                </p>
+                <SectionLabel>{labels.why ?? 'Почему этот кейс важен'}</SectionLabel>
+                <div className="mt-6 flex max-w-[58ch] flex-col gap-5">
+                  {item.why.map((text, i) => (
+                    <p
+                      key={i}
+                      className="font-heading text-xl font-bold leading-[1.45] tracking-[-0.01em] text-[var(--color-text)] md:text-[1.65rem]"
+                    >
+                      {text}
+                    </p>
+                  ))}
+                </div>
               </section>
             </RevealOnScroll>
           </>
-        )}
+        ) : null}
+
+        {/* --- «Связанные услуги» — теги-пилюли, как у публикаций --- */}
+        {item.relatedServices?.length ? (
+          <section className="mt-12 lg:ml-20">
+            <SectionLabel>Связанные услуги</SectionLabel>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {item.relatedServices.map((service) => (
+                <li
+                  key={service}
+                  className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3.5 py-1.5 text-sm leading-snug text-[var(--color-text)]"
+                >
+                  {service}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {/* CTA — по центру и крупнее: финальное действие страницы, а не
             приписка к последнему абзацу. Ведёт на отдельную страницу /contacts:

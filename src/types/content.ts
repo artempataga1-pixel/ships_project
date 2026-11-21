@@ -227,6 +227,10 @@ export interface CaseStudy {
   year?: string
   /* Короткий итог: подпись под карточкой практики и description страницы */
   summary: string
+  /* «Кратко» — вступление кейса (анкеты Максима) */
+  lead?: string
+  /* Паспорт дела из анкеты: направление, регион, роль клиента, объект… */
+  passport?: { label: string; value: string }[]
   /* Развёрнутые разделы страницы кейса */
   situation?: string[]
   task?: string
@@ -234,7 +238,14 @@ export interface CaseStudy {
   result?: string[]
   /* Для дел, которые ещё идут, — вместо результата */
   status?: string
-  why?: string
+  why?: string[]
+  /* Подписи разделов, если в документе они названы иначе стандартных
+     («Задача клиента», «Результат текущего этапа», «Практическое значение») */
+  labels?: { situation?: string; task?: string; result?: string; why?: string }
+  /* «Связанные услуги» */
+  relatedServices?: string[]
+  /* Ссылки на карточки дел в судах из анкет — на сайте не выводятся */
+  sourceUrls?: string[]
   /* id практик, к которым относится кейс (Practice.id) */
   practiceIds?: string[]
 }
