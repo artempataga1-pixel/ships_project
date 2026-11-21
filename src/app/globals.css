@@ -494,8 +494,18 @@ body {
   backface-visibility: hidden;
 }
 
+/* Грани переключаются ещё и по opacity — ровно в момент, когда карточка встаёт
+   ребром (90° кривой 0.2,0.75,0.25,1 при 900ms наступают на ~130ms).
+   backface-visibility одной не хватает: заголовок с печатью и заблюренный кадр
+   лица Chrome выносит в отдельные слои, и они просвечивали сквозь оборот
+   зеркальным текстом. Скачок в 0s невидим — грань в этот момент без площади. */
+.case-flip-face {
+  transition: opacity 0s linear 130ms;
+}
+
 .case-flip-face-back {
   transform: rotateY(180deg);
+  opacity: 0;
 }
 
 /* Кнопка на обороте — всплывает снизу уже после того, как карточка довернулась
@@ -518,12 +528,28 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+
+  .case-flip:hover .case-flip-face:not(.case-flip-face-back) {
+    opacity: 0;
+  }
+
+  .case-flip:hover .case-flip-face-back {
+    opacity: 1;
+  }
 }
 
 /* Клавиатура: карточка — ссылка, фокус приходит на неё же, поэтому оборот
    должен открываться и без мыши. */
 .case-flip:focus-visible .case-flip-inner {
   transform: rotateY(180deg) rotate(6deg) scale(0.94);
+}
+
+.case-flip:focus-visible .case-flip-face:not(.case-flip-face-back) {
+  opacity: 0;
+}
+
+.case-flip:focus-visible .case-flip-face-back {
+  opacity: 1;
 }
 
 .case-flip:focus-visible .case-flip-cta {
@@ -542,6 +568,21 @@ body {
   .case-flip:hover .case-flip-inner,
   .case-flip:focus-visible .case-flip-inner {
     transform: none;
+  }
+
+  /* Без вращения оборот не открывается — лицо остаётся видимым */
+  .case-flip-face {
+    transition: none;
+  }
+
+  .case-flip:hover .case-flip-face:not(.case-flip-face-back),
+  .case-flip:focus-visible .case-flip-face:not(.case-flip-face-back) {
+    opacity: 1;
+  }
+
+  .case-flip:hover .case-flip-face-back,
+  .case-flip:focus-visible .case-flip-face-back {
+    opacity: 0;
   }
 }
 

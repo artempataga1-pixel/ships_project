@@ -6,6 +6,7 @@ import { getCaseBySlug, getPracticesSorted } from '@/lib/content'
 import type { CaseStudy } from '@/types/content'
 import { ScrollTopOnLoad } from '@/components/ui/ScrollTopOnLoad'
 import { CaseBackground } from '@/components/ui/CaseBackground'
+import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 
 interface CasePageProps {
   params: Promise<{ slug: string }>
@@ -114,37 +115,47 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
       style={{
         background:
           'radial-gradient(circle at 74% 30%, rgba(168,204,51,.09), transparent 26%), linear-gradient(180deg,#ffffff 0%,#fafafa 58%,#f7f7f5 100%)',
+        clipPath: 'inset(0)',
       }}
     >
       <ScrollTopOnLoad />
-      <CaseBackground />
-      {/* --- Фоновый декор: эллиптические орбиты + лайм-точки + контурная скобка --- */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-[38%] h-[560px] w-[92%] max-w-[1400px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[4deg]"
-        style={{ borderColor: 'rgba(168,204,51,.34)' }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-[42%] h-[420px] w-[66%] max-w-[1040px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[8deg]"
-        style={{ borderColor: 'rgba(0,0,0,.07)' }}
-      />
-      {[
-        'left-[8%] top-[30%]',
-        'right-[10%] top-[20%]',
-        'left-[16%] bottom-[16%]',
-        'right-[13%] bottom-[24%]',
-      ].map((pos) => (
-        <span
-          key={pos}
-          aria-hidden
-          className={`pointer-events-none absolute ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)]`}
-          style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
+      {/* Задник закреплён на вьюпорте, как на странице практики. Прежний
+          absolute растягивал кадр 16:9 на всю высоту кейса (~2400px, зум ×4),
+          и край стены в кадре проезжал по экрану резкой ступенькой сразу под
+          «Результатом». clip-path на main — чтобы fixed-слой не вылезал за
+          страницу; -z-10 внутри этого контекста — над фоном main, под текстом. */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+        <CaseBackground />
+      </div>
+      {/* --- Фоновый декор: эллиптические орбиты + лайм-точки + контурная скобка.
+          Привязан к первому экрану, а не ко всей странице: проценты от полной
+          высоты длинного кейса роняли точку прямо на «Почему этот кейс важен»,
+          а орбиты резали абзацы «Фабулы». Точки — у краёв и только с lg, где
+          поля вокруг колонки 1120px гарантированно пустые. --- */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-svh">
+        <div
+          className="absolute left-1/2 top-[52%] h-[560px] w-[92%] max-w-[1400px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[4deg]"
+          style={{ borderColor: 'rgba(168,204,51,.34)' }}
         />
-      ))}
-      <LogoOutline className="right-[6%] top-[16%]" />
+        <div
+          className="absolute left-1/2 top-[56%] h-[420px] w-[66%] max-w-[1040px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border rotate-[8deg]"
+          style={{ borderColor: 'rgba(0,0,0,.07)' }}
+        />
+        {['left-[3%] top-[34%]', 'right-[3%] top-[22%]', 'left-[4%] bottom-[12%]', 'right-[4%] bottom-[20%]'].map(
+          (pos) => (
+            <span
+              key={pos}
+              className={`absolute hidden ${pos} h-[10px] w-[10px] rounded-full bg-[var(--color-lime)] lg:block`}
+              style={{ boxShadow: '0 0 20px var(--color-lime-glow)' }}
+            />
+          ),
+        )}
+        <LogoOutline className="right-[2%] top-[14%]" />
+      </div>
 
-      <div className="relative z-10 mx-auto max-w-[1120px] px-6 pb-28 pt-36 md:pt-44">
+      {/* pt-28/32 — шапка фиксированная (~80px): герой кейса садится сразу под
+          неё, и заголовок с панелью суммы целиком входят в первый экран. */}
+      <div className="relative z-10 mx-auto max-w-[1120px] px-6 pb-28 pt-28 md:pt-32">
         {/* Возврат ровно к карточке этого кейса в блоке «Кейсы».
             Эффект .btn-lime-fill: залита лаймом → при наведении белеет + лайм-glow. */}
         {/* scroll={false} — свой скролл к карточке делает HomeAnchorScroll на
@@ -161,7 +172,7 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
 
         {/* --- Герой: слева мета+заголовок, справа панель с суммой --- */}
         <div
-          className={`mt-14 grid gap-10 lg:items-center ${item.amount ? 'lg:grid-cols-[1.1fr_0.9fr]' : ''}`}
+          className={`mt-8 grid gap-10 md:mt-10 lg:items-center ${item.amount ? 'lg:grid-cols-[1.1fr_0.9fr]' : ''}`}
         >
           {/* Левая колонка */}
           <div>
@@ -282,28 +293,45 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
         </div>
         )}
 
-        {/* --- Почему кейс важен: вывод дела, лайм-линия слева --- */}
+        {/* --- Почему кейс важен: вывод дела, лайм-линия слева.
+            Отделён от «Результата» широкой паузой с затухающей лайм-чертой и
+            выплывает при скролле: прежние 48px читались как продолжение той же
+            панели, а не как переход к выводу. --- */}
         {item.why && (
-          <section className="mt-12 border-l-[3px] border-[var(--color-lime)] pl-6 md:pl-8">
-            <SectionLabel>Почему этот кейс важен</SectionLabel>
-            <p className="mt-5 max-w-[66ch] font-heading text-lg font-bold leading-[1.5] text-[var(--color-text)] md:text-xl">
-              {item.why}
-            </p>
-          </section>
+          <>
+            <div aria-hidden className="mx-auto mt-20 flex justify-center md:mt-28">
+              <span
+                className="h-px w-[min(420px,70%)]"
+                style={{
+                  background:
+                    'linear-gradient(90deg, transparent, var(--color-lime) 50%, transparent)',
+                  boxShadow: '0 0 18px var(--color-lime-glow)',
+                }}
+              />
+            </div>
+            <RevealOnScroll y={30} duration={0.8} className="mt-20 md:mt-28">
+              <section className="border-l-[3px] border-[var(--color-lime)] pl-6 md:pl-8">
+                <SectionLabel>Почему этот кейс важен</SectionLabel>
+                <p className="mt-5 max-w-[66ch] font-heading text-lg font-bold leading-[1.5] text-[var(--color-text)] md:text-xl">
+                  {item.why}
+                </p>
+              </section>
+            </RevealOnScroll>
+          </>
         )}
 
-        {/* CTA под рамкой результата — ведёт на отдельную страницу /contacts.
-            Раньше был якорь «/#contacts», то есть полная загрузка главной со
-            сторибуком (9.5 МБ трафика) ради формы на пять полей.
-            next/link: страница лёгкая, клиентский переход мгновенный.
-            .btn-lime-breathe добавляет пульсацию свечения в покое поверх
-            .btn-lime-fill. */}
-        <Link
-          href="/contacts"
-          className="btn-lime-fill btn-lime-breathe mt-8 inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
-        >
-          Оставить заявку
-        </Link>
+        {/* CTA — по центру и крупнее: финальное действие страницы, а не
+            приписка к последнему абзацу. Ведёт на отдельную страницу /contacts:
+            якорь «/#contacts» грузил бы главную со сторибуком (9.5 МБ) ради
+            формы на пять полей. .btn-lime-breathe — пульсация свечения. */}
+        <div className="mt-16 flex justify-center md:mt-20">
+          <Link
+            href="/contacts"
+            className="btn-lime-fill btn-lime-breathe inline-flex h-14 items-center justify-center rounded-md px-10 text-base font-semibold md:h-16 md:px-14 md:text-lg"
+          >
+            Оставить заявку
+          </Link>
+        </div>
       </div>
     </main>
   )

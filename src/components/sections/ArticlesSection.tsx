@@ -2,7 +2,6 @@
 
 import { useRef } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useGSAP } from '@gsap/react'
 import { gsap } from '@/lib/gsap'
 import { SectionHeading } from '@/components/ui/SectionHeading'
@@ -114,8 +113,9 @@ function ArticleCard({ item }: { item: Publication }) {
 }
 
 /* Стопка — избранные публикации (№1–8 контентной таблицы заказчика) с их
-   фирменными обложками; полная библиотека — на странице /publications.
-   Данные приходят пропсом от серверной главной: секция клиентская, и
+   фирменными обложками. Живёт на странице /publications, сразу под героем;
+   на главной вместо неё — короткий блок-переход (PublicationsTeaser).
+   Данные приходят пропсом от серверной страницы: секция клиентская, и
    прямой импорт реестра тянул бы в бандл тексты всех 25 материалов. */
 export function ArticlesSection({ featured }: { featured: Publication[] }) {
   const sectionRef = useRef<HTMLElement>(null)
@@ -208,16 +208,20 @@ export function ArticlesSection({ featured }: { featured: Publication[] }) {
   if (featured.length === 0) {
     return (
       <SectionComingSoon
-        id="articles"
+        id="featured-publications"
         eyebrow="публикации"
-        title="Публикации"
+        title="Избранные публикации"
         text="Публикации и комментарии экспертов компании скоро появятся здесь."
       />
     )
   }
 
   return (
-    <section id="articles" ref={sectionRef} className="relative scroll-mt-16 bg-[var(--color-bg)]">
+    <section
+      id="featured-publications"
+      ref={sectionRef}
+      className="relative scroll-mt-16 bg-[var(--color-bg)] pb-16 xl:motion-safe:pb-0"
+    >
       <div
         ref={pinRef}
         /* Раскладка стопки (экран-пин, карточки друг на друге) — только при
@@ -267,7 +271,7 @@ export function ArticlesSection({ featured }: { featured: Publication[] }) {
                 работает вариант, оседающий в нижней полосе (см. ниже) */}
             {i === 0 && (
               <div className="xl:motion-safe:hidden max-w-[1440px] w-full mx-auto px-8">
-                <SectionHeading title="Публикации" subtitle="Экспертная аналитика партнёров фирмы" />
+                <SectionHeading title="Избранные публикации" subtitle="Экспертная аналитика партнёров фирмы" />
               </div>
             )}
             <ArticleCard item={item} />
@@ -285,7 +289,7 @@ export function ArticlesSection({ featured }: { featured: Publication[] }) {
           "
         >
           <h2 className="font-heading text-[clamp(2.5rem,4vw,4.25rem)] font-black uppercase leading-[0.9] tracking-[-0.04em] text-[var(--color-text)]">
-            Публикации
+            Избранные публикации
           </h2>
           <p className="text-base lg:text-lg text-[var(--color-muted)]">
             Экспертная аналитика партнёров фирмы
@@ -299,17 +303,6 @@ export function ArticlesSection({ featured }: { featured: Publication[] }) {
             className="h-full w-full origin-left bg-gradient-to-r from-[var(--color-lime-ink)] to-[var(--color-lime)]"
           />
         </div>
-      </div>
-
-      {/* Выход в полную библиотеку — после стопки, вне пина: внутри пина
-          кнопка либо пряталась бы под карточками, либо висела поверх них. */}
-      <div className="flex justify-center px-8 pb-16 pt-12 xl:pt-16">
-        <Link
-          href="/publications"
-          className="btn-lime-fill inline-flex h-12 items-center justify-center rounded-md px-7 text-sm font-semibold"
-        >
-          Все публикации и комментарии →
-        </Link>
       </div>
     </section>
   )

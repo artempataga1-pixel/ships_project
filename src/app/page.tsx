@@ -1,7 +1,7 @@
 import { ScrollStory } from '@/components/hero/ScrollStory'
 import { HomeAnchorScroll } from '@/components/sections/HomeAnchorScroll'
 import { PracticesSection } from '@/components/sections/PracticesSection'
-import { ArticlesSection } from '@/components/sections/ArticlesSection'
+import { PublicationsTeaser } from '@/components/sections/PublicationsTeaser'
 import { CasesSection } from '@/components/sections/CasesSection'
 import { ContactsSection } from '@/components/sections/ContactsSection'
 import { getFeaturedPublications } from '@/lib/content'
@@ -18,7 +18,10 @@ export default function Home() {
       <ScrollStory />
 
       <PracticesSection />
-      <ArticlesSection featured={getFeaturedPublications()} />
+      {/* Публикации — только переход: стопка, каталог и фильтры на /publications */}
+      <PublicationsTeaser
+        covers={getFeaturedPublications().flatMap((item) => (item.cover ? [item.cover] : []))}
+      />
       <CasesSection />
       <ContactsSection />
     </>

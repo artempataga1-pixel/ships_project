@@ -13,6 +13,7 @@ import { BlurText } from '@/components/ui/BlurText'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { PublicationsLibrary } from '@/components/publications/PublicationsLibrary'
 import { ProbankrotstvoSection } from '@/components/publications/ProbankrotstvoSection'
+import { ArticlesSection } from '@/components/sections/ArticlesSection'
 
 /* Страница «Публикации и аналитика» — по ТЗ заказчика (new/01_ТЗ_страницы).
    Не архив ссылок, а редакционно отобранная библиотека: избранное с
@@ -36,7 +37,12 @@ const byOrder = (a: Publication, b: Publication) => a.order - b.order
 const visible = PUBLICATIONS.filter((item) => !item.hidden)
 
 const FEATURED = visible.filter((item) => item.kind === 'main' && item.featured).sort(byOrder)
-const CATALOG = visible.filter((item) => item.kind === 'main' && !item.featured).sort(byOrder)
+/* Избранное с обложками показывает анимированная стопка под героем, поэтому
+   в библиотеку блок «Избранные» не передаётся (пустой массив — блок скрыт),
+   а каталог «Все публикации» получает все материалы: фильтры по автору и теме
+   по-прежнему действуют на каждую публикацию, просто без второго дубля
+   больших обложек. */
+const ALL_MAIN = visible.filter((item) => item.kind === 'main').sort(byOrder)
 const PROBANKROTSTVO = visible.filter((item) => item.kind === 'probankrotstvo').sort(byOrder)
 
 /* Та же плотная белая панель, что у CTA страницы практики */
@@ -139,9 +145,12 @@ export default function PublicationsPage() {
         />
       </section>
 
-      {/* ── Фильтры + избранные + каталог ── */}
-      <div className="relative mx-auto max-w-[1280px] px-6 pb-24 sm:px-8 md:pb-32">
-        <PublicationsLibrary featured={FEATURED} catalog={CATALOG} topics={PUBLICATION_TOPICS} />
+      {/* ── Избранные: анимированная стопка карточек (переехала с главной) ── */}
+      <ArticlesSection featured={FEATURED} />
+
+      {/* ── Фильтры + каталог всех публикаций ── */}
+      <div className="relative mx-auto max-w-[1280px] px-6 pb-24 pt-16 sm:px-8 md:pb-32 md:pt-24">
+        <PublicationsLibrary featured={[]} catalog={ALL_MAIN} topics={PUBLICATION_TOPICS} />
       </div>
 
       {/* ── Комментарии PROбанкротство (вне фильтров) ── */}
