@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
 import { getHomeCases, getPracticesSorted } from '@/lib/content'
+import { byPractices, pluralCases } from '@/lib/ruNumbers'
 
 /* Блок «Кейсы» на главной — переход в каталог /cases. Прежний поток из шести
    карточек поверх прилипающего заголовка занимал около десяти экранов; здесь
@@ -9,14 +10,6 @@ import { getHomeCases, getPracticesSorted } from '@/lib/content'
 
    id="cases" сохранён: на него ведут пункт меню «Кейсы», «← На главную» с
    /cases и редиректы со старых адресов. */
-
-function pluralCases(n: number) {
-  const mod10 = n % 10
-  const mod100 = n % 100
-  if (mod10 === 1 && mod100 !== 11) return `${n} дело`
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${n} дела`
-  return `${n} дел`
-}
 
 export function CasesTeaser() {
   const practices = getPracticesSorted()
@@ -54,7 +47,7 @@ export function CasesTeaser() {
             Кейсы
           </h2>
           <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-[var(--color-muted)] md:text-xl">
-            Отрасли, суммы и результаты — {pluralCases(total)} по пяти практикам фирмы.
+            Отрасли, суммы и результаты — {pluralCases(total)} {byPractices(practices.length)} фирмы.
           </p>
 
           {/* Вход сразу в нужную практику каталога */}

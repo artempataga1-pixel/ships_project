@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
-import { getCaseBySlug } from '@/lib/content'
+import { getCaseBySlug, getPracticesSorted } from '@/lib/content'
+import { SITE_URL } from '@/lib/site'
+import { CaseBackLink, type CasePracticeLink } from '@/components/case/CaseBackLink'
 import type { CaseStudy } from '@/types/content'
 import { ScrollTopOnLoad } from '@/components/ui/ScrollTopOnLoad'
 import { CaseBackground } from '@/components/ui/CaseBackground'
@@ -24,10 +26,12 @@ export async function generateMetadata({ params }: CasePageProps): Promise<Metad
   return {
     title: `${item.title} — Шумская и партнёры`,
     description: item.summary,
+    // Адрес с ?from=<практика> — та же страница, поисковику отдаём основной
+    alternates: { canonical: `${SITE_URL}/cases/${item.slug}` },
   }
 }
 
-/* Контурная лого-скобка — тот же декор фона, что в CasesSection/Practices
+/* Контурная лого-скобка — тот же декор фона, что у страниц практик
    (угловые border-рамки + три бара, ~16% opacity). */
 function LogoOutline({ className }: { className?: string }) {
   return (
@@ -54,11 +58,14 @@ function LogoOutline({ className }: { className?: string }) {
   )
 }
 
-/* «← Все кейсы» — к этой же карточке в каталоге /cases (якорь case-<slug>,
-   до него довозит ScrollTopOnLoad). Каталог — общий вход во все дела; с
-   практики назад приводит обычная кнопка «Назад» браузера. */
-function backHref(item: CaseStudy): string {
-  return `/cases#case-${item.slug}`
+/* Практики кейса — куда кнопке возврата разрешено вести по ?from=
+   (см. CaseBackLink): «← К практике», если кейс открыли с её страницы,
+   иначе «← Все кейсы» в каталог /cases. */
+function casePractices(item: CaseStudy): CasePracticeLink[] {
+  const ids = item.practiceIds ?? []
+  return getPracticesSorted()
+    .filter((p) => ids.includes(p.id))
+    .map((p) => ({ slug: p.slug }))
 }
 
 /* Заголовок раздела страницы кейса — та же лайм-подпись, что у «Результата» */
@@ -142,19 +149,10 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
       {/* pt-28/32 — шапка фиксированная (~80px): герой кейса садится сразу под
           неё, и заголовок с панелью суммы целиком входят в первый экран. */}
       <div className="relative z-10 mx-auto max-w-[1120px] px-6 pb-28 pt-28 md:pt-32">
-        {/* Возврат ровно к карточке этого кейса в блоке «Кейсы».
-            Эффект .btn-lime-fill: залита лаймом → при наведении белеет + лайм-glow. */}
-        {/* scroll={false} — свой скролл к карточке делает HomeAnchorScroll на
-            главной (с повторными попытками, пока раскладка не устаканится);
-            встроенный hash-scroll Next.js делает это одним ранним прыжком и
-            гонится с ним, из-за чего страница иногда оставалась в самом верху. */}
-        <Link
-          href={backHref(item)}
-          scroll={false}
-          className="btn-lime-fill inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
-        >
-          ← Все кейсы
-        </Link>
+        {/* Возврат ровно к карточке этого кейса: в каталог /cases или, если
+            пришли с практики, на её страницу. Эффект .btn-lime-fill: залита
+            лаймом → при наведении белеет + лайм-glow. */}
+        <CaseBackLink caseSlug={item.slug} practices={casePractices(item)} />
 
         {/* --- Герой: слева мета+заголовок, справа панель с суммой --- */}
         <div

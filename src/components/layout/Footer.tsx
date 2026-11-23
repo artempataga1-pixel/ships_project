@@ -6,8 +6,11 @@ import { X, Send, ExternalLink } from 'lucide-react'
 import { NAV_ITEMS } from '@/constants/nav'
 import { CONTACT_INFO } from '@/constants/content/contacts'
 import { handleStoryNavClick } from '@/components/hero/useStoryController'
+import { useNavHref } from '@/lib/useContactsHref'
 
 export function Footer() {
+  // Вне главной «Публикации», «Кейсы» и «Контакты» — на свои страницы
+  const navHref = useNavHref()
   return (
     <footer className="border-t border-[var(--color-line)] bg-[var(--color-surface-soft)] pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <div className="max-w-[1440px] mx-auto px-8 py-12">
@@ -66,7 +69,7 @@ export function Footer() {
                       Пока на главной жива стори, полки about/competencies/partners
                       не имеют DOM id — клик уходит в контроллер (handleStoryNavClick). */}
                   <a
-                    href={item.href}
+                    href={navHref(item.href)}
                     onClick={(e) => handleStoryNavClick(e, item.href)}
                     className="text-sm text-[var(--color-muted)] hover:text-[var(--color-lime-ink)] transition-colors duration-200"
                     style={{ fontFamily: 'var(--font-body)' }}

@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: PracticePageProps): Promise<M
   }
 }
 
-/* Контурная лого-скобка — тот же декор фона, что в CasesSection/Practices
+/* Контурная лого-скобка — тот же декор фона, что у страницы кейса
    (угловые border-рамки + три бара, ~16% opacity). */
 function LogoOutline({ className }: { className?: string }) {
   return (
@@ -282,7 +282,7 @@ function PracticeView({ practice }: { practice: Practice }) {
           собственная заливка фона, и в колонке 1120px она читалась бы
           случайной серой плашкой посреди страницы. */}
       <div className="relative pb-20 md:pb-28">
-        <RelatedCasesShowcase cases={cases} />
+        <RelatedCasesShowcase cases={cases} practiceSlug={practice.slug} />
       </div>
 
       {/* 7. Публикации и аналитика */}

@@ -5,7 +5,7 @@ import { NAV_ITEMS } from '@/constants/nav'
 import { useActiveSection } from '@/components/layout/useActiveSection'
 import { handleStoryNavClick } from '@/components/hero/useStoryController'
 import { useFormFocus } from '@/lib/useFormFocus'
-import { useContactsHref } from '@/lib/useContactsHref'
+import { useNavHref } from '@/lib/useContactsHref'
 
 // Те же величины, что в LimelightNav — лампа той же формы/свечения
 const LINK_PADDING_X = 32
@@ -20,7 +20,7 @@ export function MobileBottomNav() {
   // NAV_ITEMS отдаём в useActiveSection нетронутым — он ищет секции по id из
   // href; подменённый «/contacts» без решётки сломал бы подсветку пункта.
   const activeIndex = useActiveSection(NAV_ITEMS)
-  const contactsHref = useContactsHref()
+  const navHref = useNavHref()
   // Во время ввода в поле формы iOS-клавиатура двигает fixed-элементы —
   // прячем меню, чтобы оно не наезжало на поля/кнопку отправки
   const isFormFocused = useFormFocus()
@@ -97,11 +97,11 @@ export function MobileBottomNav() {
                 itemRefs.current[i] = el
               }}
             >
-              {/* «Контакты» вне главной ведут на отдельную страницу, остальные
+              {/* «Публикации», «Кейсы», «Контакты» вне главной — на свои страницы, остальные
                   пункты — прежними якорями главной. handleStoryNavClick на
                   адресе без решётки сам выходит в no-op. */}
               <a
-                href={item.href === '/#contacts' ? contactsHref : item.href}
+                href={navHref(item.href)}
                 onClick={(e) => handleStoryNavClick(e, item.href)}
                 className={`block whitespace-nowrap rounded-full px-4 py-3 text-sm font-medium transition-colors duration-200 ${
                   i === activeIndex ? 'text-[var(--color-text)]' : 'text-[#333333]'

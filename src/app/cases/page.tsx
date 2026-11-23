@@ -8,12 +8,13 @@ import { WordReveal } from '@/components/ui/WordReveal'
 import { BlurText } from '@/components/ui/BlurText'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { CasesLibrary } from '@/components/cases/CasesLibrary'
+import { byPractices } from '@/lib/ruNumbers'
 
 /* Каталог кейсов — все дела практик карточками с фильтром по практикам.
    Блок «Кейсы» на главной теперь только переход сюда. Конструкция героя —
    как у /publications: fixed-задник, обрезанный clip-path героя. */
 
-const INTRO = 'Обезличенные описания дел по пяти практикам фирмы: отрасли, суммы и результаты.'
+const INTRO = `Обезличенные описания дел ${byPractices(getPracticesSorted().length)} фирмы: отрасли, суммы и результаты.`
 
 export const metadata: Metadata = {
   title: 'Кейсы — Шумская и партнёры',
@@ -50,8 +51,18 @@ function HeroDecor() {
   )
 }
 
-export default function CasesPage() {
+/* Практика из ?practice= читается на сервере: страница сразу приходит
+   отфильтрованной. Раньше фильтр ставился эффектом после гидрации — на
+   переходе с главной мелькали все дела, а «Назад» в отфильтрованный список
+   сначала докручивал до места карточки в полном списке. */
+export default async function CasesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const practices = getPracticesSorted().map((p) => ({ id: p.id, slug: p.slug, label: p.label }))
+  const requested = (await searchParams).practice
+  const initialPractice = practices.find((p) => p.slug === requested)?.id
 
   return (
     <main className="relative min-h-svh bg-[var(--color-bg)]">
@@ -113,7 +124,7 @@ export default function CasesPage() {
       </section>
 
       <div className="relative mx-auto max-w-[1280px] px-6 pb-24 pt-6 sm:px-8 md:pb-32">
-        <CasesLibrary cases={CASE_STUDIES} practices={practices} />
+        <CasesLibrary cases={CASE_STUDIES} practices={practices} initialPractice={initialPractice} />
       </div>
 
       <section className="relative mx-auto max-w-[1280px] px-6 pb-28 sm:px-8 md:pb-36">

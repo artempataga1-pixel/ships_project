@@ -42,14 +42,26 @@ function Chip({
   )
 }
 
-export function CasesLibrary({ cases, practices }: { cases: CaseStudy[]; practices: PracticeFilter[] }) {
-  const [active, setActive] = useState<string>('all')
+export function CasesLibrary({
+  cases,
+  practices,
+  initialPractice,
+}: {
+  cases: CaseStudy[]
+  practices: PracticeFilter[]
+  /* id практики из ?practice= — страница читает его на сервере, и первый
+     же кадр уже отфильтрован */
+  initialPractice?: string
+}) {
+  const [active, setActive] = useState<string>(initialPractice ?? 'all')
 
-  // Практика из адреса — после гидрации, чтобы серверная разметка совпадала
+  /* Подстраховка: «Назад» браузера восстанавливает страницу из кеша роутера,
+     отрисованного под тот адрес, с которым на неё пришли. Если потом фильтр
+     переключали (адрес меняет replaceState), сверяемся с текущим адресом. */
   useEffect(() => {
     const slug = new URLSearchParams(window.location.search).get('practice')
-    const match = practices.find((p) => p.slug === slug)
-    if (match) setActive(match.id)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- сверка с адресом после восстановления из кеша
+    setActive(practices.find((p) => p.slug === slug)?.id ?? 'all')
   }, [practices])
 
   const counts = useMemo(() => {

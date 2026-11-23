@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useLenis } from 'lenis/react'
 import { NAV_ID_TO_STEP, isStoryActive } from '@/components/hero/useStoryController'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
@@ -11,7 +12,7 @@ const useClientLayoutEffect = typeof window === 'undefined' ? useEffect : useLay
 /* Довозит скролл до цели для якорей главной — в двух режимах:
 
    1) ПОЛНАЯ ЗАГРУЗКА страницы с хэшем в URL (переход с другой страницы —
-      /#practices, /#articles, /#cases, /#contacts, /#case-<slug>,
+      /#practices, /#articles, /#cases, /#contacts,
       /#practice-<slug>, а на мобиле ещё и /#about, /#competencies, /#partners,
       см. isHandledHash). Браузер мгновенно скроллит к якорю ещё по ранней
       flow-разметке, затем на десктопе ScrollStory апгрейдится до story и пины
@@ -78,11 +79,19 @@ function isHandledHash(hash: string): boolean {
   return true
 }
 
-/* «Склеенный» хэш вида «#cases#case-<slug>». Получается так: главную открыли
-   по /#cases, ушли на кейс, вернулись кнопкой «← Все кейсы» (/#case-<slug>) —
-   роутер Next запомнил адрес главной вместе с первым хэшем и дописывает к
-   нему новый. Ни один якорь такого id не находит, и возврат приземлялся в
-   самый верх. Оставляем последний фрагмент — именно он и есть цель перехода.
+/* Карточки кейсов на главной жили до 23.11.2026, возврат к ним шёл по
+   /#case-<slug>. Такие адреса остались в истории браузеров и в пересланных
+   ссылках, а карточки теперь в каталоге /cases — туда и уводим, к той же
+   карточке. Возвращает хэш «#case-<slug>» или null. */
+function legacyCaseHash(hash: string): string | null {
+  return hash.startsWith('#case-') ? hash : null
+}
+
+/* «Склеенный» хэш вида «#cases#practice-<slug>». Получается так: главную
+   открыли по одному якорю, ушли на внутреннюю страницу, вернулись по ссылке с
+   другим — роутер Next запомнил адрес главной вместе с первым хэшем и
+   дописывает к нему новый. Ни один якорь такого id не находит, и возврат
+   приземлялся в самый верх. Оставляем последний фрагмент — цель перехода.
    Вызывается в layout-эффекте этого компонента: он стоит на главной первым,
    поэтому отрабатывает раньше всех остальных читателей хэша (стори, сборка
    героя). history.state передаём как есть — см. ReturnAnchorLink. */
@@ -95,14 +104,23 @@ function normalizeStackedHash() {
 
 export function HomeAnchorScroll() {
   const lenis = useLenis()
+  const router = useRouter()
   const [cover, setCover] = useState(false) // оверлей смонтирован
   const [faded, setFaded] = useState(false) // оверлей растворяется
 
   // Оверлей — до первой отрисовки, чтобы чужой блок не мигнул даже на кадр
   useClientLayoutEffect(() => {
     normalizeStackedHash()
+    const legacy = legacyCaseHash(window.location.hash)
+    if (legacy) {
+      // Главную под оверлеем не показываем — сразу в каталог к карточке
+      // (до неё довозит ScrollTopOnLoad страницы /cases)
+      setCover(true)
+      router.replace(`/cases${legacy}`, { scroll: false })
+      return
+    }
     if (isHandledHash(window.location.hash)) setCover(true)
-  }, [])
+  }, [router])
 
   useEffect(() => {
     // Без Lenis (тач/iOS) html имеет CSS `scroll-behavior: smooth` (globals.css,
@@ -255,8 +273,8 @@ export function HomeAnchorScroll() {
         // (вторая волна на реальном устройстве), молча довозим scrollY без
         // повторного мелькания фона. Фиксированные таймеры покрывают
         // предсказуемый хвост (шрифты/видео на телефоне), но на планшетах с
-        // более тяжёлыми ассетами (крупные картинки в PracticesSection/
-        // CasesSection, пин пересчитывается по фактической ширине трека)
+        // более тяжёлыми ассетами (крупные картинки в PracticesSection,
+        // пин пересчитывается по фактической ширине трека)
         // сдвиг раскладки может произойти позже отведённых 500/1400мс —
         // фиксированные тайминги её просто не поймают. ScrollTrigger.refresh
         // — это и есть момент, когда GSAP пересчитал позиции триггеров из-за
@@ -338,6 +356,9 @@ export function HomeAnchorScroll() {
     const run = (hash: string, withCover: boolean) => {
       cancelCurrent?.()
       cancelCurrent = null
+      // Старый адрес карточки кейса — уходим в /cases (layout-эффект выше),
+      // оверлей не снимаем и скролл не крутим
+      if (legacyCaseHash(hash)) return
       if (!isHandledHash(hash)) {
         setCover(false)
         return

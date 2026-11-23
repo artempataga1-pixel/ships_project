@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import type { NavItem } from '@/types/content'
 import { STORY_STEP_EVENT } from '@/components/hero/useStoryController'
+import { sectionPageIndex } from '@/lib/useContactsHref'
 
 // Общая логика LimelightNav и MobileBottomNav: какая секция активна сейчас.
 // Источники — IntersectionObserver по секциям DOM и событие story:step от
@@ -15,9 +16,11 @@ export function useActiveSection(items: NavItem[]): number | null {
   const pathname = usePathname()
 
   useEffect(() => {
-    // На внутренних страницах (например /cases/…) секций нет — активного пункта нет
+    // На внутренних страницах секций нет. Горит только пункт раздела, чья
+    // страница открыта (/cases, /publications, /contacts), иначе — ничего.
+    const pageIndex = sectionPageIndex(items, pathname)
     // eslint-disable-next-line react-hooks/set-state-in-effect -- намеренный сброс перед пере-подпиской observer
-    setActiveIndex(null)
+    setActiveIndex(pageIndex === -1 ? null : pageIndex)
     // Узкая полоса по центру вьюпорта: активна секция, пересекающая её.
     const observer = new IntersectionObserver(
       (entries) => {

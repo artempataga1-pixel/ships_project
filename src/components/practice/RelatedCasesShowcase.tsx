@@ -45,20 +45,32 @@ const CASE_IMAGES = [
 ]
 
 /* Карточка кейса — общая для «Связанных кейсов» практики и каталога /cases */
-export function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
+export function CaseCard({
+  item,
+  index,
+  fromPractice,
+}: {
+  item: CaseStudy
+  index: number
+  /* slug практики, на странице которой стоит карточка: кейс откроется с
+     ?from=<slug>, и кнопка возврата на нём поведёт обратно сюда */
+  fromPractice?: string
+}) {
   /* На карточке — сокращённое название, если полное в неё не влезает;
      на странице кейса всегда полное (решение 26.10). */
   const cardTitle = item.shortTitle ?? item.title
+  const href = fromPractice ? `/cases/${item.slug}?from=${fromPractice}` : `/cases/${item.slug}`
 
   return (
-    /* id — якорь возврата: кнопка «← К практике» на странице кейса ведёт на
-       /practices/<slug>#case-<slug>, до него довозит ScrollTopOnLoad.
-       ReturnAnchorLink дописывает тот же хэш в текущую запись истории —
-       чтобы и браузерный «Назад» приземлял на карточку, а не в верх страницы. */
+    /* id — якорь возврата: кнопка на странице кейса ведёт на
+       /cases#case-<slug> или /practices/<slug>#case-<slug>, до карточки
+       довозит ScrollTopOnLoad. ReturnAnchorLink дописывает тот же хэш в
+       текущую запись истории — чтобы и браузерный «Назад» приземлял на
+       карточку, а не в верх страницы. */
     <ReturnAnchorLink
       id={`case-${item.slug}`}
       returnHash={`#case-${item.slug}`}
-      href={`/cases/${item.slug}`}
+      href={href}
       className="case-flip group scroll-mt-28 flex h-full flex-col rounded-[20px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-lime-ink)]"
     >
       {/* Медиа-область: двусторонняя карточка. Лицо — заблюренный кадр с
@@ -200,7 +212,7 @@ export function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
   )
 }
 
-export function RelatedCasesShowcase({ cases }: { cases: CaseStudy[] }) {
+export function RelatedCasesShowcase({ cases, practiceSlug }: { cases: CaseStudy[]; practiceSlug: string }) {
   return (
     /* Линии сверху и снизу — не декор: --color-surface-soft отличается от
        --color-bg на пару процентов яркости, и без границ блок не читался как
@@ -246,7 +258,7 @@ export function RelatedCasesShowcase({ cases }: { cases: CaseStudy[] }) {
                 duration={0.6}
                 className="h-full"
               >
-                <CaseCard item={item} index={index} />
+                <CaseCard item={item} index={index} fromPractice={practiceSlug} />
               </RevealOnScroll>
             ))}
           </div>
