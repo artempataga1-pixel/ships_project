@@ -44,7 +44,8 @@ const CASE_IMAGES = [
   '/images/articles/stat4.jpg',
 ]
 
-function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
+/* Карточка кейса — общая для «Связанных кейсов» практики и каталога /cases */
+export function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
   /* На карточке — сокращённое название, если полное в неё не влезает;
      на странице кейса всегда полное (решение 26.10). */
   const cardTitle = item.shortTitle ?? item.title

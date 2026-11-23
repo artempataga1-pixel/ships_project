@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { CASE_STUDIES } from '@/constants/content/case-studies'
-import { getCaseBySlug, getPracticesSorted } from '@/lib/content'
+import { getCaseBySlug } from '@/lib/content'
 import type { CaseStudy } from '@/types/content'
 import { ScrollTopOnLoad } from '@/components/ui/ScrollTopOnLoad'
 import { CaseBackground } from '@/components/ui/CaseBackground'
@@ -54,14 +54,11 @@ function LogoOutline({ className }: { className?: string }) {
   )
 }
 
-/* Куда ведёт «← К практике»: к карточке в блоке «Связанные кейсы» на странице
-   практики (якорь case-<slug>, до него довозит ScrollTopOnLoad). Кейс без
-   практики — к блоку «Кейсы» на главной. */
+/* «← Все кейсы» — к этой же карточке в каталоге /cases (якорь case-<slug>,
+   до него довозит ScrollTopOnLoad). Каталог — общий вход во все дела; с
+   практики назад приводит обычная кнопка «Назад» браузера. */
 function backHref(item: CaseStudy): string {
-  const practiceId = item.practiceIds?.[0]
-  const practice = practiceId ? getPracticesSorted().find((p) => p.id === practiceId) : undefined
-  if (practice) return `/practices/${practice.slug}#case-${item.slug}`
-  return '/#cases'
+  return `/cases#case-${item.slug}`
 }
 
 /* Заголовок раздела страницы кейса — та же лайм-подпись, что у «Результата» */
@@ -156,7 +153,7 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
           scroll={false}
           className="btn-lime-fill inline-flex items-center justify-center h-11 px-6 rounded-md text-sm font-semibold"
         >
-          {item.practiceIds?.length ? '← К практике' : '← Все кейсы'}
+          ← Все кейсы
         </Link>
 
         {/* --- Герой: слева мета+заголовок, справа панель с суммой --- */}

@@ -2,7 +2,7 @@ import { ScrollStory } from '@/components/hero/ScrollStory'
 import { HomeAnchorScroll } from '@/components/sections/HomeAnchorScroll'
 import { PracticesSection } from '@/components/sections/PracticesSection'
 import { PublicationsTeaser } from '@/components/sections/PublicationsTeaser'
-import { CasesSection } from '@/components/sections/CasesSection'
+import { CasesTeaser } from '@/components/sections/CasesTeaser'
 import { ContactsSection } from '@/components/sections/ContactsSection'
 import { RecognitionSection } from '@/components/sections/RecognitionSection'
 import { getFeaturedPublications } from '@/lib/content'
@@ -25,7 +25,8 @@ export default function Home() {
           item.cover ? [{ src: item.cover, publisher: item.publisher }] : [],
         )}
       />
-      <CasesSection />
+      {/* Кейсы — только переход: каталог всех дел на /cases */}
+      <CasesTeaser />
       <RecognitionSection />
       <ContactsSection />
     </>

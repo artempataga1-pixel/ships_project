@@ -69,10 +69,10 @@ const nextConfig: NextConfig = {
       { source: '/practices/ip-brands', destination: '/#practices', permanent: true },
       /* Бывшие демо-кейсы главной (выдуманные дела, удалены): ссылки на них
          могли разойтись — ведём на блок «Кейсы» с настоящими делами. */
-      { source: '/cases/zashchita-developera', destination: '/#cases', permanent: true },
-      { source: '/cases/mezhdunarodnyy-arbitrazh', destination: '/#cases', permanent: true },
-      { source: '/cases/subsidiarnaya-otvetstvennost', destination: '/#cases', permanent: true },
-      { source: '/cases/nalogovyy-spor', destination: '/#cases', permanent: true },
+      { source: '/cases/zashchita-developera', destination: '/cases', permanent: true },
+      { source: '/cases/mezhdunarodnyy-arbitrazh', destination: '/cases', permanent: true },
+      { source: '/cases/subsidiarnaya-otvetstvennost', destination: '/cases', permanent: true },
+      { source: '/cases/nalogovyy-spor', destination: '/cases', permanent: true },
     ]
   },
 };
