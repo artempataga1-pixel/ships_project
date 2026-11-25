@@ -3,7 +3,7 @@ import type { NavItem } from '@/types/content'
 // Пункты ведут на якоря секций главной. Формат «/#id»:
 // на главной клик перехватывает Lenis (pathname совпадает — плавный скролл),
 // с внутренних страниц браузер уводит на главную к секции. Исключения —
-// разделы со своей страницей (Публикации, Кейсы, Контакты): вне главной
+// разделы со своей страницей (Публикации, Кейсы, Признание, Контакты): вне главной
 // они ведут туда, см. useNavHref.
 export const NAV_ITEMS: NavItem[] = [
   { label: 'О компании', href: '/#about' },
@@ -12,5 +12,6 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Практики', href: '/#practices' },
   { label: 'Публикации', href: '/#articles' },
   { label: 'Кейсы', href: '/#cases' },
+  { label: 'Признание', href: '/#recognition' },
   { label: 'Контакты', href: '/#contacts' },
 ]

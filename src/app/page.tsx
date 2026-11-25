@@ -4,7 +4,7 @@ import { PracticesSection } from '@/components/sections/PracticesSection'
 import { PublicationsTeaser } from '@/components/sections/PublicationsTeaser'
 import { CasesTeaser } from '@/components/sections/CasesTeaser'
 import { ContactsSection } from '@/components/sections/ContactsSection'
-import { RecognitionSection } from '@/components/sections/RecognitionSection'
+import { RecognitionTeaser } from '@/components/sections/RecognitionTeaser'
 import { getFeaturedPublications } from '@/lib/content'
 
 // Одностраничный сайт. Начало — scroll-story: единое видео-полотно, скролл
@@ -27,7 +27,8 @@ export default function Home() {
       />
       {/* Кейсы — только переход: каталог всех дел на /cases */}
       <CasesTeaser />
-      <RecognitionSection />
+      {/* Признание — только переход: рейтинги по годам на /recognition */}
+      <RecognitionTeaser />
       <ContactsSection />
     </>
   )

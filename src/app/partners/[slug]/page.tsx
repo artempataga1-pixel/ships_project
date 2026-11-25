@@ -353,6 +353,12 @@ function PartnerView({ partner }: { partner: TeamMember }) {
                   </li>
                 ))}
               </ul>
+              <Link
+                href={`/recognition#${partner.slug}`}
+                className="mt-8 inline-flex min-h-11 items-center gap-2 text-base font-semibold text-white transition-colors duration-200 hover:text-[var(--color-lime)]"
+              >
+                Всё признание фирмы и партнёров <span aria-hidden>→</span>
+              </Link>
             </div>
           </RevealOnScroll>
         ) : null}

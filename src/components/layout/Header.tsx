@@ -41,7 +41,7 @@ export function Header() {
           : 'xl:bg-transparent'
       }`}
     >
-      <div className="max-w-[1440px] mx-auto h-12 px-8 flex items-center justify-between gap-8 xl:h-16">
+      <div className="max-w-[1440px] mx-auto h-12 px-8 flex items-center justify-between gap-8 xl:h-16 xl:gap-5 min-[1440px]:gap-8">
         {/* Логотип — клиентский якорь «домой»: из любой точки сайта на hero.
             data-header-logo для LogoIntro внутри. */}
         <LogoLink />
@@ -50,7 +50,7 @@ export function Header() {
             для лампы (LimelightNav измеряет offsetLeft относительно него).
             До 1280px (xl) — нижнее меню MobileBottomNav, эта прячется.
             Порог поднят с lg (1024px): на 1024–1279px (iPad landscape и
-            похожие ширины) логотипу + 7 пунктам меню + CTA физически не
+            похожие ширины) логотипу + 8 пунктам меню + CTA физически не
             хватает места в строке — переносится текст, обрезается кнопка. */}
         <nav aria-label="Основная навигация" className="relative hidden xl:block">
           <LimelightNav items={NAV_ITEMS} />
