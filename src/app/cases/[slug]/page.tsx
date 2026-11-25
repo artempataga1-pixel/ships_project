@@ -68,6 +68,12 @@ function casePractices(item: CaseStudy): CasePracticeLink[] {
     .map((p) => ({ slug: p.slug }))
 }
 
+/* Арбитражные дела лежат в общей картотеке, дела судов общей юрисдикции — на
+   сайте конкретного суда */
+function courtLinkLabel(url: string): string {
+  return new URL(url).hostname === 'kad.arbitr.ru' ? 'Картотека арбитражных дел' : 'Сайт суда'
+}
+
 /* Заголовок раздела страницы кейса — та же лайм-подпись, что у «Результата» */
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -315,6 +321,31 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
                   className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3.5 py-1.5 text-sm leading-snug text-[var(--color-text)]"
                 >
                   {service}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {/* --- Карточки дела в судах (разрешение заказчика от 25.11.2026).
+            nofollow — вес страницы на сайты судов не отдаём. --- */}
+        {item.sourceUrls?.length ? (
+          <section className="mt-10 lg:ml-20">
+            <SectionLabel>Карточка дела в суде</SectionLabel>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {item.sourceUrls.map((url, i, all) => (
+                <li key={url}>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-4 text-sm font-medium text-[var(--color-text)] transition-[border-color,box-shadow] duration-300 hover:border-[var(--color-lime)] hover:shadow-[0_0_18px_var(--color-lime-glow)]"
+                  >
+                    {courtLinkLabel(url)}
+                    {all.length > 1 ? ` — ${i + 1}` : ''}
+                    <span aria-hidden>↗</span>
+                    <span className="sr-only">, откроется в новой вкладке</span>
+                  </a>
                 </li>
               ))}
             </ul>

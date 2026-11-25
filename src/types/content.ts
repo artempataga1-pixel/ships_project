@@ -244,7 +244,7 @@ export interface CaseStudy {
   labels?: { situation?: string; task?: string; result?: string; why?: string }
   /* «Связанные услуги» */
   relatedServices?: string[]
-  /* Ссылки на карточки дел в судах из анкет — на сайте не выводятся */
+  /* Ссылки на карточки дел в судах из анкет — внизу страницы кейса */
   sourceUrls?: string[]
   /* id практик, к которым относится кейс (Practice.id) */
   practiceIds?: string[]

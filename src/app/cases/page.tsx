@@ -14,7 +14,7 @@ import { byPractices } from '@/lib/ruNumbers'
    Блок «Кейсы» на главной теперь только переход сюда. Конструкция героя —
    как у /publications: fixed-задник, обрезанный clip-path героя. */
 
-const INTRO = `Обезличенные описания дел ${byPractices(getPracticesSorted().length)} фирмы: отрасли, суммы и результаты.`
+const INTRO = `Описания дел ${byPractices(getPracticesSorted().length)} фирмы: отрасли, суммы и результаты.`
 
 export const metadata: Metadata = {
   title: 'Кейсы — Шумская и партнёры',
