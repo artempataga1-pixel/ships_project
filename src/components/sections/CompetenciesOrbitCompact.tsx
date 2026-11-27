@@ -78,7 +78,7 @@ export function CompetenciesOrbitCompact() {
         <SectionHeading
           id="competencies-heading-compact"
           title="Ключевые компетенции"
-          subtitle="Конкретные задачи, которые мы ведём чаще всего"
+          subtitle="Конкретные задачи, с которыми мы работаем чаще всего"
           className="text-center"
         />
       </div>

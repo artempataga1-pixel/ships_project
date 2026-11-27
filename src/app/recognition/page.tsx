@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 /* Вкладки партнёров — в порядке прототипа */
 const PARTNERS: RecognitionPartner[] = [
   { id: 'anna-shumskaya', name: 'Анна Шумская', role: 'Управляющий партнёр' },
-  { id: 'maksim-posazhennikov', name: 'Максим Посаженников', role: 'Старший партнёр' },
+  { id: 'maksim-posazhennikov', name: 'Максим Посаженников', role: 'Управляющий партнёр' },
 ]
 
 /* Та же плотная белая панель, что у вводного текста /publications */

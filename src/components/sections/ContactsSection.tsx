@@ -18,14 +18,12 @@ import { getPracticeBySlug } from '@/lib/content'
 import './contacts-section.css'
 import { contactsContent } from './contacts-content'
 
-/* Логотипы изданий для «Нам доверяют» — берём только реальные файлы
-   из MEDIA_MENTIONS (Право.ru идёт текстом, без файла — сюда не подходит).
-   Континент Сибирь и Российская газета исключены по просьбе — оставшиеся
-   логотипы крупнее и заметнее в один ряд. Рендерим как mask-image в
-   акцентном цвете — так все логотипы выглядят единым лаймовым силуэтом. */
-const EXCLUDED_TRUST_LOGOS = new Set(['Континент Сибирь', 'Российская газета'])
-const trustLogos = MEDIA_MENTIONS.filter(
-  (m): m is typeof m & { logo: string } => Boolean(m.logo) && !EXCLUDED_TRUST_LOGOS.has(m.name),
+/* Логотипы блока «Профессиональное признание и публикации» — состав и порядок
+   «по значимости» из аудита заказчика 05.11.2026. Рисуются mask-image: чёрный
+   силуэт с лаймовым свечением (раньше были бледно-лаймовыми, «их не видно»). */
+const TRUST_ORDER = ['ПРАВО-300', 'Коммерсантъ', 'Российская газета', 'Best Lawyers', 'BusinessFM', 'Деловой квартал']
+const trustLogos = TRUST_ORDER.map((name) => MEDIA_MENTIONS.find((m) => m.name === name)).filter(
+  (m): m is NonNullable<typeof m> & { logo: string } => Boolean(m?.logo),
 )
 
 // Плейсхолдер селекта «Направление» — на узких экранах полный текст
@@ -68,6 +66,20 @@ export interface ContactsSectionProps {
      там работает прежняя ветка с эффектом. */
   initialPractice?: string
   initialMessage?: string
+  /* Отдельная страница /contacts: заголовок блока — главный заголовок страницы
+     (h1), на главной — h2 (аудит 05.11.2026) */
+  standalone?: boolean
+}
+
+/* Подсказка об ошибке рядом с полем: связана с полем через aria-describedby,
+   чтобы программа чтения экрана озвучила её вместе с полем */
+function FieldError({ id, show, text }: { id: string; show?: boolean; text: string }) {
+  if (!show) return null
+  return (
+    <span className="pb-contact__field-error" id={id}>
+      {text}
+    </span>
+  )
 }
 
 /* Секция «Контакты» — блок из contact-section-package, перенесённый в React.
@@ -75,7 +87,8 @@ export interface ContactsSectionProps {
    contact-background-2.webp, заголовки/форма/иконки/панели — кодом. Заявка
    уходит в тот же /api/contact (Telegram-уведомления), что и раньше — роут
    глобальный, работает одинаково с главной и с отдельной страницы. */
-export function ContactsSection({ initialPractice, initialMessage }: ContactsSectionProps = {}) {
+export function ContactsSection({ initialPractice, initialMessage, standalone }: ContactsSectionProps = {}) {
+  const Title = standalone ? 'h1' : 'h2'
   const formRef = useRef<HTMLFormElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
   const phoneRef = useRef<HTMLInputElement>(null)
@@ -175,7 +188,16 @@ export function ContactsSection({ initialPractice, initialMessage }: ContactsSec
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone: digits, practice, message, website }),
+        // page — откуда пришла заявка (страница практики, кейса, услуги):
+        // сотруднику не нужно переспрашивать, что смотрел посетитель
+        body: JSON.stringify({
+          name,
+          phone: digits,
+          practice,
+          message,
+          website,
+          page: window.location.pathname + window.location.search,
+        }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
@@ -192,7 +214,7 @@ export function ContactsSection({ initialPractice, initialMessage }: ContactsSec
       setStatusMessage(contactsContent.successText)
     } catch {
       setStatus('error')
-      setStatusMessage(`${contactsContent.errorText} ${contactsContent.details[0].title}`)
+      setStatusMessage(contactsContent.errorText)
     }
   }
 
@@ -204,11 +226,11 @@ export function ContactsSection({ initialPractice, initialMessage }: ContactsSec
             должен долистывать ДО заголовка, а не до фото. См. HomeAnchorScroll. */}
         <header className="pb-contact__intro scroll-mt-16" id="contacts-anchor">
           <p className="pb-contact__eyebrow">{contactsContent.eyebrow}</p>
-          <h2 className="pb-contact__title" id="pb-contact-title">
+          <Title className="pb-contact__title" id="pb-contact-title">
             {contactsContent.titleLine1}
             <br />
             {contactsContent.titleLine2}
-          </h2>
+          </Title>
           <p className="pb-contact__lead">
             {contactsContent.subtitleLine1}
             <br />
@@ -231,8 +253,10 @@ export function ContactsSection({ initialPractice, initialMessage }: ContactsSec
               placeholder="Ваше имя"
               required
               aria-invalid={errors.name ? 'true' : undefined}
+              aria-describedby={errors.name ? 'pb-name-error' : undefined}
               onChange={() => clearFieldError('name')}
             />
+            <FieldError id="pb-name-error" show={errors.name} text={contactsContent.fieldErrors.name} />
           </div>
 
           <div className="pb-contact__field">
@@ -251,11 +275,13 @@ export function ContactsSection({ initialPractice, initialMessage }: ContactsSec
               required
               value={phone}
               aria-invalid={errors.phone ? 'true' : undefined}
+              aria-describedby={errors.phone ? 'pb-phone-error' : undefined}
               onChange={(e) => {
                 setPhone(formatPhone(e.target.value))
                 clearFieldError('phone')
               }}
             />
+            <FieldError id="pb-phone-error" show={errors.phone} text={contactsContent.fieldErrors.phone} />
           </div>
 
           <div className="pb-contact__field pb-contact__field--select">
@@ -282,7 +308,7 @@ export function ContactsSection({ initialPractice, initialMessage }: ContactsSec
           <div className="pb-contact__field pb-contact__field--message">
             <MessageSquare aria-hidden="true" />
             <label className="pb-contact__sr-only" htmlFor="pb-message">
-              Опишите вашу задачу
+              Кратко опишите вопрос
             </label>
             <textarea
               ref={messageRef}
@@ -290,12 +316,14 @@ export function ContactsSection({ initialPractice, initialMessage }: ContactsSec
               name="message"
               rows={4}
               maxLength={2000}
-              placeholder="Опишите вашу задачу"
+              placeholder={contactsContent.messagePlaceholder}
               defaultValue={initialMessage}
               required
               aria-invalid={errors.message ? 'true' : undefined}
+              aria-describedby={errors.message ? 'pb-message-error' : undefined}
               onChange={() => clearFieldError('message')}
             />
+            <FieldError id="pb-message-error" show={errors.message} text={contactsContent.fieldErrors.message} />
           </div>
 
           {/* Антиспам-поле: посетитель его не видит. */}
@@ -316,6 +344,7 @@ export function ContactsSection({ initialPractice, initialMessage }: ContactsSec
               name="consent"
               checked={consent}
               aria-invalid={errors.consent ? 'true' : undefined}
+              aria-describedby={errors.consent ? 'pb-consent-error' : undefined}
               onChange={(e) => {
                 setConsent(e.target.checked)
                 clearFieldError('consent')
@@ -326,6 +355,11 @@ export function ContactsSection({ initialPractice, initialMessage }: ContactsSec
               <a href="/privacy-policy#consent" target="_blank" rel="noopener noreferrer">
                 (политика обработки ПДн)
               </a>
+              {errors.consent && (
+                <span className="pb-contact__consent-error" id="pb-consent-error">
+                  {contactsContent.fieldErrors.consent}
+                </span>
+              )}
             </span>
           </label>
 
@@ -337,36 +371,54 @@ export function ContactsSection({ initialPractice, initialMessage }: ContactsSec
         <address className="pb-contact__details" aria-label="Контактная информация">
           {contactsContent.details.map((item) => {
             const Icon = detailIcons[item.type]
-            const inner = (
-              <>
+            return (
+              <div className="pb-contact__detail" key={item.type}>
                 <span className="pb-contact__detail-icon">
                   <Icon aria-hidden="true" />
                 </span>
                 <span>
-                  {item.href ? <a href={item.href}>{item.title}</a> : <strong>{item.title}</strong>}
+                  {item.links?.map((link) => (
+                    <a key={link.href} href={link.href}>
+                      {link.label}
+                    </a>
+                  ))}
+                  {item.title && <strong>{item.title}</strong>}
                   {item.text && <small>{item.text}</small>}
+                  {item.extraLink && (
+                    <a
+                      className="pb-contact__map-link"
+                      href={item.extraLink.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {item.extraLink.label} ↗<span className="pb-contact__sr-only">, откроется в новой вкладке</span>
+                    </a>
+                  )}
                 </span>
-              </>
-            )
-            return (
-              <div className="pb-contact__detail" key={item.type}>
-                {inner}
               </div>
             )
           })}
         </address>
 
         <section className="pb-contact__trust" aria-labelledby="pb-trust-title">
-          <h3 id="pb-trust-title">Нам доверяют</h3>
-          <div className="pb-contact__trust-logos" aria-label="СМИ и рейтинги, писавшие о компании">
+          <h3 id="pb-trust-title">Профессиональное признание и публикации</h3>
+          <div className="pb-contact__trust-logos" aria-label="Рейтинги и издания">
+            {/* Свечение — на обёртке: filter самого элемента с маской
+                срезался бы той же маской */}
             {trustLogos.map((item) => (
               <span
                 key={item.name}
-                className="pb-contact__trust-logo"
-                style={{ WebkitMaskImage: `url(${item.logo})`, maskImage: `url(${item.logo})` }}
-                role="img"
-                aria-label={item.name}
-              />
+                className={`pb-contact__trust-item${
+                  item.logoWidth && item.logoHeight && item.logoWidth / item.logoHeight >= 8 ? ' pb-contact__trust-item--wide' : ''
+                }`}
+              >
+                <span
+                  className="pb-contact__trust-logo"
+                  style={{ WebkitMaskImage: `url(${item.logo})`, maskImage: `url(${item.logo})` }}
+                  role="img"
+                  aria-label={item.name}
+                />
+              </span>
             ))}
           </div>
         </section>

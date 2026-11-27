@@ -8,13 +8,13 @@ import { WordReveal } from '@/components/ui/WordReveal'
 import { BlurText } from '@/components/ui/BlurText'
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll'
 import { CasesLibrary } from '@/components/cases/CasesLibrary'
-import { byPractices } from '@/lib/ruNumbers'
+import { byPractices, pluralCases } from '@/lib/ruNumbers'
 
 /* Каталог кейсов — все дела практик карточками с фильтром по практикам.
    Блок «Кейсы» на главной теперь только переход сюда. Конструкция героя —
    как у /publications: fixed-задник, обрезанный clip-path героя. */
 
-const INTRO = `Описания дел ${byPractices(getPracticesSorted().length)} фирмы: отрасли, суммы и результаты.`
+const INTRO = `Задачи клиентов и результаты нашей работы: ${pluralCases(CASE_STUDIES.length)} ${byPractices(getPracticesSorted().length)} фирмы.`
 
 export const metadata: Metadata = {
   title: 'Кейсы — Шумская и партнёры',
@@ -86,7 +86,7 @@ export default async function CasesPage({
 
           <div className="mt-12 flex flex-wrap items-center gap-4 md:mt-14">
             <span className="inline-flex items-center gap-3 rounded-md border border-[var(--color-line)] bg-white px-4 py-2 font-heading text-[0.7rem] font-black uppercase tracking-[0.12em] text-[var(--color-text)]">
-              Архив избранных дел
+              Избранные дела компании
               <i
                 aria-hidden
                 className="block h-[9px] w-[9px] rounded-[2px] bg-[var(--color-lime)]"

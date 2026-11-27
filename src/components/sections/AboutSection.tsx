@@ -69,7 +69,7 @@ export function AboutSection({ variant = 'flow', compact = false }: AboutSection
           className={
             compact
               ? 'w-full max-w-[560px] rounded-[var(--radius-xl)] border p-5'
-              : 'w-full max-w-[720px] rounded-[var(--radius-xl)] border p-8 md:p-12 lg:p-[min(4rem,5.5vh)]'
+              : 'w-full max-w-[820px] rounded-[var(--radius-xl)] border p-8 md:p-12 lg:p-[min(4rem,5.5vh)]'
           }
           style={{
             // В story панель чуть плотнее — над видео контент должен читаться
@@ -106,7 +106,10 @@ export function AboutSection({ variant = 'flow', compact = false }: AboutSection
             </p>
           </Reveal>
 
-          {/* Средние абзацы — обычный текст */}
+          {/* Средние абзацы — обычный текст. Аудит 05.11.2026: был мелкий (до 16.8 px)
+              и серый (--color-muted) — заметно светлее лида и финала. Теперь
+              крупнее, почти чёрный; карточка шире, чтобы стори-оверлей
+              по-прежнему влезал в экран по высоте. */}
           <Reveal
             delay={0.2}
             className={compact ? 'mt-2.5 space-y-2' : 'mt-4 space-y-3 md:mt-[min(1.5rem,2.4vh)] md:space-y-[min(0.9rem,1.5vh)]'}
@@ -116,8 +119,8 @@ export function AboutSection({ variant = 'flow', compact = false }: AboutSection
                 key={paragraph}
                 className={
                   compact
-                    ? 'text-[length:clamp(0.7rem,min(3.1vw,1.85vh),0.88rem)] font-medium leading-[1.42] text-[var(--color-muted)]'
-                    : 'text-[length:clamp(0.85rem,min(1.25vw,1.9vh),1.05rem)] font-medium leading-[1.5] text-[var(--color-muted)]'
+                    ? 'text-[length:clamp(0.75rem,min(3.3vw,1.95vh),0.95rem)] font-medium leading-[1.45] text-[#2b2d2f]'
+                    : 'text-[length:clamp(0.95rem,min(1.4vw,2.15vh),1.2rem)] font-medium leading-[1.55] text-[#2b2d2f]'
                 }
               >
                 {paragraph}

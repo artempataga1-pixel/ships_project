@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { X, Send, ExternalLink } from 'lucide-react'
 import { NAV_ITEMS } from '@/constants/nav'
 import { CONTACT_INFO } from '@/constants/content/contacts'
 import { handleStoryNavClick } from '@/components/hero/useStoryController'
@@ -15,7 +14,9 @@ export function Footer() {
     <footer className="border-t border-[var(--color-line)] bg-[var(--color-surface-soft)] pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <div className="max-w-[1440px] mx-auto px-8 py-12">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-12">
-          {/* Лого + описание + соцсети */}
+          {/* Лого + описание. Иконки соцсетей (Twitter, Telegram, «Официальный
+              сайт») вели на href="#" — убраны по аудиту 05.11.2026: Twitter фирма
+              не ведёт, Telegram-канал ещё не утверждён. */}
           <div className="flex flex-col gap-4">
             <Link href="/" aria-label="На главную">
               <Image
@@ -32,29 +33,6 @@ export function Footer() {
               Шумская и партнёры<br />
               Юридическая компания
             </p>
-            <div className="flex items-center gap-4 mt-1">
-              <a
-                href="#"
-                aria-label="Twitter"
-                className="text-[var(--color-muted)] hover:text-[var(--color-lime-ink)] transition-colors duration-200"
-              >
-                <X size={18} />
-              </a>
-              <a
-                href="#"
-                aria-label="Telegram"
-                className="text-[var(--color-muted)] hover:text-[var(--color-lime-ink)] transition-colors duration-200"
-              >
-                <Send size={18} />
-              </a>
-              <a
-                href="#"
-                aria-label="Официальный сайт"
-                className="text-[var(--color-muted)] hover:text-[var(--color-lime-ink)] transition-colors duration-200"
-              >
-                <ExternalLink size={18} />
-              </a>
-            </div>
           </div>
 
           {/* Навигация */}
@@ -90,12 +68,15 @@ export function Footer() {
               className="flex flex-col gap-3 text-sm text-[var(--color-muted)]"
               style={{ fontFamily: 'var(--font-body)' }}
             >
-              <a
-                href={`tel:+${CONTACT_INFO.phone.replace(/\D/g, '')}`}
-                className="hover:text-[var(--color-lime-ink)] transition-colors duration-200"
-              >
-                {CONTACT_INFO.phone}
-              </a>
+              {[CONTACT_INFO.phone, CONTACT_INFO.phoneSecondary].filter((p): p is string => Boolean(p)).map((phone) => (
+                <a
+                  key={phone}
+                  href={`tel:+${phone.replace(/\D/g, '')}`}
+                  className="hover:text-[var(--color-lime-ink)] transition-colors duration-200"
+                >
+                  {phone}
+                </a>
+              ))}
               <a
                 href={`mailto:${CONTACT_INFO.email}`}
                 className="hover:text-[var(--color-lime-ink)] transition-colors duration-200"

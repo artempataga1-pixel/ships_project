@@ -21,6 +21,9 @@
   --pb-accent-glow: var(--color-lime-glow);
   --pb-ink: #111311;
   --pb-muted: #747774;
+  /* Вторичный текст блока. Аудит 05.11.2026: светло-серые фразы «не видно» —
+     затемнены с --color-muted (#6b6e71) до 9.4:1 к подложке */
+  --pb-soft: #3f4245;
   --pb-glass: rgba(255, 255, 255, 0.32);
   --pb-glass-border: rgba(255, 255, 255, 0.78);
   --pb-shadow: 0 1.2cqw 3.2cqw rgba(64, 67, 57, 0.08);
@@ -99,9 +102,7 @@
 
 .pb-contact__lead {
   margin: 1.05cqw 0 0;
-  /* Был #737673 — 4.15:1 на подложке секции, ниже нормы WCAG AA (4.5:1).
-     Приведён к --color-muted, общему токену вторичного текста: 4.63:1. */
-  color: var(--color-muted);
+  color: var(--pb-soft);
   font-size: 1.02cqw;
   font-weight: 400;
   line-height: 1.45;
@@ -183,12 +184,12 @@
 }
 
 .pb-contact__field select[data-empty='true'] {
-  color: #696d69;
+  color: #4f524f;
 }
 
 .pb-contact__field input::placeholder,
 .pb-contact__field textarea::placeholder {
-  color: #696d69;
+  color: #4f524f;
   opacity: 0.9;
 }
 
@@ -286,7 +287,7 @@
   margin: 0.45cqw auto 0;
   align-items: flex-start;
   gap: 0.55cqw;
-  color: #6e716e;
+  color: var(--pb-soft);
   font-size: 0.7cqw;
   line-height: 1.42;
   cursor: pointer;
@@ -329,6 +330,43 @@
   color: #9c3535;
 }
 
+/* Пояснение у поля с ошибкой — не только красная рамка (аудит 05.11.2026).
+   Внутри поля справа: под полем места нет, форма наложена на фото по точной
+   сетке и сдвинулась бы. */
+.pb-contact__field-error {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  right: 0.85cqw;
+  padding: 0.12cqw 0.4cqw;
+  border-radius: 0.3cqw;
+  color: #8f2d2d;
+  background: rgba(255, 255, 255, 0.82);
+  font-size: 0.6cqw;
+  font-weight: 600;
+  line-height: 1.2;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.pb-contact__field--message .pb-contact__field-error {
+  top: auto;
+  bottom: 0.55cqw;
+  transform: none;
+}
+
+/* Длинный пример текста в описании не должен уходить под подсказку */
+.pb-contact__field--message:has(.pb-contact__field-error) textarea {
+  padding-bottom: 1.7cqw;
+}
+
+.pb-contact__consent-error {
+  display: block;
+  margin-top: 0.15cqw;
+  color: #8f2d2d;
+  font-weight: 600;
+}
+
 .pb-contact__honey {
   position: absolute !important;
   width: 1px !important;
@@ -344,15 +382,17 @@
 .pb-contact__details {
   position: absolute;
   z-index: 4;
-  top: 90%;
+  /* Прижат к низу сцены: с двумя телефонами и «Построить маршрут» (аудит
+     05.11.2026) блок стал выше, и при центровке по top: 90% первая строка
+     заезжала на тёмный рукав пиджака на фото */
+  bottom: 0.9%;
   left: 2.7%;
   display: flex;
-  width: 17%;
+  width: 21%;
   margin: 0;
   flex-direction: column;
-  gap: 1.75cqw;
+  gap: 0.8cqw;
   font-style: normal;
-  transform: translateY(-50%);
 }
 
 .pb-contact__detail {
@@ -402,9 +442,7 @@
 
 .pb-contact__detail small {
   margin-top: 0.3cqw;
-  /* Был #777a77 — 4.05:1 на подложке, ниже нормы WCAG AA. Приведён к общему
-     токену вторичного текста: 4.78:1. */
-  color: var(--color-muted);
+  color: var(--pb-soft);
   font-size: 0.68cqw;
   font-weight: 400;
   line-height: 1.45;
@@ -461,15 +499,31 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
-  gap: 1.8cqw;
+  gap: 1.4cqw;
 }
 
-.pb-contact__trust-logo {
+.pb-contact__trust-item {
   display: block;
   height: 3cqw;
   max-width: 7.8cqw;
   flex: 1 1 0;
-  background-color: var(--pb-accent);
+  /* Неоновая подсветка чёрного логотипа. На обёртке, а не на самом логотипе:
+     filter элемента с маской срезается его же маской */
+  filter: drop-shadow(0 0 0.35cqw rgba(185, 230, 41, 0.75));
+}
+
+.pb-contact__trust-item--wide {
+  /* Вытянутые логотипы (Российская газета — 10:1) в общей ячейке выходили
+     нечитаемо мелкими */
+  max-width: 12cqw;
+  flex-grow: 1.8;
+}
+
+.pb-contact__trust-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: #111311;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
@@ -521,6 +575,7 @@
   .pb-contact__trust {
     position: relative;
     top: auto;
+    bottom: auto;
     right: auto;
     left: auto;
     width: min(100%, 560px);
@@ -568,7 +623,7 @@
   }
 
   .pb-contact__field--message {
-    height: 112px;
+    height: 136px;
   }
 
   .pb-contact__field > svg {
@@ -653,6 +708,21 @@
     font-size: 11px;
   }
 
+  .pb-contact__field-error {
+    right: 14px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 11px;
+  }
+
+  .pb-contact__field--message .pb-contact__field-error {
+    bottom: 10px;
+  }
+
+  .pb-contact__field--message:has(.pb-contact__field-error) textarea {
+    padding-bottom: 34px;
+  }
+
   .pb-contact__details {
     order: 3;
     display: grid;
@@ -725,12 +795,13 @@
     gap: 12px 18px;
   }
 
-  .pb-contact__trust-logo {
+  .pb-contact__trust-item {
     width: 100%;
     max-width: 105px;
     height: 36px;
     margin: auto;
     flex: initial;
+    filter: drop-shadow(0 0 5px rgba(185, 230, 41, 0.75));
   }
 }
 

@@ -7,6 +7,16 @@ function escapeHtml(s: string): string {
   return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 }
 
+/* Русские слаги и параметры в адресе приходят закодированными — для
+   сотрудника раскодируем, а битую последовательность оставляем как есть */
+function decodeURIComponentSafe(s: string): string {
+  try {
+    return decodeURIComponent(s)
+  } catch {
+    return s
+  }
+}
+
 function formatMoscowTime(): string {
   return new Intl.DateTimeFormat('ru-RU', {
     timeZone: 'Europe/Moscow',
@@ -84,6 +94,10 @@ export async function POST(request: NextRequest) {
   const practice = typeof body.practice === 'string' ? body.practice.trim() : ''
   const message = typeof body.message === 'string' ? body.message.trim() : ''
   const honeypot = typeof body.website === 'string' ? body.website.trim() : ''
+  /* Страница, с которой ушла заявка: только путь сайта, не длиннее 300 знаков —
+     иначе не показываем */
+  const pageRaw = typeof body.page === 'string' ? body.page.trim() : ''
+  const page = pageRaw.startsWith('/') && !pageRaw.startsWith('//') && pageRaw.length <= 300 ? pageRaw : ''
 
   /* Honeypot: людям поле не видно; заполнено — значит бот. Отвечаем фейковым
      успехом, чтобы не подсказывать спамеру, что его вычислили. */
@@ -118,7 +132,7 @@ export async function POST(request: NextRequest) {
 
   /* Резервная копия заявки в логах (Vercel → Logs) — пишем ДО отправки,
      чтобы данные не потерялись, даже если Telegram недоступен. */
-  console.log('[contact] заявка:', JSON.stringify({ name, phone, email, practice, message, ts: new Date().toISOString() }))
+  console.log('[contact] заявка:', JSON.stringify({ name, phone, email, practice, message, page, ts: new Date().toISOString() }))
 
   const normalizedPhone = '+7' + phone.slice(1)
   const text = [
@@ -129,6 +143,7 @@ export async function POST(request: NextRequest) {
     `<b>E-mail:</b> ${email ? escapeHtml(email) : '—'}`,
     `<b>Направление:</b> ${practice ? escapeHtml(practice) : 'не указано'}`,
     `<b>Сообщение:</b> ${message ? escapeHtml(message) : '—'}`,
+    `<b>Страница:</b> ${page ? escapeHtml(decodeURIComponentSafe(page)) : '—'}`,
     '',
     `<i>${formatMoscowTime()} (МСК)</i>`,
   ].join('\n')

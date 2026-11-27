@@ -61,7 +61,7 @@ export function SectionHeading({ title, subtitle, className, id }: SectionHeadin
         {title}
       </h2>
       {subtitle && (
-        <p ref={subtitleRef} className="mt-4 text-[var(--color-muted)] text-lg">
+        <p ref={subtitleRef} className="mt-4 text-lg font-medium text-[#2b2d2f]">
           {subtitle}
         </p>
       )}

@@ -194,7 +194,7 @@ export function PublicationsLibrary({
       {total === 0 && (
         <div className="flex flex-col items-start gap-5 rounded-[var(--radius-lg)] border border-dashed border-[var(--color-line)] bg-[var(--color-surface-soft)] p-8 md:p-10">
           <p className="font-heading text-xl font-extrabold tracking-[-0.01em] text-[var(--color-text)]">
-            По выбранным фильтрам материалов пока нет
+            По выбранным условиям публикаций нет
           </p>
           <p className="max-w-[52ch] text-base leading-relaxed text-[var(--color-muted)]">
             Попробуйте выбрать другую тему или другого автора — или посмотрите все публикации сразу.

@@ -106,6 +106,11 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
   /* Длинные заголовки настоящих кейсов (до 150 знаков) в кегле демо-кейсов
      занимали бы пол-экрана — для них кегль ступенью ниже. */
   const longTitle = item.title.length > 70
+  const mainPractice = casePractices(item)[0]
+  const contactHref = `/contacts?${new URLSearchParams({
+    ...(mainPractice ? { practice: mainPractice.slug } : {}),
+    case: item.slug,
+  })}`
 
   return (
     <main
@@ -355,13 +360,15 @@ export default async function CaseStudyPage({ params }: CasePageProps) {
         {/* CTA — по центру и крупнее: финальное действие страницы, а не
             приписка к последнему абзацу. Ведёт на отдельную страницу /contacts:
             якорь «/#contacts» грузил бы главную со сторибуком (9.5 МБ) ради
-            формы на пять полей. .btn-lime-breathe — пульсация свечения. */}
+            формы на пять полей. .btn-lime-breathe — пульсация свечения.
+            Подпись и передача кейса в форму — по аудиту 05.11.2026: форма
+            получает практику дела и подставляет название кейса в описание. */}
         <div className="mt-16 flex justify-center md:mt-20">
           <Link
-            href="/contacts"
+            href={contactHref}
             className="btn-lime-fill btn-lime-breathe inline-flex h-14 items-center justify-center rounded-md px-10 text-base font-semibold md:h-16 md:px-14 md:text-lg"
           >
-            Оставить заявку
+            Обсудить похожую ситуацию
           </Link>
         </div>
       </div>

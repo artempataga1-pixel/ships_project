@@ -5,7 +5,7 @@ import { ContactsSection } from '@/components/sections/ContactsSection'
 import { ScrollTopOnLoad } from '@/components/ui/ScrollTopOnLoad'
 import { PRACTICE_OPTIONS } from '@/constants/content/contacts'
 import { PRODUCTS } from '@/constants/content/products'
-import { getPracticeBySlug } from '@/lib/content'
+import { getCaseBySlug, getPracticeBySlug } from '@/lib/content'
 import { SITE_URL } from '@/lib/site'
 
 /* ── ОТДЕЛЬНАЯ СТРАНИЦА «КОНТАКТЫ» ────────────────────────────────────────
@@ -28,7 +28,7 @@ import { SITE_URL } from '@/lib/site'
    роут валидирует заявку; сверку делаем прямо здесь, ниже. */
 
 interface ContactsPageProps {
-  searchParams: Promise<{ practice?: string; product?: string }>
+  searchParams: Promise<{ practice?: string; product?: string; case?: string }>
 }
 
 export const metadata: Metadata = {
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 }
 
 export default async function ContactsPage({ searchParams }: ContactsPageProps) {
-  const { practice: practiceSlug, product: productSlug } = await searchParams
+  const { practice: practiceSlug, product: productSlug, case: caseSlug } = await searchParams
 
   /* Резолвим параметры НА СЕРВЕРЕ, а не эффектом после гидрации: значение
      приезжает уже в первом HTML, пустая форма не мигает перед подстановкой. */
@@ -50,12 +50,23 @@ export default async function ContactsPage({ searchParams }: ContactsPageProps) 
     practiceTitle && PRACTICE_OPTIONS.includes(practiceTitle) ? practiceTitle : ''
 
   const product = productSlug ? PRODUCTS.find((item) => item.slug === productSlug) : undefined
-  const initialMessage = product ? `Интересует: ${product.title}` : ''
+  /* Пришёл с кейса («Обсудить похожую ситуацию») — название дела в описании,
+     сотрудник сразу видит, какое дело узнал посетитель */
+  const caseStudy = caseSlug ? getCaseBySlug(caseSlug) : undefined
+  const initialMessage = product
+    ? `Интересует: ${product.title}`
+    : caseStudy
+      ? `Моя ситуация похожа на дело «${caseStudy.title}». `
+      : ''
 
   /* Куда вернуть посетителя. Пришёл со страницы практики — возвращаем на неё,
      а не на главную: это единственное, что он на сайте открывал. */
-  const backHref = practiceTitle ? `/practices/${practiceSlug}` : '/'
-  const backLabel = practiceTitle ? '← К практике' : '← На главную'
+  const backHref = caseStudy
+    ? `/cases/${caseStudy.slug}`
+    : practiceTitle
+      ? `/practices/${practiceSlug}`
+      : '/'
+  const backLabel = caseStudy ? '← К кейсу' : practiceTitle ? '← К практике' : '← На главную'
 
   return (
     <div className="relative bg-[var(--color-bg)]">
@@ -74,7 +85,7 @@ export default async function ContactsPage({ searchParams }: ContactsPageProps) 
       </div>
 
       <div className="pt-10 md:pt-14">
-        <ContactsSection initialPractice={initialPractice} initialMessage={initialMessage} />
+        <ContactsSection initialPractice={initialPractice} initialMessage={initialMessage} standalone />
       </div>
     </div>
   )

@@ -252,6 +252,8 @@ export interface CaseStudy {
 
 export interface ContactInfo {
   phone: string
+  /* Второй номер — с аудита 05.11.2026 на сайте два телефона */
+  phoneSecondary?: string
   email: string
   address: string
 }

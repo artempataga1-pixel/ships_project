@@ -35,7 +35,7 @@ export function CasesTeaser() {
       <div className="relative mx-auto grid max-w-[1200px] items-center gap-14 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
         <RevealOnScroll y={30} duration={0.8}>
           <span className="inline-flex items-center gap-3 rounded-md border border-[var(--color-line)] bg-white px-4 py-2 font-heading text-[0.7rem] font-black uppercase tracking-[0.12em] text-[var(--color-text)]">
-            Архив избранных дел
+            Избранные дела компании
             <i
               aria-hidden
               className="block h-[9px] w-[9px] rounded-[2px] bg-[var(--color-lime)]"
@@ -47,7 +47,7 @@ export function CasesTeaser() {
             Кейсы
           </h2>
           <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-[var(--color-muted)] md:text-xl">
-            Отрасли, суммы и результаты — {pluralCases(total)} {byPractices(practices.length)} фирмы.
+            Задачи клиентов и результаты нашей работы — {pluralCases(total)} {byPractices(practices.length)} фирмы.
           </p>
 
           {/* Вход сразу в нужную практику каталога */}

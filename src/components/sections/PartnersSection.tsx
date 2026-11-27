@@ -59,10 +59,11 @@ function fanPosition(index: number, total: number): FanPos {
   return arcFallback(index, total)
 }
 
-// Только для мобильной сетки (см. ниже) — управляющий партнёр первой карточкой.
+// Только для мобильной сетки (см. ниже) — Анна Шумская первой карточкой. Раньше
+// искали по должности, но с ноября 2026 оба партнёра управляющие — ищем по slug.
 // sort стабилен (ES2019+), остальные сохраняют исходный порядок TEAM.
 export const MOBILE_TEAM_ORDER: TeamMember[] = [...TEAM].sort(
-  (a, b) => Number(b.role === 'Управляющий партнёр') - Number(a.role === 'Управляющий партнёр'),
+  (a, b) => Number(b.slug === 'anna-shumskaya') - Number(a.slug === 'anna-shumskaya'),
 )
 
 // Готовая карточка-визитка: контент (фото, имя, роль) впечатан в JPG,
@@ -161,7 +162,7 @@ export function MobilePartnerCard({ member, compact = false }: MobilePartnerCard
         role="button"
         tabIndex={0}
         aria-pressed={flipped}
-        aria-label={`${member.name}, ${member.role}. Нажмите, чтобы посмотреть регалии`}
+        aria-label={`${member.name}, ${member.role}. достижения: нажмите, чтобы открыть`}
         onClick={toggle}
         onKeyDown={onKeyDown}
         className="relative h-full w-full cursor-pointer outline-none transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
@@ -198,7 +199,7 @@ export function MobilePartnerCard({ member, compact = false }: MobilePartnerCard
               <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
               <path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.13 5.87l-2.12 2.12M7.99 15.89l-2.12 2.12M18.13 18.13l-2.12-2.12M7.99 8.11 5.87 5.99" />
             </svg>
-            Нажмите
+            Достижения
           </span>
         </div>
 

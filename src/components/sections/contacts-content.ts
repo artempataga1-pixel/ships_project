@@ -1,17 +1,41 @@
 import { CONTACT_INFO } from '@/constants/content/contacts'
 
-export interface ContactDetailItem {
-  type: 'phone' | 'email' | 'address'
-  title: string
-  text?: string
-  href?: string
+export interface ContactDetailLink {
+  label: string
+  href: string
 }
 
-/* Редактируемый текст блока «Контакты». Телефон/почта/адрес — из
+export interface ContactDetailItem {
+  type: 'phone' | 'email' | 'address'
+  /* Ссылки строки (два телефона — две ссылки); у адреса ссылок нет */
+  links?: ContactDetailLink[]
+  /* Текст без ссылки — адрес */
+  title?: string
+  text?: string
+  /* Дополнительная ссылка мелким шрифтом под строкой («Построить маршрут») */
+  extraLink?: ContactDetailLink
+}
+
+const telHref = (phone: string) => `tel:+${phone.replace(/\D/g, '')}`
+
+const PHONES = [CONTACT_INFO.phone, CONTACT_INFO.phoneSecondary].filter(
+  (phone): phone is string => Boolean(phone),
+)
+
+/* Маршрут — поиск адреса в Яндекс Картах: там одна кнопка до маршрута.
+   Ссылку на карточку самого офиса в Яндекс Бизнесе или 2ГИС заказчик пока не
+   передавал; когда передаст — подставить её сюда. */
+const ROUTE_HREF = `https://yandex.ru/maps/?text=${encodeURIComponent(
+  'Новосибирск, улица Депутатская, 2',
+)}`
+
+/* Редактируемый текст блока «Контакты». Телефоны/почта/адрес — из
    канонического CONTACT_INFO (src/constants/content/contacts.ts), синхронно
-   с футером. Telegram-ссылки в проекте нет (в футере — заглушка href="#"),
-   поэтому в списке контактов её нет — добавить, когда появится реальная
-   ссылка на канал/чат. */
+   с футером. Telegram-канала заказчик пока не утвердил, поэтому ссылки на
+   него нет ни здесь, ни в футере.
+
+   Аудит 05.11.2026: убрана фраза «Ответим в течение рабочего дня», к часам
+   добавлено «по времени Новосибирска», к адресу — «Построить маршрут». */
 export const contactsContent = {
   eyebrow: 'КОНТАКТЫ',
   titleLine1: 'Обсудим вашу задачу',
@@ -20,25 +44,30 @@ export const contactsContent = {
   subtitleLine2: 'и предложим оптимальный путь',
   submitLabel: 'ОТПРАВИТЬ ЗАЯВКУ',
   consentLabel: 'Согласен(на) на обработку персональных данных',
-  invalidText: 'Проверьте правильность заполнения полей.',
+  messagePlaceholder: 'Кратко опишите вопрос. Порядок передачи документов согласуем после первого контакта',
+  invalidText: 'Заявка не отправлена: заполните отмеченные поля.',
+  fieldErrors: {
+    name: 'Укажите имя',
+    phone: 'Номер из 11 цифр',
+    message: 'Опишите вопрос',
+    consent: 'Нужно согласие на обработку данных',
+  },
   successText: 'Спасибо! Заявка принята. Мы скоро свяжемся с вами.',
-  errorText: 'Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам:',
+  errorText: `Заявка не отправлена. Введённый текст сохранён — попробуйте ещё раз или позвоните нам: ${PHONES.join(', ')}.`,
   details: [
     {
       type: 'phone',
-      title: CONTACT_INFO.phone,
-      text: 'Пн–Пт: 9:00 – 18:00',
-      href: `tel:+${CONTACT_INFO.phone.replace(/\D/g, '')}`,
+      links: PHONES.map((phone) => ({ label: phone, href: telHref(phone) })),
+      text: 'Пн–Пт: 9:00 – 18:00 по времени Новосибирска',
     },
     {
       type: 'email',
-      title: CONTACT_INFO.email,
-      text: 'Ответим в течение рабочего дня',
-      href: `mailto:${CONTACT_INFO.email}`,
+      links: [{ label: CONTACT_INFO.email, href: `mailto:${CONTACT_INFO.email}` }],
     },
     {
       type: 'address',
       title: CONTACT_INFO.address,
+      extraLink: { label: 'Построить маршрут', href: ROUTE_HREF },
     },
   ] satisfies ContactDetailItem[] as ContactDetailItem[],
 }
